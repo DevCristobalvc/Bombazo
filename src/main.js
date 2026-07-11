@@ -1,35 +1,89 @@
 /**
- * Punto de entrada: monta las tres pantallas y navega entre ellas.
- * El estado global es mínimo: la última configuración elegida (para la revancha).
+ * Punto de entrada: monta las tres pantallas, navega entre ellas y
+ * orquesta los modos de juego (partido rápido y torneo).
  */
 import './styles/tokens.css';
 import './styles/base.css';
 import { teamById } from './data/teams.js';
+import { createTournament, currentRival, currentStage, advance, isChampion, STAGES } from './core/tournament.js';
 import { createMenuScreen } from './components/MenuScreen.js';
 import { createMatchScreen } from './components/MatchScreen.js';
 import { createEndScreen } from './components/EndScreen.js';
 
 const app = document.getElementById('app');
-let lastConfig = null;
+let session = null; // { mode, teamId, rivalId, diff, tournament? }
 
-const toMatchConfig = (c) => ({
-  playerTeam: teamById(c.teamId),
-  rivalTeam: teamById(c.rivalId),
-  diff: c.diff,
-});
+function startQuickMatch() {
+  show(match.el);
+  match.start({
+    playerTeam: teamById(session.teamId),
+    rivalTeam: teamById(session.rivalId),
+    diff: session.diff,
+  });
+}
+
+function startTournamentMatch() {
+  const t = session.tournament;
+  show(match.el);
+  match.start({
+    playerTeam: teamById(t.playerTeamId),
+    rivalTeam: teamById(currentRival(t)),
+    diff: session.diff,
+    stageLabel: currentStage(t),
+  });
+}
 
 const menu = createMenuScreen({
   onPlay(config) {
-    lastConfig = config;
-    show(match.el);
-    match.start(toMatchConfig(config));
+    session = config;
+    if (config.mode === 'torneo') {
+      session.tournament = createTournament(config.teamId);
+      startTournamentMatch();
+    } else {
+      startQuickMatch();
+    }
   },
 });
 
 const match = createMatchScreen({
   onFinish(result) {
     show(end.el);
-    end.show(result);
+    if (session.mode !== 'torneo') {
+      end.show(result, {
+        confetti: result.won,
+        primary: { act: 'rematch', label: 'REVANCHA' },
+      });
+      return;
+    }
+
+    const t = session.tournament;
+    if (!result.won) {
+      end.show(result, {
+        emoji: '😭',
+        title: 'ELIMINADO',
+        sub: `El sueño terminó en ${currentStage(t)}. El torneo no perdona.`,
+        primary: { act: 'new-tournament', label: 'NUEVO TORNEO' },
+      });
+      return;
+    }
+
+    advance(t);
+    if (isChampion(t)) {
+      end.show(result, {
+        emoji: '🏆',
+        title: '¡CAMPEÓN DEL TORNEO!',
+        sub: 'Cuatro rondas, cero excusas. ¡Bombazo mundial! 🌎',
+        confetti: true,
+        primary: { act: 'new-tournament', label: 'NUEVO TORNEO' },
+      });
+    } else {
+      end.show(result, {
+        emoji: '🎟️',
+        title: '¡CLASIFICADO!',
+        sub: `Superaste ${STAGES[t.stage - 1]}. Ahora: ${currentStage(t)} contra ${teamById(currentRival(t)).name}.`,
+        primary: { act: 'next', label: 'SIGUIENTE PARTIDO' },
+      });
+    }
   },
   onExit() {
     show(menu.el);
@@ -37,12 +91,17 @@ const match = createMatchScreen({
 });
 
 const end = createEndScreen({
-  onRematch() {
-    show(match.el);
-    match.start(toMatchConfig(lastConfig));
-  },
-  onMenu() {
-    show(menu.el);
+  onAction(act) {
+    if (act === 'menu') {
+      show(menu.el);
+    } else if (act === 'rematch') {
+      startQuickMatch();
+    } else if (act === 'next') {
+      startTournamentMatch();
+    } else if (act === 'new-tournament') {
+      session.tournament = createTournament(session.teamId);
+      startTournamentMatch();
+    }
   },
 });
 

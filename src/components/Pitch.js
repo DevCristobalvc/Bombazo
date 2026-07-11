@@ -68,7 +68,8 @@ export function createPitch() {
     keeper.style.transform = `translate(${dx}px, ${dy}px) rotate(${angle}deg)`;
   }
 
-  function ballTo(zone) {
+  function ballTo(zone, { fast = false } = {}) {
+    ball.classList.toggle('fast', fast);
     const c = zoneCenter(zone);
     ball.style.transform = `translate(${c.x - BALL_HOME.x}px, ${c.y - BALL_HOME.y}px) scale(.6)`;
   }
@@ -100,6 +101,7 @@ export function createPitch() {
     svg.classList.remove('kick');
     keeper.style.transform = '';
     ball.style.transform = '';
+    ball.classList.remove('fast');
     svg.querySelectorAll('.zone.picked').forEach((r) => r.classList.remove('picked'));
   }
 

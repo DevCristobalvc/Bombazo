@@ -26,6 +26,11 @@
   will-change: transform;
 }
 
+/* Remate perfecto: el balón viaja notablemente más rápido */
+#ball.fast {
+  transition-duration: 0.26s;
+}
+
 #shooter {
   transition: transform 0.2s ease-in;
 }

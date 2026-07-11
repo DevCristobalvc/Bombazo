@@ -52,9 +52,12 @@ async function assertNoPageScroll(page, label, failures) {
   await page.screenshot({ path: path.join(OUT, '3-partido-patear.png') });
   await assertNoPageScroll(page, 'partido 390x844', failures);
 
-  // patear a la esquina superior izquierda
+  // patear a la esquina superior izquierda: zona + barra de potencia
   await page.click('.zone[data-zone="0"]', { force: true });
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(350);
+  await page.screenshot({ path: path.join(OUT, '3b-powerbar.png') });
+  await page.click('.powerbar', { force: true });
+  await page.waitForTimeout(900);
   await page.screenshot({ path: path.join(OUT, '4-tiro-resultado.png') });
   await page.waitForTimeout(1600);
 
@@ -63,6 +66,17 @@ async function assertNoPageScroll(page, label, failures) {
   await page.click('.zone[data-zone="8"]', { force: true });
   await page.waitForTimeout(700);
   await page.screenshot({ path: path.join(OUT, '6-atajada-resultado.png') });
+
+  // menú en modo torneo
+  await page.click('.btn-exit');
+  await page.waitForTimeout(300);
+  await page.click('.chips [data-id="torneo"]');
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: path.join(OUT, '8-menu-torneo.png') });
+  await page.click('.btn-big');
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: path.join(OUT, '9-torneo-partido.png') });
+  await assertNoPageScroll(page, 'torneo 390x844', failures);
 
   // partido en teléfono pequeño
   await page.setViewportSize({ width: 360, height: 640 });

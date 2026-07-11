@@ -237,13 +237,15 @@ Decisiones:
 - [x] Sonidos sintetizados con WebAudio (silbato, patada, gol, atajada, ovación, fanfarria) — cero assets, botón mute persistente
 - [x] Confeti al ganar (colores del equipo campeón) + tribuna que salta en las celebraciones
 - [x] Vibración háptica en móvil (gol, atajada, gol en contra)
-- [ ] Barra de "potencia/precisión" opcional al patear (timing skill, no solo puntería)
+- [x] Barra de potencia al patear (timing skill): verde = remate perfecto y más rápido, rojo = riesgo de desvío o tiro afuera
+- [x] Identidad de marca: logo SVG (balón como "O" + explosión), favicon/íconos propios (192/512/apple-touch), manifest y og:image para compartir
 - [ ] Estadísticas de sesión (efectividad, zona favorita) y racha de victorias en `localStorage`
-- [ ] PWA: manifest + service worker para jugar offline e "instalar" en el teléfono
+- [ ] PWA completa: service worker para jugar offline (manifest ya listo)
 
 ### 🌌 Fase 3 — El cielo es el límite (backlog de ideas)
 - [ ] **Customización del personaje**: piel, pelo, nombre y dorsal en la camiseta
-- [ ] **Modo torneo**: llave de octavos → cuartos → semis → final con los 16 clasificados reales del Mundial 2026
+- [x] **Modo torneo (v1)**: camino al título de 4 rondas eliminatorias contra las otras selecciones, con rótulo de ronda dorado
+- [ ] **Modo torneo (v2)**: llave completa de octavos → final con los 16 clasificados reales del Mundial 2026 y vista de bracket
 - [ ] Más selecciones (los 16 de octavos completos) y kits alternos
 - [ ] Arqueros con "personalidad" (uno que siempre se queda parado, uno que adivina esquinas…)
 - [ ] Multijugador local (pasar el teléfono) y luego online (WebSocket/Vercel)

@@ -5,9 +5,11 @@
  */
 import { createShootout, registerKick, registerHabit, winner, isSuddenDeath, score } from '../core/shootout.js';
 import { keeperPick, shooterPick } from '../core/ai.js';
+import { adjacentZone } from '../core/zones.js';
 import { createPitch } from './Pitch.js';
 import { createScoreboard } from './Scoreboard.js';
 import { createAnnouncer } from './Announcer.js';
+import { createPowerBar } from './PowerBar.js';
 import { fromHTML, sleep } from '../utils/dom.js';
 import { pick } from '../utils/random.js';
 import { sfx, isMuted, setMuted } from '../audio/sfx.js';
@@ -23,6 +25,7 @@ const buzz = (pattern) => {
 const COPY = {
   goalPlayer: ['¡GOOOOL!', '¡BOMBAZO! 💥', '¡GOLAZO! 🔥', '¡LA CLAVÓ!'],
   savedShot: ['¡ATAJADO! 🧤', '¡TE LA SACÓ!', '¡VOLÓ EL ARQUERO!'],
+  playerMiss: ['¡AFUERA! 😱', '¡A LAS NUBES!', '¡POR ENCIMA DEL ARCO!'],
   playerSave: ['¡ATAJADÓN! 🧤', '¡QUÉ MANOS!', '¡MONUMENTAL!'],
   cpuGoal: ['GOL DEL RIVAL…', 'LA MANDÓ ADENTRO 😖', 'NADA QUE HACER'],
   cpuMiss: ['¡AFUERA! 🎉', '¡A LAS NUBES!', '¡LA TIRÓ A LA TRIBUNA!'],
@@ -32,20 +35,23 @@ export function createMatchScreen({ onFinish, onExit }) {
   const pitch = createPitch();
   const scoreboard = createScoreboard();
   const announcer = createAnnouncer();
+  const powerBar = createPowerBar();
 
   const el = fromHTML(`
     <section class="screen match-screen">
       <button class="btn-exit" aria-label="Salir al menú">✕</button>
       <button class="btn-sound" data-ref="sound" aria-label="Activar o silenciar sonido"></button>
+      <div class="stage-chip" data-ref="stage" hidden></div>
       <div class="phase-msg"><b data-ref="msg"></b><span data-ref="sub"></span></div>
       <div class="pitch-wrap" data-ref="wrap"></div>
     </section>`);
 
   el.prepend(scoreboard.el);
   const wrap = el.querySelector('[data-ref="wrap"]');
-  wrap.append(pitch.el, announcer.el);
+  wrap.append(pitch.el, powerBar.el, announcer.el);
   const msgEl = el.querySelector('[data-ref="msg"]');
   const subEl = el.querySelector('[data-ref="sub"]');
+  const stageEl = el.querySelector('[data-ref="stage"]');
 
   el.querySelector('.btn-exit').addEventListener('click', () => {
     stop();
@@ -90,28 +96,56 @@ export function createMatchScreen({ onFinish, onExit }) {
     const zone = await pitch.pickZone();
     if (zone === null || aborted) return;
     registerHabit(s, zone);
-    const gkZone = keeperPick(diff, zone, s.habits);
+
+    // Timing skill: frenar la barra define la calidad del remate
+    setMsg(`Penal ${s.kicks.P.length + 1} — ¡Tú pateas!`, '¡Frena la barra en el verde!');
+    const power = await powerBar.run();
+    if (power === null || aborted) return;
+
+    let finalZone = zone;
+    let offTarget = false;
+    let fast = false;
+    if (power.quality === 'perfect') {
+      fast = true; // remate imparable en velocidad
+    } else if (power.quality === 'poor') {
+      const roll = Math.random();
+      if (roll < 0.3) offTarget = true;
+      else if (roll < 0.8) finalZone = adjacentZone(zone);
+    }
+
+    const gkZone = keeperPick(diff, zone, s.habits); // el arquero lee la intención
 
     await pitch.kickAnim();
     sfx.kick();
-    pitch.ballTo(zone);
     pitch.keeperDive(gkZone);
-    await sleep(480);
 
-    const goal = zone !== gkZone;
+    let goal;
+    if (offTarget) {
+      pitch.ballOver(zone);
+      goal = false;
+    } else {
+      pitch.ballTo(finalZone, { fast });
+      goal = finalZone !== gkZone;
+    }
+    await sleep(fast ? 340 : 480);
+
     if (goal) {
       sfx.goal();
       buzz(80);
       pitch.celebrate();
+    } else if (offTarget) {
+      sfx.fail();
+      buzz(25);
     } else {
-      pitch.ballBounce(zone);
+      pitch.ballBounce(finalZone);
       sfx.save();
       sfx.fail();
       buzz(25);
     }
     registerKick(s, 'P', goal);
     updateBoard();
-    await announcer.say(pick(goal ? COPY.goalPlayer : COPY.savedShot), goal ? 'goal' : 'miss');
+    const copy = goal ? COPY.goalPlayer : offTarget ? COPY.playerMiss : COPY.savedShot;
+    await announcer.say(pick(copy), goal ? 'goal' : 'miss');
     pitch.reset();
     await sleep(350);
   }
@@ -164,9 +198,11 @@ export function createMatchScreen({ onFinish, onExit }) {
     await sleep(350);
   }
 
-  async function start({ playerTeam, rivalTeam, diff }) {
+  async function start({ playerTeam, rivalTeam, diff, stageLabel = null }) {
     aborted = false;
     ctx = { s: createShootout(), playerTeam, rivalTeam, diff, phase: 'shoot' };
+    stageEl.hidden = !stageLabel;
+    stageEl.textContent = stageLabel ?? '';
     pitch.reset();
     sfx.whistle();
     let suddenAnnounced = false;
@@ -205,6 +241,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   function stop() {
     aborted = true;
     pitch.cancelAim();
+    powerBar.hide();
   }
 
   return { el, start, stop };

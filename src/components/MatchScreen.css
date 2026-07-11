@@ -33,6 +33,22 @@
   cursor: pointer;
 }
 
+.stage-chip {
+  align-self: center;
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #3a2600;
+  background: linear-gradient(180deg, #ffe14d, #ffb200);
+  padding: 6px 16px 3px;
+  border-radius: 999px;
+  box-shadow: 0 2px 0 var(--c-accent-dark);
+}
+
+.stage-chip[hidden] {
+  display: none;
+}
+
 .phase-msg {
   text-align: center;
   min-height: 40px;

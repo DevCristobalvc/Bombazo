@@ -5,27 +5,37 @@
 import { TEAMS, DIFFICULTIES, teamById } from '../data/teams.js';
 import { heroSVG } from '../art/players.js';
 import { flagSVG } from '../art/flags.js';
+import { logoSVG } from '../art/logo.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
+const MODES = [
+  { id: 'rapido', label: 'Partido rápido', emoji: '⚡' },
+  { id: 'torneo', label: 'Torneo', emoji: '🏆' },
+];
+
 export function createMenuScreen({ onPlay }) {
-  const state = { teamId: 'col', rivalId: 'fra', diff: 'medio' };
+  const state = { mode: 'rapido', teamId: 'col', rivalId: 'fra', diff: 'medio' };
 
   const el = fromHTML(`
     <section class="screen menu-screen">
-      <h1 class="logo">BOMBAZO</h1>
-      <p class="tagline">Tanda de penales · Octavos del Mundial 2026</p>
+      <h1 class="logo" aria-label="Bombazo">${logoSVG()}</h1>
+      <p class="tagline">Tanda de penales · Mundial 2026</p>
       <div class="hero" data-ref="hero"></div>
       <p class="vs-line" data-ref="vs"></p>
       <div class="panel">
+        <h2 class="panel-title">Modo de juego</h2>
+        <div class="chips" data-ref="modes"></div>
         <h2 class="panel-title">Tu selección</h2>
         <div class="chips" data-ref="teams"></div>
-        <h2 class="panel-title">Rival</h2>
-        <div class="chips" data-ref="rivals"></div>
+        <div data-ref="rivalBlock">
+          <h2 class="panel-title">Rival</h2>
+          <div class="chips" data-ref="rivals"></div>
+        </div>
         <h2 class="panel-title">Dificultad</h2>
         <div class="chips" data-ref="diffs"></div>
         <button class="btn-big" data-ref="play">¡A LA CANCHA!</button>
-        <p class="howto">5 penales cada uno. Toca una de las 9 casillas del arco para <b>patear</b> o para <b>atajar</b>. Empate = muerte súbita.</p>
+        <p class="howto">Toca una casilla del arco para <b>patear</b> o <b>atajar</b>, y frena la barra en el verde. Empate = muerte súbita.</p>
       </div>
     </section>`);
 
@@ -41,8 +51,12 @@ export function createMenuScreen({ onPlay }) {
   }
 
   function render() {
+    refs.modes.innerHTML = MODES.map(
+      (m) => `<button class="chip ${m.id === state.mode ? 'is-selected' : ''}" data-id="${m.id}">${m.emoji} ${m.label}</button>`
+    ).join('');
     refs.teams.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.teamId, false)).join('');
     refs.rivals.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.rivalId, t.id === state.teamId)).join('');
+    refs.rivalBlock.style.display = state.mode === 'torneo' ? 'none' : '';
     refs.diffs.innerHTML = DIFFICULTIES.map(
       (d) => `<button class="chip ${d.id === state.diff ? 'is-selected' : ''}" data-id="${d.id}">${d.emoji} ${d.label}</button>`
     ).join('');
@@ -50,8 +64,18 @@ export function createMenuScreen({ onPlay }) {
     const player = teamById(state.teamId);
     const rival = teamById(state.rivalId);
     const diff = DIFFICULTIES.find((d) => d.id === state.diff);
-    refs.vs.innerHTML = `${player.short} 🆚 ${rival.short} · ${diff.label} ${diff.emoji}`;
+    refs.vs.innerHTML =
+      state.mode === 'torneo'
+        ? `${player.short} · 🏆 4 rondas al título · ${diff.label} ${diff.emoji}`
+        : `${player.short} 🆚 ${rival.short} · ${diff.label} ${diff.emoji}`;
   }
+
+  refs.modes.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    state.mode = chip.dataset.id;
+    render();
+  });
 
   refs.teams.addEventListener('click', (e) => {
     const chip = e.target.closest('.chip');

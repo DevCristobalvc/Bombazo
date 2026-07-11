@@ -1,4 +1,8 @@
-/** Pantalla final: resultado, recap de la tanda, confeti si ganas, revancha o menú. */
+/**
+ * Pantalla final: resultado, recap de la tanda y acciones.
+ * show(result, opts) acepta variantes (partido rápido, ronda de torneo
+ * superada, campeón, eliminado) definidas por quien orquesta (main.js).
+ */
 import { fromHTML } from '../utils/dom.js';
 import { flagSVG } from '../art/flags.js';
 import { pick } from '../utils/random.js';
@@ -8,7 +12,7 @@ import './EndScreen.css';
 const WIN_LINES = [
   '¡Qué tanda te mandaste! 🎉',
   'La hinchada se queda contigo.',
-  '¡A cuartos de final!',
+  'Sangre fría desde los once pasos.',
 ];
 const LOSE_LINES = [
   'Los penales son una lotería… revancha ya.',
@@ -16,7 +20,7 @@ const LOSE_LINES = [
   'Casi casi. La próxima es tuya.',
 ];
 
-export function createEndScreen({ onRematch, onMenu }) {
+export function createEndScreen({ onAction }) {
   const el = fromHTML(`
     <section class="screen end-screen">
       <div class="panel end-card" data-ref="card"></div>
@@ -41,11 +45,17 @@ export function createEndScreen({ onRematch, onMenu }) {
     setTimeout(() => layer.remove(), 5000);
   }
 
-  function show(result) {
+  function show(result, opts = {}) {
     const { won, playerTeam, rivalTeam } = result;
+    const emoji = opts.emoji ?? (won ? '🏆' : '😭');
+    const title = opts.title ?? (won ? '¡CAMPEÓN!' : 'ELIMINADO…');
+    const sub = opts.sub ?? (won ? pick(WIN_LINES) : pick(LOSE_LINES));
+    const primary = opts.primary ?? { act: 'rematch', label: 'REVANCHA' };
+    const celebrate = opts.confetti ?? false;
+
     card.innerHTML = `
-      <div class="end-emoji">${won ? '🏆' : '😭'}</div>
-      <h2 class="end-title">${won ? '¡CAMPEÓN!' : 'ELIMINADO…'}</h2>
+      <div class="end-emoji">${emoji}</div>
+      <h2 class="end-title">${title}</h2>
       <div class="end-score">
         ${flagSVG(playerTeam.id, 34, 22)}
         <span>${playerTeam.short}</span>
@@ -53,19 +63,21 @@ export function createEndScreen({ onRematch, onMenu }) {
         <span>${rivalTeam.short}</span>
         ${flagSVG(rivalTeam.id, 34, 22)}
       </div>
-      <p class="end-sub">${won ? pick(WIN_LINES) : pick(LOSE_LINES)}</p>
+      <p class="end-sub">${sub}</p>
       <div class="end-recap">
         ${recapRow(result.kicksP)}
         ${recapRow(result.kicksC)}
       </div>
       <div class="end-actions">
-        <button class="btn-big" data-act="rematch">REVANCHA</button>
+        <button class="btn-big" data-act="${primary.act}">${primary.label}</button>
         <button class="btn-ghost" data-act="menu">Menú</button>
       </div>`;
 
-    if (won) {
+    if (celebrate) {
       sfx.fanfare();
       confetti(['#ffd100', '#ff5c39', '#37d67a', '#ffffff', playerTeam.kit.shirt, playerTeam.kit.accent]);
+    } else if (won) {
+      sfx.cheer();
     } else {
       sfx.fail();
     }
@@ -74,8 +86,7 @@ export function createEndScreen({ onRematch, onMenu }) {
   card.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-act]');
     if (!btn) return;
-    if (btn.dataset.act === 'rematch') onRematch();
-    else onMenu();
+    onAction(btn.dataset.act);
   });
 
   return { el, show };

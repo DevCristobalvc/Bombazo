@@ -56,6 +56,10 @@ export function sceneSVG() {
       <pattern id="p-net" width="13" height="13" patternUnits="userSpaceOnUse">
         <path d="M0 0 H13 M0 0 V13" stroke="rgba(255,255,255,.28)" stroke-width="1"/>
       </pattern>
+      <radialGradient id="g-vignette" cx=".5" cy=".42" r=".8">
+        <stop offset=".68" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".3"/>
+      </radialGradient>
     </defs>
 
     <!-- cielo y reflectores -->
@@ -100,6 +104,9 @@ export function sceneSVG() {
     <g transform="translate(180 371)"><g id="keeper">${keeperSVG()}</g></g>
     <g transform="translate(126 556) scale(.66)"><g id="shooter">${shooterSVG()}</g></g>
     <g transform="translate(180 462)"><g id="ball">${ballArt(11)}</g></g>
+
+    <!-- viñeta de profundidad -->
+    <rect x="0" y="0" width="360" height="560" fill="url(#g-vignette)" pointer-events="none"/>
 
     <!-- grilla de 9 zonas -->
     <g id="zones">

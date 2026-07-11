@@ -2,6 +2,18 @@
   gap: 6px;
 }
 
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.logo svg {
+  width: min(82vw, 320px);
+  height: auto;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
+}
+
 /* El héroe absorbe el espacio flexible: crece o encoge para que nada desborde */
 .hero {
   flex: 1 1 auto;
