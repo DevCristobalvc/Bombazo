@@ -1,7 +1,8 @@
-/** Pantalla final: resultado, recap de la tanda, revancha o menú. */
+/** Pantalla final: resultado, recap de la tanda, confeti si ganas, revancha o menú. */
 import { fromHTML } from '../utils/dom.js';
 import { flagSVG } from '../art/flags.js';
 import { pick } from '../utils/random.js';
+import { sfx } from '../audio/sfx.js';
 import './EndScreen.css';
 
 const WIN_LINES = [
@@ -25,6 +26,21 @@ export function createEndScreen({ onRematch, onMenu }) {
   const recapRow = (kicks) =>
     `<div class="sb-dots">${kicks.map((k) => `<i class="dot ${k ? 'goal' : 'fail'}"></i>`).join('')}</div>`;
 
+  /** Lluvia de confeti con los colores del equipo campeón. */
+  function confetti(colors) {
+    const layer = fromHTML('<div class="confetti" aria-hidden="true"></div>');
+    for (let i = 0; i < 70; i++) {
+      const piece = document.createElement('i');
+      piece.style.left = `${Math.random() * 100}%`;
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDelay = `${Math.random() * 0.9}s`;
+      piece.style.animationDuration = `${2.2 + Math.random() * 1.6}s`;
+      layer.appendChild(piece);
+    }
+    el.appendChild(layer);
+    setTimeout(() => layer.remove(), 5000);
+  }
+
   function show(result) {
     const { won, playerTeam, rivalTeam } = result;
     card.innerHTML = `
@@ -46,6 +62,13 @@ export function createEndScreen({ onRematch, onMenu }) {
         <button class="btn-big" data-act="rematch">REVANCHA</button>
         <button class="btn-ghost" data-act="menu">Menú</button>
       </div>`;
+
+    if (won) {
+      sfx.fanfare();
+      confetti(['#ffd100', '#ff5c39', '#37d67a', '#ffffff', playerTeam.kit.shirt, playerTeam.kit.accent]);
+    } else {
+      sfx.fail();
+    }
   }
 
   card.addEventListener('click', (e) => {

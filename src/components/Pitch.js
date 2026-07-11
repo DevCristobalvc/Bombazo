@@ -90,6 +90,12 @@ export function createPitch() {
     await sleep(220);
   }
 
+  /** La tribuna salta un instante (goles propios, atajadas heroicas). */
+  function celebrate() {
+    svg.classList.add('celebrate');
+    setTimeout(() => svg.classList.remove('celebrate'), 1100);
+  }
+
   function reset() {
     svg.classList.remove('kick');
     keeper.style.transform = '';
@@ -97,5 +103,5 @@ export function createPitch() {
     svg.querySelectorAll('.zone.picked').forEach((r) => r.classList.remove('picked'));
   }
 
-  return { el, setKits, pickZone, cancelAim, keeperDive, ballTo, ballBounce, ballOver, kickAnim, reset };
+  return { el, setKits, pickZone, cancelAim, keeperDive, ballTo, ballBounce, ballOver, kickAnim, celebrate, reset };
 }

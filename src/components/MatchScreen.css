@@ -19,9 +19,23 @@
   cursor: pointer;
 }
 
+.btn-sound {
+  position: absolute;
+  top: 56px;
+  right: 10px;
+  z-index: 5;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--c-line);
+  background: var(--c-panel);
+  font-size: 14px;
+  cursor: pointer;
+}
+
 .phase-msg {
   text-align: center;
-  min-height: 44px;
+  min-height: 40px;
 }
 
 .phase-msg b {
@@ -35,9 +49,9 @@
   font-weight: 700;
 }
 
+/* La cancha llena el espacio restante del viewport, sin desbordarlo nunca */
 .pitch-wrap {
   position: relative;
   flex: 1;
-  display: flex;
-  align-items: flex-start;
+  min-height: 0;
 }

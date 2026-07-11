@@ -1,13 +1,14 @@
+/* La escena se escala para caber completa en el hueco disponible
+   (preserveAspectRatio centra el dibujo sin deformarlo). */
 .pitch {
-  width: 100%;
+  position: absolute;
+  inset: 0;
 }
 
 .pitch svg {
   display: block;
   width: 100%;
-  height: auto;
-  border-radius: var(--radius-m);
-  box-shadow: var(--shadow-1);
+  height: 100%;
 }
 
 /* Actores animados por transform (secuenciados desde MatchScreen) */
@@ -64,4 +65,19 @@
 
 .scene.aiming .gridlines {
   opacity: 0.5;
+}
+
+/* La multitud salta al celebrar */
+.crowd-dots {
+  transform-box: fill-box;
+}
+
+.scene.celebrate .crowd-dots {
+  animation: crowd-jump 0.26s ease-in-out 4;
+}
+
+@keyframes crowd-jump {
+  50% {
+    transform: translateY(-4px);
+  }
 }

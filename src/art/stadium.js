@@ -60,9 +60,9 @@ export function sceneSVG() {
 
     <!-- cielo y reflectores -->
     <rect x="0" y="0" width="360" height="132" fill="url(#g-sky)"/>
-    <circle cx="30" cy="0" r="70" fill="#ffffff" opacity=".1"/>
-    <circle cx="330" cy="0" r="70" fill="#ffffff" opacity=".1"/>
-    <circle cx="180" cy="-20" r="90" fill="#ffffff" opacity=".05"/>
+    <circle cx="30" cy="0" r="70" fill="#ffffff" opacity=".05"/>
+    <circle cx="330" cy="0" r="70" fill="#ffffff" opacity=".05"/>
+    <circle cx="180" cy="-20" r="90" fill="#ffffff" opacity=".03"/>
     <g fill="#fffbe0" opacity=".9">
       <circle cx="60" cy="30" r="1.2"/><circle cx="120" cy="14" r="1.4"/><circle cx="230" cy="22" r="1.2"/>
       <circle cx="290" cy="38" r="1.4"/><circle cx="180" cy="44" r="1.1"/><circle cx="330" cy="70" r="1.2"/>
@@ -71,7 +71,7 @@ export function sceneSVG() {
 
     <!-- tribuna -->
     <rect x="0" y="128" width="360" height="204" fill="#141d3d"/>
-    <rect x="0" y="128" width="360" height="204" fill="url(#p-crowd)"/>
+    <rect class="crowd-dots" x="0" y="128" width="360" height="204" fill="url(#p-crowd)"/>
     <rect x="0" y="124" width="360" height="6" fill="#1f2c57"/>
 
     <!-- valla publicitaria -->

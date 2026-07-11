@@ -232,10 +232,11 @@ Decisiones:
 - [x] Deploy a Vercel
 - [ ] Prueba real en un teléfono (pendiente: la hace Cristóbal con la URL)
 
-### 🚀 Fase 2 — Juice y pulido
-- [ ] Sonidos (silbato, ovación, abucheo, golpe al balón) — Web Audio, assets CC0 (freesound/Kenney)
-- [ ] Confeti/celebración al ganar; reacción de la multitud (olas de opacidad en el patrón)
-- [ ] Vibración háptica en móvil
+### 🚀 Fase 2 — Juice y pulido (en curso)
+- [x] Layout 100% viewport: cero scroll de página; solo scrollean zonas internas pequeñas (chips y panel del menú)
+- [x] Sonidos sintetizados con WebAudio (silbato, patada, gol, atajada, ovación, fanfarria) — cero assets, botón mute persistente
+- [x] Confeti al ganar (colores del equipo campeón) + tribuna que salta en las celebraciones
+- [x] Vibración háptica en móvil (gol, atajada, gol en contra)
 - [ ] Barra de "potencia/precisión" opcional al patear (timing skill, no solo puntería)
 - [ ] Estadísticas de sesión (efectividad, zona favorita) y racha de victorias en `localStorage`
 - [ ] PWA: manifest + service worker para jugar offline e "instalar" en el teléfono

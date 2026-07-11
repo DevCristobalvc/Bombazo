@@ -10,7 +10,15 @@ import { createScoreboard } from './Scoreboard.js';
 import { createAnnouncer } from './Announcer.js';
 import { fromHTML, sleep } from '../utils/dom.js';
 import { pick } from '../utils/random.js';
+import { sfx, isMuted, setMuted } from '../audio/sfx.js';
 import './MatchScreen.css';
+
+/** Vibración háptica donde exista (móvil). */
+const buzz = (pattern) => {
+  try {
+    navigator.vibrate?.(pattern);
+  } catch { /* sin vibración */ }
+};
 
 const COPY = {
   goalPlayer: ['¡GOOOOL!', '¡BOMBAZO! 💥', '¡GOLAZO! 🔥', '¡LA CLAVÓ!'],
@@ -28,6 +36,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   const el = fromHTML(`
     <section class="screen match-screen">
       <button class="btn-exit" aria-label="Salir al menú">✕</button>
+      <button class="btn-sound" data-ref="sound" aria-label="Activar o silenciar sonido"></button>
       <div class="phase-msg"><b data-ref="msg"></b><span data-ref="sub"></span></div>
       <div class="pitch-wrap" data-ref="wrap"></div>
     </section>`);
@@ -42,6 +51,16 @@ export function createMatchScreen({ onFinish, onExit }) {
     stop();
     onExit();
   });
+
+  const soundBtn = el.querySelector('[data-ref="sound"]');
+  const renderSoundBtn = () => {
+    soundBtn.textContent = isMuted() ? '🔇' : '🔊';
+  };
+  soundBtn.addEventListener('click', () => {
+    setMuted(!isMuted());
+    renderSoundBtn();
+  });
+  renderSoundBtn();
 
   let aborted = false;
   let ctx = null; // { s, playerTeam, rivalTeam, diff, phase }
@@ -74,12 +93,22 @@ export function createMatchScreen({ onFinish, onExit }) {
     const gkZone = keeperPick(diff, zone, s.habits);
 
     await pitch.kickAnim();
+    sfx.kick();
     pitch.ballTo(zone);
     pitch.keeperDive(gkZone);
     await sleep(480);
 
     const goal = zone !== gkZone;
-    if (!goal) pitch.ballBounce(zone);
+    if (goal) {
+      sfx.goal();
+      buzz(80);
+      pitch.celebrate();
+    } else {
+      pitch.ballBounce(zone);
+      sfx.save();
+      sfx.fail();
+      buzz(25);
+    }
     registerKick(s, 'P', goal);
     updateBoard();
     await announcer.say(pick(goal ? COPY.goalPlayer : COPY.savedShot), goal ? 'goal' : 'miss');
@@ -99,6 +128,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     const shot = shooterPick(diff, dive);
 
     await pitch.kickAnim();
+    sfx.kick();
     pitch.keeperDive(dive);
 
     let goal;
@@ -114,7 +144,19 @@ export function createMatchScreen({ onFinish, onExit }) {
     }
     await sleep(480);
 
-    if (!goal && !shot.offTarget) pitch.ballBounce(shot.zone);
+    if (goal) {
+      sfx.fail();
+      buzz([40, 50, 40]);
+    } else if (shot.offTarget) {
+      sfx.cheer();
+      buzz(40);
+    } else {
+      pitch.ballBounce(shot.zone);
+      sfx.save();
+      sfx.cheer();
+      buzz(60);
+      pitch.celebrate();
+    }
     registerKick(s, 'C', goal);
     updateBoard();
     await announcer.say(pick(COPY[copyKey]), goal ? 'miss' : 'save');
@@ -126,6 +168,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     aborted = false;
     ctx = { s: createShootout(), playerTeam, rivalTeam, diff, phase: 'shoot' };
     pitch.reset();
+    sfx.whistle();
     let suddenAnnounced = false;
 
     while (!aborted) {
@@ -139,6 +182,7 @@ export function createMatchScreen({ onFinish, onExit }) {
 
       if (isSuddenDeath(ctx.s) && !suddenAnnounced) {
         suddenAnnounced = true;
+        sfx.sudden();
         await announcer.say('¡MUERTE SÚBITA! ⚡', 'info', 1200);
       }
     }

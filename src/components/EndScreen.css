@@ -1,5 +1,37 @@
 .end-screen {
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Confeti del campeón */
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.confetti i {
+  position: absolute;
+  top: -14px;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: conf-fall linear forwards;
+}
+
+@keyframes conf-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateY(105dvh) rotate(720deg);
+  }
 }
 
 .end-card {

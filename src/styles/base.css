@@ -7,10 +7,12 @@ html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
-  min-height: 100dvh;
   font-family: var(--font-ui);
   color: var(--c-text);
   background: linear-gradient(180deg, var(--c-night-1) 0%, var(--c-night-2) 55%, var(--c-grass) 100%) fixed;
@@ -22,15 +24,19 @@ body {
 #app {
   width: 100%;
   max-width: var(--app-max-width);
-  min-height: 100dvh;
+  height: 100dvh;
   position: relative;
+  overflow: hidden;
 }
 
+/* Cada pantalla ocupa exactamente el viewport: nunca hay scroll de página.
+   Si algo no cabe, solo scrollea una zona interna pequeña (p.ej. el panel del menú). */
 .screen {
   display: none;
   flex-direction: column;
-  min-height: 100dvh;
-  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  height: 100dvh;
+  min-height: 0;
+  padding: 12px 16px calc(10px + env(safe-area-inset-bottom));
 }
 
 .screen.active {
@@ -88,14 +94,22 @@ button {
   margin-top: 0;
 }
 
-/* --- Chips de selección --- */
+/* --- Chips de selección: una fila con scroll horizontal propio --- */
 .chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 3px;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
 }
 
 .chip {
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 7px;
