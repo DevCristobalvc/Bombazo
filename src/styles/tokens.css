@@ -1,0 +1,32 @@
+/* ============================================================
+   BOMBAZO · Design tokens — la identidad visual vive aquí.
+   Noche de mundial: cielo profundo, amarillo eléctrico, césped vivo.
+   ============================================================ */
+:root {
+  /* Paleta */
+  --c-night-1: #04081a;
+  --c-night-2: #0d1f4d;
+  --c-panel: rgba(9, 17, 41, 0.84);
+  --c-line: #26407f;
+  --c-accent: #ffd100;
+  --c-accent-dark: #b97e00;
+  --c-accent-2: #ff5c39;
+  --c-grass: #0e3d1d;
+  --c-text: #f4f7ff;
+  --c-muted: #9fb0d8;
+  --c-good: #37d67a;
+  --c-bad: #ff5b5b;
+
+  /* Tipografía */
+  --font-display: 'Luckiest Guy', 'Arial Black', sans-serif;
+  --font-ui: 'Nunito', system-ui, sans-serif;
+
+  /* Forma y profundidad */
+  --radius-s: 10px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --shadow-1: 0 4px 14px rgba(0, 0, 0, 0.35);
+
+  /* Layout vertical mobile-first */
+  --app-max-width: 430px;
+}

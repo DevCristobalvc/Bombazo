@@ -1,0 +1,46 @@
+.scoreboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--c-panel);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-m);
+  padding: 8px 12px;
+  margin-right: 44px; /* espacio para el botón salir */
+}
+
+.sb-row {
+  display: grid;
+  grid-template-columns: 34px 44px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.72;
+  transition: opacity 0.2s;
+}
+
+.sb-row.is-active {
+  opacity: 1;
+}
+
+.sb-flag svg {
+  display: block;
+  border-radius: 3px;
+}
+
+.sb-name {
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.sb-dots {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.sb-score {
+  font-weight: 900;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}

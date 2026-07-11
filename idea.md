@@ -172,25 +172,42 @@ Detalles de juicio (game feel):
 
 ```
 bombazo/
-├── index.html          # Las 3 pantallas (menú, partido, resultado)
-├── css/
-│   └── style.css       # Mobile-first, container max-width ~430px centrado
-├── js/
-│   ├── teams.js        # Diccionario TEAMS: colores, banderas SVG, kit arquero
-│   ├── sprites.js      # Funciones que generan los SVG (héroe, escena, arquero…)
-│   ├── ai.js           # keeperPick() y shooterPick() por dificultad
-│   └── game.js         # Máquina de estados, secuencias async, UI del partido
-├── idea.md             # Este documento
-└── README.md
+├── index.html              # Shell HTML (fuentes, meta, #app)
+├── package.json            # Vite (dev/build/preview)
+├── scripts/smoke.cjs       # Smoke test visual con navegador headless
+└── src/
+    ├── main.js             # Punto de entrada: monta pantallas y navega
+    ├── styles/
+    │   ├── tokens.css      # Design tokens: la identidad visual vive aquí
+    │   └── base.css        # Reset, layout, chips, botones, dots compartidos
+    ├── data/
+    │   └── teams.js        # TEAMS + DIFFICULTIES (agregar equipo = 1 entrada)
+    ├── core/               # Lógica pura, sin DOM (testeable por separado)
+    │   ├── shootout.js     # Motor de la tanda: reglas FIFA, corte, muerte súbita
+    │   └── ai.js           # keeperPick() y shooterPick() por dificultad
+    ├── art/                # Identidad visual 100% SVG propia
+    │   ├── flags.js        # Banderas mini por país
+    │   ├── ball.js         # Balón cartoon
+    │   ├── players.js      # Héroe frontal, pateador de espaldas, arquero
+    │   └── stadium.js      # Escena del estadio + geometría de las 9 zonas
+    └── components/         # UI por componentes, cada uno con su .css
+        ├── MenuScreen.js/.css
+        ├── MatchScreen.js/.css   # Orquesta core + Pitch + Scoreboard + Announcer
+        ├── EndScreen.js/.css
+        ├── Pitch.js/.css         # Escena jugable con API imperativa
+        ├── Scoreboard.js/.css
+        └── Announcer.js/.css
 ```
 
 Decisiones:
 
-- **Vanilla JS con `<script>` clásicos** (no ES modules) para que funcione incluso abriendo `index.html` con doble clic (file://), sin servidor.
-- **Estado**: un objeto `match` plano (ronda, marcadores, arrays de tiros, fase, hábitos). Nada de librerías de estado.
+- **Vite + vanilla JS por componentes** (sin framework): cada componente es una factory que devuelve `{ el, api }` con su CSS co-ubicado. Escalar = agregar componentes; la lógica de juego (`core/`) no conoce el DOM, así que se puede portar o testear sin tocar UI.
+- **Capas bien separadas**: `data` (contenido) → `core` (reglas puras) → `art` (SVG parametrizable por CSS vars) → `components` (UI) → `main` (navegación). Las dependencias solo apuntan hacia abajo.
+- **Estado**: objeto de tanda plano en `core/shootout.js` (tiros, hábitos) + contexto de partido en MatchScreen. Nada de librerías de estado.
 - **Animaciones**: CSS transitions sobre `transform` de los grupos SVG (`#ball`, `#keeper`), secuenciadas con `async/await + sleep()`. Sin canvas ni requestAnimationFrame en la v1.
-- **Responsive**: `#app { max-width: 430px; margin: auto }`, altura `100dvh`, safe-areas de iOS. En desktop el fondo (degradado estadio) llena los lados.
-- **Deploy**: sitio estático en **Vercel** (cuenta `devcristobal`), preview + producción. No requiere `vercel.json`.
+- **Responsive**: `#app { max-width: 430px }` centrado, altura `100dvh`, safe-areas de iOS. En desktop el fondo (degradado estadio) llena los lados.
+- **Deploy**: sitio estático en **Vercel** (cuenta `devcristobal`), build de Vite auto-detectado. No requiere `vercel.json`.
+- **Verificación**: `scripts/smoke.cjs` recorre el flujo completo (menú → patear → atajar → desktop) con Edge headless y captura screenshots en `.smoke/`.
 
 ---
 
@@ -201,18 +218,19 @@ Decisiones:
 - [x] `idea.md` con la especificación completa
 - [x] README + .gitignore
 
-### 🎯 Fase 1 — MVP jugable (primera sesión de desarrollo)
-- [ ] Estructura de archivos y estilos base mobile-first
-- [ ] `teams.js` con los 5 equipos + banderas SVG
-- [ ] Pantalla menú: héroe con camiseta viva, selectores de equipo/rival/dificultad
-- [ ] Escena SVG del estadio completa
-- [ ] Sprites: pateador (espaldas), arquero (frontal + vuelos a 9 zonas), balón
-- [ ] Grilla 9 zonas interactiva con estados (insinuada / hover / elegida / bloqueada)
-- [ ] Lógica de tanda completa: 5 tiros, alternancia, corte anticipado, muerte súbita
-- [ ] IA con las 3 dificultades según la tabla de la sección 6
-- [ ] Marcador vivo + anuncios animados de resultado
-- [ ] Pantalla de resultado con revancha
-- [ ] Deploy a Vercel (preview) y prueba real en un teléfono
+### 🎯 Fase 1 — MVP jugable ✅ (2026-07-11)
+- [x] Estructura de archivos y estilos base mobile-first (Vite + componentes)
+- [x] `teams.js` con los 5 equipos + banderas SVG
+- [x] Pantalla menú: héroe con camiseta viva, selectores de equipo/rival/dificultad
+- [x] Escena SVG del estadio completa
+- [x] Sprites: pateador (espaldas), arquero (frontal + vuelos a 9 zonas), balón
+- [x] Grilla 9 zonas interactiva con estados (insinuada / hover / elegida / bloqueada)
+- [x] Lógica de tanda completa: 5 tiros, alternancia, corte anticipado, muerte súbita
+- [x] IA con las 3 dificultades según la tabla de la sección 6
+- [x] Marcador vivo + anuncios animados de resultado
+- [x] Pantalla de resultado con revancha
+- [x] Deploy a Vercel
+- [ ] Prueba real en un teléfono (pendiente: la hace Cristóbal con la URL)
 
 ### 🚀 Fase 2 — Juice y pulido
 - [ ] Sonidos (silbato, ovación, abucheo, golpe al balón) — Web Audio, assets CC0 (freesound/Kenney)

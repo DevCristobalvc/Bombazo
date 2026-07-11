@@ -1,0 +1,67 @@
+.pitch {
+  width: 100%;
+}
+
+.pitch svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-1);
+}
+
+/* Actores animados por transform (secuenciados desde MatchScreen) */
+#keeper {
+  transition: transform 0.48s cubic-bezier(0.3, 0.9, 0.35, 1.05);
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+
+#ball {
+  transition: transform 0.42s cubic-bezier(0.25, 0.8, 0.4, 1);
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+
+#shooter {
+  transition: transform 0.2s ease-in;
+}
+
+.scene.kick #shooter {
+  transform: translate(56px, -44px) rotate(10deg);
+}
+
+/* Grilla de 9 zonas: solo interactiva durante la puntería */
+.zone {
+  fill: transparent;
+  pointer-events: none;
+}
+
+.scene.aiming .zone {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.scene.aiming .zone:hover,
+.scene.aiming .zone:active {
+  fill: rgba(255, 209, 0, 0.18);
+  stroke: #ffd100;
+  stroke-width: 2;
+}
+
+.zone.picked {
+  fill: rgba(255, 209, 0, 0.12);
+  stroke: #ffd100;
+  stroke-width: 2.5;
+}
+
+.gridlines {
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.scene.aiming .gridlines {
+  opacity: 0.5;
+}

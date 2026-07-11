@@ -1,0 +1,186 @@
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-ui);
+  color: var(--c-text);
+  background: linear-gradient(180deg, var(--c-night-1) 0%, var(--c-night-2) 55%, var(--c-grass) 100%) fixed;
+  display: flex;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+#app {
+  width: 100%;
+  max-width: var(--app-max-width);
+  min-height: 100dvh;
+  position: relative;
+}
+
+.screen {
+  display: none;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+}
+
+.screen.active {
+  display: flex;
+}
+
+h1, h2, h3, p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* --- Identidad: logo y textos --- */
+.logo {
+  font-family: var(--font-display);
+  font-size: clamp(46px, 14vw, 64px);
+  text-align: center;
+  color: var(--c-accent);
+  text-shadow: 0 3px 0 #a97a00, 0 7px 20px rgba(0, 0, 0, 0.55);
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-top: 8px;
+}
+
+.tagline {
+  text-align: center;
+  color: var(--c-muted);
+  font-weight: 800;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+/* --- Superficies --- */
+.panel {
+  background: var(--c-panel);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-l);
+  padding: 16px;
+  box-shadow: var(--shadow-1);
+}
+
+.panel-title {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  font-weight: 900;
+  margin: 14px 0 8px;
+}
+
+.panel-title:first-child {
+  margin-top: 0;
+}
+
+/* --- Chips de selección --- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border-radius: 999px;
+  border: 2px solid var(--c-line);
+  background: #0c1836;
+  font-weight: 900;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.15s, background 0.15s;
+}
+
+.chip:active {
+  transform: scale(0.95);
+}
+
+.chip.is-selected {
+  border-color: var(--c-accent);
+  background: #1c2f63;
+  box-shadow: 0 0 0 3px rgba(255, 209, 0, 0.18);
+}
+
+.chip:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.chip svg {
+  border-radius: 3px;
+  display: block;
+}
+
+/* --- Botones --- */
+.btn-big {
+  width: 100%;
+  margin-top: 16px;
+  padding: 15px 10px 11px;
+  border: 0;
+  border-radius: var(--radius-m);
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 1px;
+  color: #3a2600;
+  background: linear-gradient(180deg, #ffe14d, #ffb200);
+  box-shadow: 0 5px 0 var(--c-accent-dark), var(--shadow-1);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-big:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--c-accent-dark);
+}
+
+.btn-ghost {
+  padding: 12px;
+  border-radius: var(--radius-m);
+  border: 2px solid var(--c-line);
+  background: transparent;
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* --- Puntos de tanda (compartidos por marcador y recap) --- */
+.dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #223766;
+  border: 1px solid #3b5aa0;
+  display: inline-block;
+}
+
+.dot.goal {
+  background: var(--c-good);
+  border-color: #1f9e57;
+}
+
+.dot.fail {
+  background: var(--c-bad);
+  border-color: #c0392b;
+}
+
+.dot.now {
+  box-shadow: 0 0 0 2px var(--c-accent);
+}

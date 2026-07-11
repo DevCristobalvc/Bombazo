@@ -1,4 +1,6 @@
 node_modules/
+dist/
+.smoke/
 .vercel/
 .DS_Store
 Thumbs.db
