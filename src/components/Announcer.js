@@ -5,7 +5,7 @@ import './Announcer.css';
 export function createAnnouncer() {
   const el = fromHTML('<div class="announcer" aria-live="polite"></div>');
 
-  async function say(text, type = 'info', ms = 950) {
+  async function say(text, type = 'info', ms = 820) {
     el.textContent = text;
     el.className = `announcer show ${type}`;
     await sleep(ms);

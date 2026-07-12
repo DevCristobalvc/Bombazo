@@ -240,8 +240,9 @@ Decisiones:
 - [x] Cero emojis: todos reemplazados por íconos SVG propios (rayo, trofeo, llamas de dificultad, altavoz, ticket, balón triste)
 - [x] Los 16 equipos reales de octavos del Mundial 2026 habilitados, con kits, arqueros y banderas propias
 - [x] Estadísticas persistentes: victorias, derrotas, racha y récord en `localStorage`, visibles en el menú
+- [x] PWA completa: service worker (vite-plugin-pwa/Workbox) con precache de la app y cache de fuentes — instalable y jugable offline
+- [x] Ritmo más ágil: anuncios y pausas entre penales recortados (partida completa en ~90 segundos)
 - [ ] Estadísticas avanzadas (efectividad por zona, zona favorita)
-- [ ] PWA completa: service worker para jugar offline (manifest ya listo)
 
 ### 🌌 Fase 3 — El cielo es el límite (backlog de ideas)
 - [ ] **Customización del personaje**: piel, pelo, nombre y dorsal en la camiseta
@@ -253,6 +254,25 @@ Decisiones:
 - [ ] Tabla de posiciones global (leaderboard) con Vercel + base de datos del Marketplace
 - [ ] Efectos de clima (lluvia, nieve en Suiza 😄) y estadios distintos por sede
 - [ ] Comentarista con frases ("¡La mandó a las nubes!") y modo narrador con TTS
+
+### ⚙️ Fase 4 — Físicas y nuevos modos de tiro
+
+El salto de "elegir casilla" a "ejecutar el tiro". Principios: seguir siendo un juego de 1 toque (o 1 gesto), rápido y vertical.
+
+- [ ] **Física de balón real**: trayectoria parametrizada (velocidad, ángulo, curva/efecto) en lugar de interpolación directa a la casilla. Motor propio ligero (integración simple en `requestAnimationFrame`) o Matter.js si se justifica — evaluar peso vs beneficio; la v1 del motor debe vivir en `core/physics.js` puro y testeable.
+- [ ] **Gesto de disparo**: deslizar (swipe) para patear — la dirección del gesto define la puntería y la curvatura del trazo define el efecto. Reemplaza (o convive con) la grilla + barra de potencia.
+- [ ] **Tiros de esquina (córners)**: nuevo modo con física distinta — el balón viene con comba desde la esquina, eliges el punto de remate de cabeza/volea y el timing del salto. Reutiliza el estadio y los sprites; nueva escena de área.
+- [ ] **Tiros libres** con barrera: otra variante de física (elevación por encima de la barrera + caída).
+- [ ] Viento/condiciones por estadio como modificador ligero de la física.
+
+### 📱 Fase 5 — Distribución como app móvil (tiendas)
+
+La PWA ya es instalable; para tiendas de aplicaciones:
+
+- [ ] **Google Play**: empaquetar como TWA (Trusted Web Activity) con Bubblewrap — reutiliza la PWA tal cual, solo requiere assetlinks.json en el dominio y el wrapper Android.
+- [ ] **App Store (iOS)**: wrapper con **Capacitor** (WebView + plugins nativos). Migrar vibración/audio a plugins nativos donde mejore la experiencia.
+- [ ] Preparativos comunes: splash screens nativos, íconos por plataforma (ya existen 192/512/maskable), política de privacidad, página de soporte, versioning semántico y pipeline de release desde GitHub.
+- [ ] Monetización eventual (opcional): compras cosméticas (kits alternos, balones) — nunca pay-to-win.
 
 ---
 

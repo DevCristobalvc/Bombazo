@@ -4,9 +4,13 @@ Juego web arcade de **tandas de penales** estilo Copa Mundial FIFA 2026. Mobile-
 
 > 📋 **Toda la especificación del juego está en [`idea.md`](./idea.md)** — concepto, mecánica de 9 zonas, IA por dificultad, dirección de arte, arquitectura y roadmap.
 
+## Jugar
+
+🎮 **https://bombazo-chi.vercel.app** — funciona como página web y como **PWA instalable** (en el teléfono: "Agregar a pantalla de inicio"; juega incluso sin conexión).
+
 ## Estado
 
-✅ **Fase 1 — MVP jugable.** Tanda completa contra la máquina con 5 selecciones, 3 dificultades, formato FIFA (corte anticipado + muerte súbita).
+✅ **v1 lanzada como web + PWA.** Tanda completa contra la máquina con los 16 equipos reales de octavos del Mundial 2026, 3 dificultades, formato FIFA (corte anticipado + muerte súbita), modo torneo de 4 rondas, barra de potencia con timing, sonido sintetizado y estadísticas persistentes. Roadmap siguiente en `idea.md`: físicas de tiro (córners, tiros libres, swipe con efecto) y distribución en tiendas (TWA/Capacitor).
 
 ## Cómo correr
 

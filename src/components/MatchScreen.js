@@ -148,7 +148,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     const copy = goal ? COPY.goalPlayer : offTarget ? COPY.playerMiss : COPY.savedShot;
     await announcer.say(pick(copy), goal ? 'goal' : 'miss');
     pitch.reset();
-    await sleep(350);
+    await sleep(240);
   }
 
   async function cpuKick() {
@@ -196,7 +196,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     updateBoard();
     await announcer.say(pick(COPY[copyKey]), goal ? 'miss' : 'save');
     pitch.reset();
-    await sleep(350);
+    await sleep(240);
   }
 
   async function start({ playerTeam, rivalTeam, diff, stageLabel = null }) {

@@ -32,6 +32,14 @@ async function assertNoPageScroll(page, label, failures) {
   await page.screenshot({ path: path.join(OUT, '1-menu.png') });
   await assertNoPageScroll(page, 'menu 390x844', failures);
 
+  // PWA: el service worker debe registrarse y quedar activo
+  const swActive = await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) return 'sin soporte';
+    const reg = await navigator.serviceWorker.ready.catch(() => null);
+    return reg?.active ? 'activo' : 'no activo';
+  });
+  if (swActive !== 'activo') failures.push(`service worker: ${swActive}`);
+
   // teléfono pequeño
   await page.setViewportSize({ width: 360, height: 640 });
   await page.waitForTimeout(250);
