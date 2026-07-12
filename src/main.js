@@ -21,11 +21,14 @@ let duelCtx = null; // { isHost, myTeamId, rivalTeamId }
 /* ---------- Partidos ---------- */
 
 function startQuickMatch() {
+  const corners = session.mode === 'corners';
   show(match.el);
   match.start({
     playerTeam: teamById(session.teamId),
     rivalTeam: teamById(session.rivalId),
     diff: session.diff,
+    mode: corners ? 'corners' : 'penales',
+    stageLabel: corners ? 'CÓRNERS' : null,
   });
 }
 
@@ -127,7 +130,7 @@ const menu = createMenuScreen({
     } else if (config.mode === 'duelo') {
       startHosting(config);
     } else {
-      startQuickMatch();
+      startQuickMatch(); // penales o córners contra la IA
     }
   },
 });

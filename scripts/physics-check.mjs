@@ -1,5 +1,5 @@
 /* Test unitario del motor de físicas (lógica pura, corre en Node). */
-import { analyzeSwipe, shotPath, makeCpuShot } from '../src/core/physics.js';
+import { analyzeSwipe, shotPath, makeCpuShot, cornerCrossPath, headerShot } from '../src/core/physics.js';
 import { zoneAt, zoneNearest, GOAL, BALL_HOME } from '../src/core/zones.js';
 
 let failures = 0;
@@ -62,5 +62,29 @@ check('tiro CPU desviado va por encima', zoneAt(off.tx, off.ty) === null && off.
 
 // zoneNearest lee tiros afuera
 check('zoneNearest de un tiro alto al centro es la fila alta', [0, 1, 2].includes(zoneNearest(180, 100)));
+
+// Córners: el centro barre de lado a lado por delante del arco
+const cross = cornerCrossPath('right');
+const c0 = cross.path(0);
+const c1 = cross.path(1);
+const cm = cross.path(0.5);
+check('el centro entra por la derecha y sale por la izquierda', c0.x > 350 && c1.x < 10);
+check('el centro pasa por delante del arco (bajo la línea de gol)', cm.y > GOAL.bottom && cm.y < 470);
+
+// Cabezazo desde el centro del área: remata hacia el arco
+let headersInGoal = 0;
+for (let i = 0; i < 200; i++) {
+  const h = headerShot(cross.path(0.5));
+  if (zoneAt(h.tx, h.ty) !== null) headersInGoal += 1;
+}
+check('cabezazo desde el centro casi siempre va al arco', headersInGoal > 180);
+
+// Cabezazo en el extremo del barrido: suele irse desviado
+let wideMisses = 0;
+for (let i = 0; i < 200; i++) {
+  const h = headerShot(cross.path(0.02));
+  if (zoneAt(h.tx, h.ty) === null) wideMisses += 1;
+}
+check('cabezazo al inicio del centro (muy abierto) suele irse afuera', wideMisses > 150);
 
 process.exit(failures ? 1 : 0);

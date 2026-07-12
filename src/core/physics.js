@@ -71,6 +71,39 @@ export function shotPath(shot, from = BALL_HOME) {
   });
 }
 
+/**
+ * Centro de córner: el balón barre con comba el área frente al arco.
+ * Devuelve { path(u), dur }. El jugador remata de cabeza con un toque
+ * en el momento justo (la posición del balón define el remate).
+ */
+export function cornerCrossPath(side = 'right') {
+  const from = side === 'right' ? { x: 372, y: 310 } : { x: -12, y: 310 };
+  const to = side === 'right' ? { x: -10, y: 425 } : { x: 370, y: 425 };
+  const cx = 180;
+  const cy = 480; // control bajo: la comba pasa por delante del arco
+  const path = (u) => ({
+    x: (1 - u) ** 2 * from.x + 2 * (1 - u) * u * cx + u ** 2 * to.x,
+    y: (1 - u) ** 2 * from.y + 2 * (1 - u) * u * cy + u ** 2 * to.y,
+  });
+  return { path, dur: 1650 };
+}
+
+/**
+ * Cabezazo: nace donde está el balón al momento del toque.
+ * La columna la define la posición del balón (timing = puntería);
+ * la profundidad del centro define la altura del remate.
+ */
+export function headerShot(point) {
+  const tx = point.x + (Math.random() * 2 - 1) * 14;
+  const ty = clamp(165 + (point.y - 385) * 1.35 + (Math.random() * 2 - 1) * 18, 150, 371);
+  return {
+    tx: clamp(tx, -25, 385),
+    ty,
+    curve: (Math.random() * 2 - 1) * 0.3,
+    dur: 300 + Math.random() * 120,
+  };
+}
+
 /** Tiro sintético de la CPU hacia una zona (o desviado por encima). */
 export function makeCpuShot(zone, offTarget) {
   const curve = (Math.random() * 2 - 1) * 0.55;

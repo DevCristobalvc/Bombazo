@@ -12,7 +12,8 @@ import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
 const MODES = [
-  { id: 'rapido', label: 'Partido rápido', icon: 'bolt' },
+  { id: 'rapido', label: 'Penales', icon: 'bolt' },
+  { id: 'corners', label: 'Córners', icon: 'flag' },
   { id: 'torneo', label: 'Torneo', icon: 'trophy' },
   { id: 'duelo', label: '1 vs 1', icon: 'versus' },
 ];
@@ -88,7 +89,8 @@ export function createMenuScreen({ onPlay }) {
     ).join('');
     refs.teams.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.teamId, false)).join('');
     refs.rivals.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.rivalId, t.id === state.teamId)).join('');
-    refs.rivalBlock.style.display = state.mode === 'rapido' ? '' : 'none';
+    const vsAI = state.mode === 'rapido' || state.mode === 'corners';
+    refs.rivalBlock.style.display = vsAI ? '' : 'none';
     refs.diffBlock.style.display = state.mode === 'duelo' ? 'none' : '';
     refs.diffs.innerHTML = DIFFICULTIES.map(
       (d) => `<button class="chip ${d.id === state.diff ? 'is-selected' : ''}" data-id="${d.id}">${flames(d.level)} ${d.label}</button>`
@@ -103,7 +105,9 @@ export function createMenuScreen({ onPlay }) {
         ? `${player.short} · Torneo: 4 rondas al título · ${diff.label}`
         : state.mode === 'duelo'
           ? `${player.short} · Duelo 1 vs 1 · El rival escanea tu QR`
-          : `${player.short} <i class="vs">VS</i> ${rival.short} · ${diff.label}`;
+          : state.mode === 'corners'
+            ? `${player.short} <i class="vs">VS</i> ${rival.short} · Córners · ${diff.label}`
+            : `${player.short} <i class="vs">VS</i> ${rival.short} · ${diff.label}`;
     renderStats();
   }
 

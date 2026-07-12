@@ -115,6 +115,7 @@ export function createPitch() {
       resolve(null);
     }
     if (cancelSwipe) cancelSwipe();
+    if (cancelCross) cancelCross();
   }
 
   /* ---------- Vestuario y animaciones ---------- */
@@ -156,9 +157,10 @@ export function createPitch() {
     setTimeout(() => dot.remove(), 300);
   }
 
-  /** Vuelo físico del balón (requestAnimationFrame sobre core/physics). */
-  function ballFlight(shot) {
-    const path = shotPath(shot);
+  /** Vuelo físico del balón (requestAnimationFrame sobre core/physics).
+      `from` permite rematar desde donde esté el balón (cabezazos de córner). */
+  function ballFlight(shot, from) {
+    const path = shotPath(shot, from);
     ball.style.transition = 'none';
     return new Promise((resolve) => {
       const t0 = performance.now();
@@ -172,6 +174,56 @@ export function createPitch() {
         frame += 1;
         if (u < 1) requestAnimationFrame(step);
         else resolve();
+      };
+      requestAnimationFrame(step);
+    });
+  }
+
+  let cancelCross = null;
+
+  /**
+   * Centro de córner: anima el balón por su comba y espera el toque del
+   * jugador. Resuelve { x, y, u } (posición del balón al tocar) o null si
+   * el centro pasó de largo sin remate.
+   */
+  function cornerCross({ path, dur }, { interactive = true, stopAt = 1 } = {}) {
+    ball.style.transition = 'none';
+    svg.classList.add('crossing');
+    return new Promise((resolve) => {
+      let tappedU = null;
+      const onTap = () => {
+        tappedU = -1; // marca: resolver en el próximo frame con la posición actual
+      };
+      const cleanup = () => {
+        svg.classList.remove('crossing');
+        svg.removeEventListener('pointerdown', onTap);
+        cancelCross = null;
+      };
+      cancelCross = () => {
+        cleanup();
+        resolve(null);
+      };
+      if (interactive) svg.addEventListener('pointerdown', onTap);
+
+      const t0 = performance.now();
+      let frame = 0;
+      const step = (now) => {
+        if (!cancelCross) return; // cancelado
+        const u = Math.min(stopAt, (now - t0) / dur);
+        const p = path(u);
+        ball.style.transform = `translate(${(p.x - BALL_HOME.x).toFixed(1)}px, ${(p.y - BALL_HOME.y).toFixed(1)}px) scale(.92)`;
+        if (frame % 3 === 0) spawnTrail(p.x, p.y, 0.7);
+        frame += 1;
+        if (tappedU !== null) {
+          cleanup();
+          resolve({ x: p.x, y: p.y, u });
+          return;
+        }
+        if (u < stopAt) requestAnimationFrame(step);
+        else {
+          cleanup();
+          resolve(interactive ? null : { x: p.x, y: p.y, u });
+        }
       };
       requestAnimationFrame(step);
     });
@@ -229,5 +281,5 @@ export function createPitch() {
     svg.querySelectorAll('.zone.picked').forEach((r) => r.classList.remove('picked'));
   }
 
-  return { el, setKits, pickZone, captureSwipe, cancelAim, keeperDive, ballFlight, ballBounce, kickAnim, celebrate, shake, flash, netRipple, reset };
+  return { el, setKits, pickZone, captureSwipe, cornerCross, cancelAim, keeperDive, ballFlight, ballBounce, kickAnim, celebrate, shake, flash, netRipple, reset };
 }

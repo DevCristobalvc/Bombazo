@@ -9,7 +9,7 @@
 import { createShootout, registerKick, registerHabit, winner, isSuddenDeath, score } from '../core/shootout.js';
 import { keeperPick, shooterPick } from '../core/ai.js';
 import { zoneAt, zoneNearest } from '../core/zones.js';
-import { makeCpuShot } from '../core/physics.js';
+import { makeCpuShot, cornerCrossPath, headerShot } from '../core/physics.js';
 import { recordShot } from '../core/stats.js';
 import { createPitch } from './Pitch.js';
 import { createScoreboard } from './Scoreboard.js';
@@ -35,6 +35,7 @@ const COPY = {
   playerSave: ['¡ATAJADÓN!', '¡QUÉ MANOS!', '¡MONUMENTAL!'],
   cpuGoal: ['GOL DEL RIVAL…', 'LA MANDÓ ADENTRO', 'NADA QUE HACER'],
   cpuMiss: ['¡AFUERA!', '¡A LAS NUBES!', '¡LA TIRÓ A LA TRIBUNA!'],
+  crossLost: ['¡PASÓ DE LARGO!', '¡SE FUE EL CENTRO!', '¡NADIE LA PEINÓ!'],
 };
 
 export function createMatchScreen({ onFinish, onExit }) {
@@ -250,6 +251,72 @@ export function createMatchScreen({ onFinish, onExit }) {
     await settleTheirKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? intent.zone });
   }
 
+  /* ---------- Modo Córners: cabezazo con timing ---------- */
+
+  const crossSide = () => (ctx.s.kicks.P.length % 2 === 0 ? 'right' : 'left');
+
+  async function myCornerKick() {
+    const { s, playerTeam, rivalTeam } = ctx;
+    ctx.phase = 'shoot';
+    pitch.setKits({ shooterTeam: playerTeam, keeperTeam: rivalTeam });
+    setMsg(`Córner ${s.kicks.P.length + 1} — ¡Remata de cabeza!`, 'Toca justo cuando el centro pase por donde quieres');
+    updateBoard();
+
+    sfx.kick(); // saque de esquina
+    const tap = await pitch.cornerCross(cornerCrossPath(crossSide()));
+    if (aborted) return;
+
+    if (tap === null) {
+      // No remató: el centro se perdió
+      registerKick(s, 'P', false);
+      updateBoard();
+      await announcer.say(pick(COPY.crossLost), 'miss');
+      pitch.reset();
+      await sleep(240);
+      return;
+    }
+
+    const shot = headerShot(tap);
+    const finalZone = zoneAt(shot.tx, shot.ty);
+    const readZone = finalZone ?? zoneNearest(shot.tx, shot.ty);
+    const gkZone = keeperPick(ctx.diff, readZone, s.habits);
+
+    sfx.kick();
+    pitch.keeperDive(gkZone);
+    await pitch.ballFlight(shot, { x: tap.x, y: tap.y });
+
+    const goal = finalZone !== null && finalZone !== gkZone;
+    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? readZone });
+  }
+
+  async function theirCornerKick() {
+    const { s, playerTeam, rivalTeam, diff } = ctx;
+    ctx.phase = 'save';
+    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam });
+    setMsg(`Córner ${s.kicks.C.length + 1} — ¡Ataja el cabezazo!`, 'Toca la casilla hacia donde volarás');
+    updateBoard();
+
+    const dive = await pitch.pickZone();
+    if (dive === null || aborted) return;
+    const intent = shooterPick(diff, dive);
+    const cpuShot = makeCpuShot(intent.zone, intent.offTarget);
+    const finalZone = intent.offTarget ? null : zoneAt(cpuShot.tx, cpuShot.ty);
+
+    sfx.kick();
+    // El centro rival viaja hasta el punto de remate y ahí llega el cabezazo
+    const headAt = 0.35 + Math.random() * 0.3;
+    const cross = cornerCrossPath(crossSide());
+    const headPoint = await pitch.cornerCross(cross, { interactive: false, stopAt: headAt });
+    if (aborted) return;
+
+    sfx.kick();
+    pitch.keeperDive(dive);
+    await pitch.ballFlight(cpuShot, headPoint);
+
+    const goal = finalZone !== null && finalZone !== dive;
+    await settleTheirKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? intent.zone });
+  }
+
   /* ---------- Rival humano (duelo WebRTC) ---------- */
 
   async function myDuelKick() {
@@ -296,9 +363,9 @@ export function createMatchScreen({ onFinish, onExit }) {
 
   /* ---------- Orquestación ---------- */
 
-  async function start({ playerTeam, rivalTeam, diff, stageLabel = null, duel = null, isHost = true }) {
+  async function start({ playerTeam, rivalTeam, diff, stageLabel = null, duel = null, isHost = true, mode = 'penales' }) {
     aborted = false;
-    ctx = { s: createShootout(), playerTeam, rivalTeam, diff, phase: 'shoot', duel, isHost };
+    ctx = { s: createShootout(), playerTeam, rivalTeam, diff, phase: 'shoot', duel, isHost, mode };
     stageEl.hidden = !stageLabel;
     stageEl.textContent = stageLabel ?? '';
     pitch.reset();
@@ -310,12 +377,14 @@ export function createMatchScreen({ onFinish, onExit }) {
     let suddenAnnounced = false;
 
     while (!aborted) {
-      // El anfitrión (o el jugador local contra la IA) patea primero
+      // El anfitrión (o el jugador local contra la IA) ejecuta primero
       const legs = duel && !isHost
         ? [theirDuelKick, myDuelKick]
         : duel
           ? [myDuelKick, theirDuelKick]
-          : [playerKickVsAI, cpuKick];
+          : mode === 'corners'
+            ? [myCornerKick, theirCornerKick]
+            : [playerKickVsAI, cpuKick];
 
       await legs[0]();
       if (aborted) return;

@@ -40,6 +40,12 @@
   cursor: crosshair;
 }
 
+/* Centro de córner en el aire: un toque remata de cabeza */
+.scene.crossing {
+  touch-action: none;
+  cursor: pointer;
+}
+
 .scene.guide .gridlines {
   opacity: 0.5;
 }
