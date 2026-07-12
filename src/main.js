@@ -143,6 +143,18 @@ async function startJoining({ teamId, code }) {
 
 /* ---------- Pantallas ---------- */
 
+function startLocalMatch() {
+  show(match.el);
+  match.start({
+    playerTeam: teamById(session.teamId),
+    rivalTeam: teamById(session.rivalId),
+    diff: 'local',
+    mode: 'local',
+    stageLabel: '2 JUGADORES',
+    profile: loadProfile(),
+  });
+}
+
 const menu = createMenuScreen({
   onPlay(config) {
     session = config;
@@ -151,8 +163,10 @@ const menu = createMenuScreen({
       startTournamentMatch();
     } else if (config.mode === 'duelo') {
       startHosting(config);
+    } else if (config.mode === 'local') {
+      startLocalMatch();
     } else {
-      startQuickMatch(); // penales o córners contra la IA
+      startQuickMatch(); // penales, córners o tiros libres contra la IA
     }
   },
 });
@@ -169,8 +183,20 @@ function buildBracket(t, lostCurrent) {
 
 const match = createMatchScreen({
   onFinish(result) {
-    recordResult(result.won);
+    if (session?.mode !== 'local') recordResult(result.won); // hot-seat no cuenta en tus stats
     show(end.el);
+
+    if (session?.mode === 'local') {
+      const winner = result.won ? result.playerTeam : result.rivalTeam;
+      end.show(result, {
+        icon: 'trophy',
+        title: `¡GANÓ ${winner.short}!`,
+        sub: 'Cara a cara en el mismo teléfono. ¿La revancha?',
+        confetti: true,
+        primary: { act: 'local-rematch', label: 'REVANCHA' },
+      });
+      return;
+    }
 
     if (duelCtx) {
       const canRematch = !result.walkover && duel;
@@ -264,6 +290,8 @@ const end = createEndScreen({
       backToMenu();
     } else if (act === 'rematch') {
       startQuickMatch();
+    } else if (act === 'local-rematch') {
+      startLocalMatch();
     } else if (act === 'duel-rematch') {
       requestDuelRematch();
     } else if (act === 'next') {

@@ -61,6 +61,11 @@ export function createMatchScreen({ onFinish, onExit }) {
           <span>Desliza para rematar</span>
         </div>
       </div>
+      <div class="handoff" data-ref="handoff" hidden>
+        <b data-ref="hotitle"></b>
+        <span data-ref="hosub"></span>
+        <span class="ho-tap">Toca para continuar</span>
+      </div>
       <div class="vs-splash" data-ref="vsplash" hidden>
         <div class="vsp-stage" data-ref="vstage"></div>
         <div class="vsp-row">
@@ -84,6 +89,25 @@ export function createMatchScreen({ onFinish, onExit }) {
   const vstageEl = el.querySelector('[data-ref="vstage"]');
   const vleftEl = el.querySelector('[data-ref="vleft"]');
   const vrightEl = el.querySelector('[data-ref="vright"]');
+
+  const handoffEl = el.querySelector('[data-ref="handoff"]');
+  const hotitleEl = el.querySelector('[data-ref="hotitle"]');
+  const hosubEl = el.querySelector('[data-ref="hosub"]');
+
+  /** Pantalla de "pásale el teléfono" (modo 2 jugadores): espera un toque. */
+  function showHandoff(title, sub) {
+    return new Promise((resolve) => {
+      hotitleEl.textContent = title;
+      hosubEl.textContent = sub;
+      handoffEl.hidden = false;
+      const onTap = () => {
+        handoffEl.removeEventListener('pointerdown', onTap);
+        handoffEl.hidden = true;
+        resolve();
+      };
+      setTimeout(() => handoffEl.addEventListener('pointerdown', onTap), 350);
+    });
+  }
 
   /** Presentación estilo arcade: los dos equipos entran antes del partido. */
   async function showVsSplash(playerTeam, rivalTeam, stageLabel) {
@@ -450,6 +474,48 @@ export function createMatchScreen({ onFinish, onExit }) {
     await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? dive });
   }
 
+  /* ---------- Modo 2 jugadores (mismo teléfono, hot-seat) ---------- */
+
+  async function localLeg(shooterIsP1) {
+    const { s, playerTeam, rivalTeam } = ctx;
+    const shooterTeam = shooterIsP1 ? playerTeam : rivalTeam;
+    const keeperTeam = shooterIsP1 ? rivalTeam : playerTeam;
+    const n = (shooterIsP1 ? s.kicks.P.length : s.kicks.C.length) + 1;
+
+    if (!shooterIsP1) {
+      await showHandoff(`PATEA ${shooterTeam.short}`, 'Pásale el teléfono al pateador');
+      if (aborted) return;
+    }
+    ctx.phase = shooterIsP1 ? 'shoot' : 'save';
+    pitch.setKits({ shooterTeam, keeperTeam, shooterProfile: shooterIsP1 ? ctx.profile : null });
+    setMsg(`Penal ${n} — Patea ${shooterTeam.short}`, `Arquero de ${keeperTeam.short}: ¡no mires!`);
+    updateBoard();
+
+    const shot = await pitch.captureSwipe();
+    if (!shot || aborted) return;
+    applyWind(shot, ctx.wind);
+    const finalZone = zoneAt(shot.tx, shot.ty);
+
+    // El remate queda en secreto hasta que el arquero elija su vuelo
+    await showHandoff(`ATAJA ${keeperTeam.short}`, 'Pásale el teléfono al arquero');
+    if (aborted) return;
+    setMsg(`¡Ataja ${keeperTeam.short}!`, 'Toca la casilla o arrastra a tu arquero');
+    const dive = await pitch.pickDive();
+    if (dive === null || aborted) return;
+
+    await pitch.kickAnim();
+    sfx.kick();
+    pitch.keeperDive(dive);
+    await pitch.ballFlight(shot);
+    const goal = finalZone !== null && finalZone !== dive;
+    const outcome = { goal, offTarget: finalZone === null, ballZone: finalZone ?? dive };
+    if (shooterIsP1) await settleMyKick(outcome);
+    else await settleTheirKick(outcome);
+  }
+
+  const p1LocalKick = () => localLeg(true);
+  const p2LocalKick = () => localLeg(false);
+
   /* ---------- Duelo: tiros libres ---------- */
 
   async function myDuelFreeKick() {
@@ -643,7 +709,9 @@ export function createMatchScreen({ onFinish, onExit }) {
           ? [myCornerKick, theirCornerKick]
           : mode === 'libres'
             ? [myFreeKick, theirFreeKick]
-            : [playerKickVsAI, cpuKick];
+            : mode === 'local'
+              ? [p1LocalKick, p2LocalKick]
+              : [playerKickVsAI, cpuKick];
 
       await legs[0]();
       if (aborted) return;

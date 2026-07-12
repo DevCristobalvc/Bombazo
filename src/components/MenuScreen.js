@@ -18,6 +18,7 @@ const MODES = [
   { id: 'libres', label: 'Tiros libres', icon: 'wall' },
   { id: 'torneo', label: 'Torneo', icon: 'trophy' },
   { id: 'duelo', label: '1 vs 1', icon: 'versus' },
+  { id: 'local', label: '2 jugadores', icon: 'phone' },
 ];
 
 const DUEL_MODES = [
@@ -126,9 +127,9 @@ export function createMenuScreen({ onPlay }) {
     ).join('');
     refs.teams.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.teamId, false)).join('');
     refs.rivals.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.rivalId, t.id === state.teamId)).join('');
-    const vsAI = state.mode === 'rapido' || state.mode === 'corners' || state.mode === 'libres';
-    refs.rivalBlock.style.display = vsAI ? '' : 'none';
-    refs.diffBlock.style.display = state.mode === 'duelo' ? 'none' : '';
+    const showRival = ['rapido', 'corners', 'libres', 'local'].includes(state.mode);
+    refs.rivalBlock.style.display = showRival ? '' : 'none';
+    refs.diffBlock.style.display = state.mode === 'duelo' || state.mode === 'local' ? 'none' : '';
     refs.duelBlock.style.display = state.mode === 'duelo' ? '' : 'none';
     refs.duelModes.innerHTML = DUEL_MODES.map(
       (m) => `<button class="chip ${m.id === state.duelMode ? 'is-selected' : ''}" data-id="${m.id}">${icon(m.icon, 15)} ${m.label}</button>`
@@ -146,11 +147,13 @@ export function createMenuScreen({ onPlay }) {
         ? `${player.short} · Torneo: 4 rondas al título · ${diff.label}`
         : state.mode === 'duelo'
           ? `${player.short} · Duelo de ${DUEL_MODES.find((m) => m.id === state.duelMode).label.toLowerCase()} · El rival escanea tu QR`
-          : state.mode === 'corners'
-            ? `${player.short} <i class="vs">VS</i> ${rival.short} · Córners · ${diff.label}`
-            : state.mode === 'libres'
-              ? `${player.short} <i class="vs">VS</i> ${rival.short} · Tiros libres · ${diff.label}`
-              : `${player.short} <i class="vs">VS</i> ${rival.short} · ${diff.label}`;
+          : state.mode === 'local'
+            ? `${player.short} <i class="vs">VS</i> ${rival.short} · 2 jugadores, un teléfono`
+            : state.mode === 'corners'
+              ? `${player.short} <i class="vs">VS</i> ${rival.short} · Córners · ${diff.label}`
+              : state.mode === 'libres'
+                ? `${player.short} <i class="vs">VS</i> ${rival.short} · Tiros libres · ${diff.label}`
+                : `${player.short} <i class="vs">VS</i> ${rival.short} · ${diff.label}`;
     renderProfile();
     renderStats();
   }
