@@ -8,6 +8,31 @@ const { chromium } = require('C:/Users/Public/cristobal/barberia/BarberIA/node_m
 const OUT = path.join(__dirname, '..', '.smoke');
 const URL = 'http://localhost:4173/';
 
+/** Convierte coordenadas de escena (viewBox 360×560) a coordenadas de cliente. */
+async function toClient(page, sx, sy) {
+  return page.evaluate(([x, y]) => {
+    const svg = document.querySelector('#scene');
+    const r = svg.getBoundingClientRect();
+    const scale = Math.min(r.width / 360, r.height / 560);
+    const ox = r.left + (r.width - 360 * scale) / 2;
+    const oy = r.top + (r.height - 560 * scale) / 2;
+    return [ox + x * scale, oy + y * scale];
+  }, [sx, sy]);
+}
+
+/** Simula el swipe de remate: del balón hacia un punto del arco. */
+async function swipeShot(page, targetX, targetY) {
+  const [bx, by] = await toClient(page, 180, 462);
+  const [tx, ty] = await toClient(page, targetX, targetY);
+  await page.mouse.move(bx, by);
+  await page.mouse.down();
+  for (let i = 1; i <= 6; i++) {
+    await page.mouse.move(bx + ((tx - bx) * i) / 6, by + ((ty - by) * i) / 6);
+    await page.waitForTimeout(16);
+  }
+  await page.mouse.up();
+}
+
 async function assertNoPageScroll(page, label, failures) {
   const metrics = await page.evaluate(() => ({
     docScroll: document.documentElement.scrollHeight,
@@ -54,19 +79,16 @@ async function assertNoPageScroll(page, label, failures) {
   await page.screenshot({ path: path.join(OUT, '2-menu-espana.png') });
   await page.click('.chips [data-id="col"]');
 
-  // jugar: primero la presentación VS, luego la fase de puntería
+  // jugar: primero la presentación VS, luego la fase de remate por swipe
   await page.click('.btn-big');
   await page.waitForTimeout(500);
   await page.screenshot({ path: path.join(OUT, '3-vs-splash.png') });
-  await page.waitForSelector('#scene.aiming', { timeout: 15000 });
+  await page.waitForSelector('#scene.guide', { timeout: 15000 });
   await page.screenshot({ path: path.join(OUT, '3a-partido-patear.png') });
   await assertNoPageScroll(page, 'partido 390x844', failures);
 
-  // patear a la esquina superior izquierda: zona + barra de potencia
-  await page.click('.zone[data-zone="0"]', { force: true });
-  await page.waitForSelector('.powerbar:not([hidden])', { timeout: 10000 });
-  await page.screenshot({ path: path.join(OUT, '3b-powerbar.png') });
-  await page.click('.powerbar', { force: true });
+  // remate físico: swipe del balón a la esquina superior izquierda
+  await swipeShot(page, 100, 195);
   await page.waitForTimeout(900);
   await page.screenshot({ path: path.join(OUT, '4-tiro-resultado.png') });
 
@@ -86,7 +108,7 @@ async function assertNoPageScroll(page, label, failures) {
   await page.click('.btn-big');
   await page.waitForTimeout(600);
   await page.screenshot({ path: path.join(OUT, '9-torneo-vs.png') });
-  await page.waitForSelector('#scene.aiming', { timeout: 15000 });
+  await page.waitForSelector('#scene.guide', { timeout: 15000 });
   await page.screenshot({ path: path.join(OUT, '9a-torneo-partido.png') });
   await assertNoPageScroll(page, 'torneo 390x844', failures);
 

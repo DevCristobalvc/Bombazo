@@ -1,26 +1,12 @@
 /**
- * Escena del estadio (SVG vertical 360×560) y geometría de las 9 zonas.
- * Vista desde el punto penal: cielo nocturno, tribuna, valla, arco con red,
- * césped con franjas. Contiene los anclajes #keeper, #ball, #shooter y #zones.
+ * Escena del estadio (SVG vertical 360×560), dibujada sobre la geometría
+ * de core/zones. Vista desde el punto penal: cielo nocturno, tribuna, valla,
+ * arco con red, césped. Contiene los anclajes #keeper, #ball, #shooter,
+ * #zones y #aim-dot.
  */
 import { keeperSVG, shooterSVG } from './players.js';
 import { ballArt } from './ball.js';
-
-export const ZONE_X = [100, 180, 260];
-export const ZONE_Y = [189, 262, 335];
-export const BALL_HOME = { x: 180, y: 462 };
-export const KEEPER_HOME = { x: 180, y: 371 };
-
-export const zoneCenter = (zone) => ({
-  x: ZONE_X[zone % 3],
-  y: ZONE_Y[Math.floor(zone / 3)],
-});
-
-export const ZONE_NAMES = [
-  'arriba a la izquierda', 'arriba al centro', 'arriba a la derecha',
-  'media altura a la izquierda', 'al centro', 'media altura a la derecha',
-  'abajo a la izquierda', 'abajo al centro', 'abajo a la derecha',
-];
+import { ZONE_NAMES } from '../core/zones.js';
 
 function zoneRects() {
   let out = '';
@@ -119,5 +105,8 @@ export function sceneSVG() {
       </g>
       ${zoneRects()}
     </g>
+
+    <!-- punto de mira del swipe -->
+    <circle id="aim-dot" r="7" fill="none" stroke="#ffd100" stroke-width="2.5" stroke-dasharray="4 5" opacity="0" pointer-events="none"/>
   </svg>`;
 }

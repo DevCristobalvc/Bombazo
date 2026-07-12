@@ -34,24 +34,43 @@ const URL = 'http://localhost:4173/';
   await guest.waitForSelector('.match-screen.active', { timeout: 25000 });
   console.log('ambos en partido');
 
-  // Penal 1: el anfitrión patea (zona 0 + barra), el invitado ataja (zona 8)
-  await host.waitForSelector('#scene.aiming', { timeout: 15000 });
-  await host.click('.zone[data-zone="0"]', { force: true });
+  const toClient = (page, sx, sy) =>
+    page.evaluate(([x, y]) => {
+      const svg = document.querySelector('#scene');
+      const r = svg.getBoundingClientRect();
+      const scale = Math.min(r.width / 360, r.height / 560);
+      const ox = r.left + (r.width - 360 * scale) / 2;
+      const oy = r.top + (r.height - 560 * scale) / 2;
+      return [ox + x * scale, oy + y * scale];
+    }, [sx, sy]);
+
+  const swipeShot = async (page, targetX, targetY) => {
+    const [bx, by] = await toClient(page, 180, 462);
+    const [tx, ty] = await toClient(page, targetX, targetY);
+    await page.mouse.move(bx, by);
+    await page.mouse.down();
+    for (let i = 1; i <= 6; i++) {
+      await page.mouse.move(bx + ((tx - bx) * i) / 6, by + ((ty - by) * i) / 6);
+      await page.waitForTimeout(16);
+    }
+    await page.mouse.up();
+  };
+
+  // Penal 1: el anfitrión remata con swipe (esquina alta izquierda),
+  // el invitado ataja tocando la zona 8
+  await host.waitForSelector('#scene.guide', { timeout: 15000 });
   await guest.waitForSelector('#scene.aiming', { timeout: 15000 });
   await guest.click('.zone[data-zone="8"]', { force: true });
-  await host.waitForSelector('.powerbar:not([hidden])', { timeout: 10000 });
-  await host.click('.powerbar', { force: true });
+  await swipeShot(host, 100, 195);
   await host.waitForTimeout(2500);
   await host.screenshot({ path: path.join(OUT, 'duel-3-host-shot.png') });
   await guest.screenshot({ path: path.join(OUT, 'duel-4-guest-save.png') });
 
-  // Penal 2: el invitado patea, el anfitrión ataja
-  await guest.waitForSelector('#scene.aiming', { timeout: 15000 });
-  await guest.click('.zone[data-zone="4"]', { force: true });
+  // Penal 2: el invitado remata, el anfitrión ataja
+  await guest.waitForSelector('#scene.guide', { timeout: 15000 });
   await host.waitForSelector('#scene.aiming', { timeout: 15000 });
   await host.click('.zone[data-zone="4"]', { force: true });
-  await guest.waitForSelector('.powerbar:not([hidden])', { timeout: 10000 });
-  await guest.click('.powerbar', { force: true });
+  await swipeShot(guest, 180, 262);
   await guest.waitForTimeout(2500);
 
   // Los marcadores deben coincidir (espejados)

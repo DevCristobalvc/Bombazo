@@ -41,7 +41,7 @@ export function createMenuScreen({ onPlay }) {
           <div class="chips" data-ref="diffs"></div>
         </div>
         <button class="btn-big" data-ref="play">¡A LA CANCHA!</button>
-        <p class="howto">Toca una casilla del arco para <b>patear</b> o <b>atajar</b>, y frena la barra en el verde. Empate = muerte súbita.</p>
+        <p class="howto"><b>Desliza</b> desde el balón hacia el arco para rematar — curva el gesto para darle efecto. Para <b>atajar</b>, toca la casilla. Empate = muerte súbita.</p>
       </div>
     </section>`);
 

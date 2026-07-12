@@ -1,10 +1,14 @@
 /**
  * Componente Pitch: la escena jugable.
- * Expone una API imperativa para que MatchScreen orqueste cada penal:
- * setKits, pickZone (promesa que resuelve con la zona tocada), animaciones
- * del balón/arquero/pateador y reset.
+ * API imperativa para que MatchScreen orqueste cada penal:
+ * - captureSwipe(): gesto de remate con física (promesa → shot o null).
+ * - pickZone(): toque en la grilla para atajar (promesa → zona o null).
+ * - ballFlight(shot): vuelo del balón siguiendo core/physics.
+ * - keeperDive, kickAnim, celebrate, shake, flash, reset.
  */
-import { sceneSVG, zoneCenter, BALL_HOME, KEEPER_HOME } from '../art/stadium.js';
+import { sceneSVG } from '../art/stadium.js';
+import { zoneCenter, BALL_HOME, KEEPER_HOME } from '../core/zones.js';
+import { analyzeSwipe, projectTarget, shotPath } from '../core/physics.js';
 import { fromHTML, sleep } from '../utils/dom.js';
 import './Pitch.css';
 
@@ -13,8 +17,12 @@ export function createPitch() {
   const svg = el.querySelector('#scene');
   const keeper = el.querySelector('#keeper');
   const ball = el.querySelector('#ball');
+  const aimDot = el.querySelector('#aim-dot');
 
   let resolveZone = null;
+  let cancelSwipe = null;
+
+  /* ---------- Atajar: grilla de 9 zonas ---------- */
 
   svg.querySelector('#zones').addEventListener('click', (event) => {
     const rect = event.target.closest('.zone');
@@ -26,7 +34,91 @@ export function createPitch() {
     resolve(Number(rect.dataset.zone));
   });
 
-  /** Viste al pateador y al arquero según la fase (colores vía CSS vars). */
+  function pickZone() {
+    return new Promise((resolve) => {
+      svg.classList.add('aiming');
+      resolveZone = resolve;
+    });
+  }
+
+  /* ---------- Patear: gesto de swipe con física ---------- */
+
+  /** Convierte coordenadas de pantalla a coordenadas de escena (viewBox 360×560,
+      centrado con letterbox por preserveAspectRatio). */
+  function scenePoint(e) {
+    const r = svg.getBoundingClientRect();
+    const scale = Math.min(r.width / 360, r.height / 560);
+    const ox = r.left + (r.width - 360 * scale) / 2;
+    const oy = r.top + (r.height - 560 * scale) / 2;
+    return { x: (e.clientX - ox) / scale, y: (e.clientY - oy) / scale, t: performance.now() };
+  }
+
+  function showAimDot(p) {
+    aimDot.setAttribute('cx', p.tx);
+    aimDot.setAttribute('cy', p.ty);
+    aimDot.setAttribute('opacity', '0.9');
+  }
+
+  const hideAimDot = () => aimDot.setAttribute('opacity', '0');
+
+  function captureSwipe() {
+    return new Promise((resolve) => {
+      svg.classList.add('guide');
+      let pts = null;
+
+      const down = (e) => {
+        pts = [scenePoint(e)];
+        try {
+          svg.setPointerCapture(e.pointerId);
+        } catch { /* sin captura: igual funciona */ }
+      };
+      const move = (e) => {
+        if (!pts) return;
+        const p = scenePoint(e);
+        pts.push(p);
+        showAimDot(projectTarget(pts[0], p));
+      };
+      const up = () => {
+        if (!pts) return;
+        const shot = analyzeSwipe(pts);
+        pts = null;
+        hideAimDot();
+        if (!shot) return; // gesto inválido: sigue esperando el remate
+        finish(shot);
+      };
+
+      const finish = (value) => {
+        svg.removeEventListener('pointerdown', down);
+        svg.removeEventListener('pointermove', move);
+        svg.removeEventListener('pointerup', up);
+        svg.removeEventListener('pointercancel', up);
+        svg.classList.remove('guide');
+        hideAimDot();
+        cancelSwipe = null;
+        resolve(value);
+      };
+
+      cancelSwipe = () => finish(null);
+      svg.addEventListener('pointerdown', down);
+      svg.addEventListener('pointermove', move);
+      svg.addEventListener('pointerup', up);
+      svg.addEventListener('pointercancel', up);
+    });
+  }
+
+  /** Cancela cualquier interacción pendiente (salida del partido). */
+  function cancelAim() {
+    svg.classList.remove('aiming');
+    if (resolveZone) {
+      const resolve = resolveZone;
+      resolveZone = null;
+      resolve(null);
+    }
+    if (cancelSwipe) cancelSwipe();
+  }
+
+  /* ---------- Vestuario y animaciones ---------- */
+
   function setKits({ shooterTeam, keeperTeam }) {
     const s = el.style;
     s.setProperty('--sh-shirt', shooterTeam.kit.shirt);
@@ -41,23 +133,6 @@ export function createPitch() {
     s.setProperty('--gk-hair', keeperTeam.hair);
   }
 
-  /** Activa la grilla y espera el toque. Resuelve null si se cancela. */
-  function pickZone() {
-    return new Promise((resolve) => {
-      svg.classList.add('aiming');
-      resolveZone = resolve;
-    });
-  }
-
-  function cancelAim() {
-    svg.classList.remove('aiming');
-    if (resolveZone) {
-      const resolve = resolveZone;
-      resolveZone = null;
-      resolve(null);
-    }
-  }
-
   function keeperDive(zone) {
     svg.classList.add('diving'); // pausa el balanceo de espera
     const c = zoneCenter(zone);
@@ -69,22 +144,31 @@ export function createPitch() {
     keeper.style.transform = `translate(${dx}px, ${dy}px) rotate(${angle}deg)`;
   }
 
-  function ballTo(zone, { fast = false } = {}) {
-    ball.classList.toggle('fast', fast);
-    const c = zoneCenter(zone);
-    ball.style.transform = `translate(${c.x - BALL_HOME.x}px, ${c.y - BALL_HOME.y}px) scale(.6)`;
+  /** Vuelo físico del balón (requestAnimationFrame sobre core/physics). */
+  function ballFlight(shot) {
+    const path = shotPath(shot);
+    ball.style.transition = 'none';
+    return new Promise((resolve) => {
+      const t0 = performance.now();
+      const step = (now) => {
+        const u = Math.min(1, (now - t0) / shot.dur);
+        const p = path(u);
+        const s = 1 - 0.38 * u;
+        ball.style.transform = `translate(${(p.x - BALL_HOME.x).toFixed(1)}px, ${(p.y - BALL_HOME.y).toFixed(1)}px) scale(${s.toFixed(3)})`;
+        if (u < 1) requestAnimationFrame(step);
+        else resolve();
+      };
+      requestAnimationFrame(step);
+    });
   }
 
-  /** Rebote tras la atajada. */
+  /** Rebote tras la atajada (vuelve a transición CSS). */
   function ballBounce(zone) {
     const c = zoneCenter(zone);
-    ball.style.transform = `translate(${(c.x - BALL_HOME.x) * 0.55}px, -46px) scale(.85)`;
-  }
-
-  /** Tiro desviado: por encima del travesaño. */
-  function ballOver(zone) {
-    const c = zoneCenter(zone);
-    ball.style.transform = `translate(${c.x - BALL_HOME.x}px, ${96 - BALL_HOME.y}px) scale(.45)`;
+    ball.style.transition = '';
+    requestAnimationFrame(() => {
+      ball.style.transform = `translate(${(c.x - BALL_HOME.x) * 0.55}px, -46px) scale(.85)`;
+    });
   }
 
   async function kickAnim() {
@@ -117,10 +201,10 @@ export function createPitch() {
   function reset() {
     svg.classList.remove('kick', 'diving');
     keeper.style.transform = '';
+    ball.style.transition = '';
     ball.style.transform = '';
-    ball.classList.remove('fast');
     svg.querySelectorAll('.zone.picked').forEach((r) => r.classList.remove('picked'));
   }
 
-  return { el, setKits, pickZone, cancelAim, keeperDive, ballTo, ballBounce, ballOver, kickAnim, celebrate, shake, flash, reset };
+  return { el, setKits, pickZone, captureSwipe, cancelAim, keeperDive, ballFlight, ballBounce, kickAnim, celebrate, shake, flash, reset };
 }

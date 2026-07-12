@@ -1,19 +1,18 @@
 /**
  * Pantalla de partido: orquesta la tanda completa.
- * Une el motor puro (core/shootout) con los componentes visuales.
- * Dos modos de rival:
- * - IA local (core/ai) en partido rápido y torneo.
- * - Duelo 1 vs 1: los picks viajan por WebRTC (net/duel). En cada penal
- *   ambos jugadores actúan a la vez (uno remata, el otro elige el vuelo)
- *   y las dos pantallas animan el mismo resultado.
+ * Los remates usan física real (core/physics): el jugador desliza desde el
+ * balón hacia el arco — dirección = puntería, velocidad = potencia y la
+ * curvatura del gesto = efecto. Fallar el arco es posible por puntería
+ * propia, sin dados. Atajar sigue siendo tocar una casilla.
+ * Rivales: IA local (core/ai) o humano por WebRTC (net/duel).
  */
 import { createShootout, registerKick, registerHabit, winner, isSuddenDeath, score } from '../core/shootout.js';
 import { keeperPick, shooterPick } from '../core/ai.js';
-import { adjacentZone } from '../core/zones.js';
+import { zoneAt, zoneNearest } from '../core/zones.js';
+import { makeCpuShot } from '../core/physics.js';
 import { createPitch } from './Pitch.js';
 import { createScoreboard } from './Scoreboard.js';
 import { createAnnouncer } from './Announcer.js';
-import { createPowerBar } from './PowerBar.js';
 import { fromHTML, sleep } from '../utils/dom.js';
 import { pick } from '../utils/random.js';
 import { sfx, isMuted, setMuted } from '../audio/sfx.js';
@@ -41,7 +40,6 @@ export function createMatchScreen({ onFinish, onExit }) {
   const pitch = createPitch();
   const scoreboard = createScoreboard();
   const announcer = createAnnouncer();
-  const powerBar = createPowerBar();
 
   const el = fromHTML(`
     <section class="screen match-screen">
@@ -62,7 +60,7 @@ export function createMatchScreen({ onFinish, onExit }) {
 
   el.prepend(scoreboard.el);
   const wrap = el.querySelector('[data-ref="wrap"]');
-  wrap.append(pitch.el, powerBar.el, announcer.el);
+  wrap.append(pitch.el, announcer.el);
   const msgEl = el.querySelector('[data-ref="msg"]');
   const subEl = el.querySelector('[data-ref="sub"]');
   const stageEl = el.querySelector('[data-ref="stage"]');
@@ -115,33 +113,21 @@ export function createMatchScreen({ onFinish, onExit }) {
     });
   }
 
-  /** Fase de puntería + barra de potencia. Null si se cancela. */
+  /**
+   * Fase de remate propio: swipe con física.
+   * Devuelve { tx, ty, curve, dur, finalZone, offTarget } o null si se cancela.
+   */
   async function aimMyShot() {
     const { s, playerTeam, rivalTeam } = ctx;
     ctx.phase = 'shoot';
     pitch.setKits({ shooterTeam: playerTeam, keeperTeam: rivalTeam });
-    const n = s.kicks.P.length + 1;
-    setMsg(`Penal ${n} — ¡Tú pateas!`, 'Toca la casilla para colocar tu remate');
+    setMsg(`Penal ${s.kicks.P.length + 1} — ¡Tú pateas!`, 'Desliza hacia el arco · curva el gesto para darle efecto');
     updateBoard();
 
-    const zone = await pitch.pickZone();
-    if (zone === null || aborted) return null;
-
-    setMsg(`Penal ${n} — ¡Tú pateas!`, '¡Frena la barra en el verde!');
-    const power = await powerBar.run();
-    if (power === null || aborted) return null;
-
-    let finalZone = zone;
-    let offTarget = false;
-    let fast = false;
-    if (power.quality === 'perfect') {
-      fast = true; // remate imparable en velocidad
-    } else if (power.quality === 'poor') {
-      const roll = Math.random();
-      if (roll < 0.3) offTarget = true;
-      else if (roll < 0.8) finalZone = adjacentZone(zone);
-    }
-    return { zone, finalZone, offTarget, fast };
+    const shot = await pitch.captureSwipe();
+    if (!shot || aborted) return null;
+    const finalZone = zoneAt(shot.tx, shot.ty);
+    return { ...shot, finalZone, offTarget: finalZone === null };
   }
 
   /** Resultado + festejo de un penal propio. */
@@ -199,23 +185,18 @@ export function createMatchScreen({ onFinish, onExit }) {
   async function playerKickVsAI() {
     const shot = await aimMyShot();
     if (!shot) return;
-    registerHabit(ctx.s, shot.zone);
-    const gkZone = keeperPick(ctx.diff, shot.zone, ctx.s.habits); // el arquero lee la intención
+    if (shot.finalZone !== null) registerHabit(ctx.s, shot.finalZone);
+    // El arquero lee la zona (real o la más cercana si el tiro va afuera)
+    const readZone = shot.finalZone ?? zoneNearest(shot.tx, shot.ty);
+    const gkZone = keeperPick(ctx.diff, readZone, ctx.s.habits);
 
     await pitch.kickAnim();
     sfx.kick();
     pitch.keeperDive(gkZone);
+    await pitch.ballFlight(shot);
 
-    let goal;
-    if (shot.offTarget) {
-      pitch.ballOver(shot.zone);
-      goal = false;
-    } else {
-      pitch.ballTo(shot.finalZone, { fast: shot.fast });
-      goal = shot.finalZone !== gkZone;
-    }
-    await sleep(shot.fast ? 340 : 480);
-    await settleMyKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone });
+    const goal = !shot.offTarget && shot.finalZone !== gkZone;
+    await settleMyKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? readZone });
   }
 
   async function cpuKick() {
@@ -227,22 +208,17 @@ export function createMatchScreen({ onFinish, onExit }) {
 
     const dive = await pitch.pickZone();
     if (dive === null || aborted) return;
-    const shot = shooterPick(diff, dive);
+    const intent = shooterPick(diff, dive);
+    const cpuShot = makeCpuShot(intent.zone, intent.offTarget);
+    const finalZone = intent.offTarget ? null : zoneAt(cpuShot.tx, cpuShot.ty);
 
     await pitch.kickAnim();
     sfx.kick();
     pitch.keeperDive(dive);
+    await pitch.ballFlight(cpuShot);
 
-    let goal;
-    if (shot.offTarget) {
-      pitch.ballOver(shot.zone);
-      goal = false;
-    } else {
-      pitch.ballTo(shot.zone);
-      goal = shot.zone !== dive;
-    }
-    await sleep(480);
-    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.zone });
+    const goal = finalZone !== null && finalZone !== dive;
+    await settleTheirKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? intent.zone });
   }
 
   /* ---------- Rival humano (duelo WebRTC) ---------- */
@@ -250,7 +226,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   async function myDuelKick() {
     const shot = await aimMyShot();
     if (!shot) return;
-    ctx.duel.send({ t: 'shot', finalZone: shot.finalZone, offTarget: shot.offTarget, fast: shot.fast });
+    ctx.duel.send({ t: 'shot', tx: shot.tx, ty: shot.ty, curve: shot.curve, dur: shot.dur, finalZone: shot.finalZone, offTarget: shot.offTarget });
 
     setMsg('Esperando al arquero rival…', 'Está eligiendo su vuelo');
     const dive = await ctx.duel.next('dive');
@@ -259,17 +235,10 @@ export function createMatchScreen({ onFinish, onExit }) {
     await pitch.kickAnim();
     sfx.kick();
     pitch.keeperDive(dive.zone);
+    await pitch.ballFlight(shot);
 
-    let goal;
-    if (shot.offTarget) {
-      pitch.ballOver(shot.zone);
-      goal = false;
-    } else {
-      pitch.ballTo(shot.finalZone, { fast: shot.fast });
-      goal = shot.finalZone !== dive.zone;
-    }
-    await sleep(shot.fast ? 340 : 480);
-    await settleMyKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone });
+    const goal = !shot.offTarget && shot.finalZone !== dive.zone;
+    await settleMyKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? dive.zone });
   }
 
   async function theirDuelKick() {
@@ -290,17 +259,10 @@ export function createMatchScreen({ onFinish, onExit }) {
     await pitch.kickAnim();
     sfx.kick();
     pitch.keeperDive(dive);
+    await pitch.ballFlight(shot);
 
-    let goal;
-    if (shot.offTarget) {
-      pitch.ballOver(shot.finalZone);
-      goal = false;
-    } else {
-      pitch.ballTo(shot.finalZone, { fast: shot.fast });
-      goal = shot.finalZone !== dive;
-    }
-    await sleep(480);
-    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone });
+    const goal = !shot.offTarget && shot.finalZone !== dive;
+    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? dive });
   }
 
   /* ---------- Orquestación ---------- */
@@ -364,14 +326,12 @@ export function createMatchScreen({ onFinish, onExit }) {
     if (!ctx || aborted) return;
     aborted = true;
     pitch.cancelAim();
-    powerBar.hide();
     finish(true);
   }
 
   function stop() {
     aborted = true;
     pitch.cancelAim();
-    powerBar.hide();
   }
 
   const isRunning = () => ctx !== null && !aborted;

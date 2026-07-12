@@ -264,8 +264,8 @@ Decisiones:
 
 El salto de "elegir casilla" a "ejecutar el tiro". Principios: seguir siendo un juego de 1 toque (o 1 gesto), rápido y vertical.
 
-- [ ] **Física de balón real**: trayectoria parametrizada (velocidad, ángulo, curva/efecto) en lugar de interpolación directa a la casilla. Motor propio ligero (integración simple en `requestAnimationFrame`) o Matter.js si se justifica — evaluar peso vs beneficio; la v1 del motor debe vivir en `core/physics.js` puro y testeable.
-- [ ] **Gesto de disparo**: deslizar (swipe) para patear — la dirección del gesto define la puntería y la curvatura del trazo define el efecto. Reemplaza (o convive con) la grilla + barra de potencia.
+- [x] **Física de balón real**: motor propio en `core/physics.js` (puro, con suite de tests en `scripts/physics-check.mjs`) — trayectoria Bézier con arco de gravedad y comba; el vuelo se anima con `requestAnimationFrame`. La CPU también remata con trayectorias físicas.
+- [x] **Gesto de disparo**: swipe para patear — la dirección y largo del gesto definen la puntería (¡puedes fallar el arco tú solito!), la velocidad define la potencia del vuelo y la curvatura del trazo le da efecto que corrige el destino. Punto de mira punteado como guía durante el gesto. Reemplazó a la grilla + barra de potencia en el remate; atajar sigue siendo tocar la casilla. Funciona igual en los duelos 1 vs 1 (la trayectoria viaja por el DataChannel y ambas pantallas ven el mismo vuelo).
 - [ ] **Tiros de esquina (córners)**: nuevo modo con física distinta — el balón viene con comba desde la esquina, eliges el punto de remate de cabeza/volea y el timing del salto. Reutiliza el estadio y los sprites; nueva escena de área.
 - [ ] **Tiros libres** con barrera: otra variante de física (elevación por encima de la barrera + caída).
 - [ ] Viento/condiciones por estadio como modificador ligero de la física.

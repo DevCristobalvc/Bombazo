@@ -26,11 +26,6 @@
   will-change: transform;
 }
 
-/* Remate perfecto: el balón viaja notablemente más rápido */
-#ball.fast {
-  transition-duration: 0.26s;
-}
-
 #shooter {
   transition: transform 0.2s ease-in;
 }
@@ -39,7 +34,17 @@
   transform: translate(56px, -44px) rotate(10deg);
 }
 
-/* Grilla de 9 zonas: solo interactiva durante la puntería */
+/* Fase de remate por swipe: guía visible, escena capturando el gesto */
+.scene.guide {
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.scene.guide .gridlines {
+  opacity: 0.5;
+}
+
+/* Grilla de 9 zonas: solo interactiva al atajar */
 .zone {
   fill: transparent;
   pointer-events: none;
