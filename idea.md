@@ -257,7 +257,8 @@ Decisiones:
 - [ ] Más selecciones (los 16 de octavos completos) y kits alternos
 - [ ] Arqueros con "personalidad" (uno que siempre se queda parado, uno que adivina esquinas…)
 - [x] **Multijugador 1 vs 1 online (v1)**: duelo peer-to-peer por **WebRTC DataChannel**, sin backend propio. El anfitrión crea una sala y muestra un **QR** (generado localmente con `qrcode`); el rival lo escanea con la cámara del teléfono, elige su selección y quedan conectados. La señalización inicial usa la nube pública gratuita de PeerJS (sin API key); después todo viaja directo entre los dos navegadores. En cada penal ambos actúan a la vez (uno remata con barra de potencia, el otro elige el vuelo) y las dos pantallas animan el mismo resultado. Desconexión = victoria por retiro. Código en `src/net/duel.js` + pantallas `DuelLobby` y `JoinScreen`; PeerJS y qrcode se cargan bajo demanda (code-splitting) para no engordar la carga inicial.
-- [ ] Multijugador local (pasar el teléfono) y revancha sobre la misma conexión
+- [x] **Duelos en las 3 disciplinas**: al crear la sala 1 vs 1 el anfitrión elige la disciplina (Penales, Córners o Tiros libres) y viaja en el handshake; los córners sincronizan el punto y momento del cabezazo por el DataChannel, y los tiros libres comparten el veredicto de la barrera.
+- [ ] Multijugador local (pasar el teléfono)
 - [ ] Tabla de posiciones global (leaderboard) con Vercel + base de datos del Marketplace
 - [ ] Efectos de clima (lluvia, nieve en Suiza 😄) y estadios distintos por sede
 - [ ] Comentarista con frases ("¡La mandó a las nubes!") y modo narrador con TTS

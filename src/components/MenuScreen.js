@@ -20,8 +20,14 @@ const MODES = [
   { id: 'duelo', label: '1 vs 1', icon: 'versus' },
 ];
 
+const DUEL_MODES = [
+  { id: 'penales', label: 'Penales', icon: 'bolt' },
+  { id: 'corners', label: 'Córners', icon: 'flag' },
+  { id: 'libres', label: 'Tiros libres', icon: 'wall' },
+];
+
 export function createMenuScreen({ onPlay }) {
-  const state = { mode: 'rapido', teamId: 'col', rivalId: 'fra', diff: 'medio' };
+  const state = { mode: 'rapido', duelMode: 'penales', teamId: 'col', rivalId: 'fra', diff: 'medio' };
 
   const el = fromHTML(`
     <section class="screen menu-screen">
@@ -37,6 +43,10 @@ export function createMenuScreen({ onPlay }) {
       <div class="panel">
         <h2 class="panel-title">Modo de juego</h2>
         <div class="chips" data-ref="modes"></div>
+        <div data-ref="duelBlock">
+          <h2 class="panel-title">Disciplina del duelo</h2>
+          <div class="chips" data-ref="duelModes"></div>
+        </div>
         <h2 class="panel-title">Tu selección</h2>
         <div class="chips two-rows" data-ref="teams"></div>
         <div data-ref="rivalBlock">
@@ -113,6 +123,10 @@ export function createMenuScreen({ onPlay }) {
     const vsAI = state.mode === 'rapido' || state.mode === 'corners' || state.mode === 'libres';
     refs.rivalBlock.style.display = vsAI ? '' : 'none';
     refs.diffBlock.style.display = state.mode === 'duelo' ? 'none' : '';
+    refs.duelBlock.style.display = state.mode === 'duelo' ? '' : 'none';
+    refs.duelModes.innerHTML = DUEL_MODES.map(
+      (m) => `<button class="chip ${m.id === state.duelMode ? 'is-selected' : ''}" data-id="${m.id}">${icon(m.icon, 15)} ${m.label}</button>`
+    ).join('');
     refs.diffs.innerHTML = DIFFICULTIES.map(
       (d) => `<button class="chip ${d.id === state.diff ? 'is-selected' : ''}" data-id="${d.id}">${flames(d.level)} ${d.label}</button>`
     ).join('');
@@ -125,7 +139,7 @@ export function createMenuScreen({ onPlay }) {
       state.mode === 'torneo'
         ? `${player.short} · Torneo: 4 rondas al título · ${diff.label}`
         : state.mode === 'duelo'
-          ? `${player.short} · Duelo 1 vs 1 · El rival escanea tu QR`
+          ? `${player.short} · Duelo de ${DUEL_MODES.find((m) => m.id === state.duelMode).label.toLowerCase()} · El rival escanea tu QR`
           : state.mode === 'corners'
             ? `${player.short} <i class="vs">VS</i> ${rival.short} · Córners · ${diff.label}`
             : state.mode === 'libres'
@@ -155,6 +169,13 @@ export function createMenuScreen({ onPlay }) {
     const chip = e.target.closest('.chip');
     if (!chip) return;
     state.mode = chip.dataset.id;
+    render();
+  });
+
+  refs.duelModes.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    state.duelMode = chip.dataset.id;
     render();
   });
 

@@ -450,6 +450,159 @@ export function createMatchScreen({ onFinish, onExit }) {
     await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? dive });
   }
 
+  /* ---------- Duelo: tiros libres ---------- */
+
+  async function myDuelFreeKick() {
+    const { s, playerTeam, rivalTeam } = ctx;
+    ctx.phase = 'shoot';
+    pitch.setKits({ shooterTeam: playerTeam, keeperTeam: rivalTeam, shooterProfile: ctx.profile });
+    setMsg(`Tiro libre ${s.kicks.P.length + 1} — ¡Supera la barrera!`, 'Por arriba o con mucha curva');
+    updateBoard();
+
+    const shot = await pitch.captureSwipe();
+    if (!shot || aborted) return;
+    const finalZone = zoneAt(shot.tx, shot.ty);
+    const blocked = finalZone !== null && wallBlocks(finalZone, shot.curve);
+    ctx.duel.send({ t: 'shot', tx: shot.tx, ty: shot.ty, curve: shot.curve, dur: shot.dur, finalZone, offTarget: finalZone === null, blocked });
+
+    setMsg('Esperando al arquero rival…', 'Está eligiendo su vuelo');
+    const dive = await ctx.duel.next('dive');
+    if (dive === null || aborted) return;
+
+    await pitch.kickAnim();
+    sfx.kick();
+    if (blocked) {
+      await pitch.ballFlight({ tx: Math.min(220, Math.max(140, shot.tx)), ty: 412, curve: shot.curve, dur: 170 });
+      pitch.ballDeflect();
+      sfx.save();
+      buzz(25);
+      registerKick(s, 'P', false);
+      updateBoard();
+      await announcer.say(pick(COPY.wallBlockMine), 'miss');
+      pitch.reset();
+      await sleep(240);
+      return;
+    }
+    pitch.keeperDive(dive.zone);
+    await pitch.ballFlight(shot);
+    const goal = finalZone !== null && finalZone !== dive.zone;
+    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? dive.zone });
+  }
+
+  async function theirDuelFreeKick() {
+    const { s, playerTeam, rivalTeam } = ctx;
+    ctx.phase = 'save';
+    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
+    setMsg(`Tiro libre ${s.kicks.C.length + 1} — ¡Defiende!`, 'Toca la casilla o arrastra a tu arquero');
+    updateBoard();
+
+    const dive = await pitch.pickDive();
+    if (dive === null || aborted) return;
+    ctx.duel.send({ t: 'dive', zone: dive });
+
+    setMsg('Esperando el remate…', 'El rival está pateando');
+    const shot = await ctx.duel.next('shot');
+    if (shot === null || aborted) return;
+
+    await pitch.kickAnim();
+    sfx.kick();
+    if (shot.blocked) {
+      await pitch.ballFlight({ tx: shot.tx, ty: 412, curve: shot.curve, dur: 170 });
+      pitch.ballDeflect();
+      sfx.save();
+      sfx.cheer();
+      buzz(40);
+      registerKick(s, 'C', false);
+      updateBoard();
+      await announcer.say(pick(COPY.wallBlockTheirs), 'save');
+      pitch.reset();
+      await sleep(240);
+      return;
+    }
+    pitch.keeperDive(dive);
+    await pitch.ballFlight(shot);
+    const goal = !shot.offTarget && shot.finalZone !== dive;
+    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? dive });
+  }
+
+  /* ---------- Duelo: córners ---------- */
+
+  async function myDuelCornerKick() {
+    const { s, playerTeam, rivalTeam } = ctx;
+    ctx.phase = 'shoot';
+    pitch.setKits({ shooterTeam: playerTeam, keeperTeam: rivalTeam, shooterProfile: ctx.profile });
+    setMsg(`Córner ${s.kicks.P.length + 1} — ¡Remata de cabeza!`, 'Toca justo cuando el centro pase por donde quieres');
+    updateBoard();
+
+    const side = s.kicks.P.length % 2 === 0 ? 'right' : 'left';
+    sfx.kick();
+    const tap = await pitch.cornerCross(cornerCrossPath(side));
+    if (aborted) return;
+
+    if (tap === null) {
+      ctx.duel.send({ t: 'shot', lost: true, side });
+      registerKick(s, 'P', false);
+      updateBoard();
+      await announcer.say(pick(COPY.crossLost), 'miss');
+      pitch.reset();
+      await sleep(240);
+      return;
+    }
+
+    const shot = headerShot(tap);
+    const finalZone = zoneAt(shot.tx, shot.ty);
+    ctx.duel.send({
+      t: 'shot', tx: shot.tx, ty: shot.ty, curve: shot.curve, dur: shot.dur,
+      finalZone, offTarget: finalZone === null, side, headX: tap.x, headY: tap.y, headU: tap.u,
+    });
+
+    setMsg('Esperando al arquero rival…', 'Está eligiendo su vuelo');
+    const dive = await ctx.duel.next('dive');
+    if (dive === null || aborted) return;
+
+    sfx.kick();
+    pitch.keeperDive(dive.zone);
+    await pitch.ballFlight(shot, { x: tap.x, y: tap.y });
+    const goal = finalZone !== null && finalZone !== dive.zone;
+    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? dive.zone });
+  }
+
+  async function theirDuelCornerKick() {
+    const { s, playerTeam, rivalTeam } = ctx;
+    ctx.phase = 'save';
+    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
+    setMsg(`Córner ${s.kicks.C.length + 1} — ¡Ataja el cabezazo!`, 'Toca la casilla o arrastra a tu arquero');
+    updateBoard();
+
+    const dive = await pitch.pickDive();
+    if (dive === null || aborted) return;
+    ctx.duel.send({ t: 'dive', zone: dive });
+
+    setMsg('Esperando el remate…', 'El rival está rematando el córner');
+    const shot = await ctx.duel.next('shot');
+    if (shot === null || aborted) return;
+
+    sfx.kick();
+    if (shot.lost) {
+      // El centro rival pasó de largo: buena noticia para ti
+      await pitch.cornerCross(cornerCrossPath(shot.side ?? 'right'), { interactive: false });
+      registerKick(s, 'C', false);
+      updateBoard();
+      await announcer.say(pick(COPY.crossLost), 'save');
+      pitch.reset();
+      await sleep(240);
+      return;
+    }
+
+    const headPoint = await pitch.cornerCross(cornerCrossPath(shot.side ?? 'right'), { interactive: false, stopAt: shot.headU ?? 0.5 });
+    if (aborted) return;
+    sfx.kick();
+    pitch.keeperDive(dive);
+    await pitch.ballFlight(shot, { x: shot.headX ?? headPoint.x, y: shot.headY ?? headPoint.y });
+    const goal = !shot.offTarget && shot.finalZone !== dive;
+    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? dive });
+  }
+
   /* ---------- Orquestación ---------- */
 
   async function start({ playerTeam, rivalTeam, diff, stageLabel = null, duel = null, isHost = true, mode = 'penales', profile = null, rivalProfile = null }) {
@@ -473,17 +626,24 @@ export function createMatchScreen({ onFinish, onExit }) {
     startAmbience();
     let suddenAnnounced = false;
 
+    const duelLegs = {
+      penales: [myDuelKick, theirDuelKick],
+      corners: [myDuelCornerKick, theirDuelCornerKick],
+      libres: [myDuelFreeKick, theirDuelFreeKick],
+    };
+
     while (!aborted) {
       // El anfitrión (o el jugador local contra la IA) ejecuta primero
-      const legs = duel && !isHost
-        ? [theirDuelKick, myDuelKick]
-        : duel
-          ? [myDuelKick, theirDuelKick]
-          : mode === 'corners'
-            ? [myCornerKick, theirCornerKick]
-            : mode === 'libres'
-              ? [myFreeKick, theirFreeKick]
-              : [playerKickVsAI, cpuKick];
+      const legs = duel
+        ? (() => {
+            const pair = duelLegs[mode] ?? duelLegs.penales;
+            return isHost ? pair : [pair[1], pair[0]];
+          })()
+        : mode === 'corners'
+          ? [myCornerKick, theirCornerKick]
+          : mode === 'libres'
+            ? [myFreeKick, theirFreeKick]
+            : [playerKickVsAI, cpuKick];
 
       await legs[0]();
       if (aborted) return;

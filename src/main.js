@@ -52,13 +52,21 @@ function startTournamentMatch() {
   });
 }
 
+const DUEL_LABELS = {
+  penales: 'DUELO 1 VS 1',
+  corners: 'DUELO · CÓRNERS',
+  libres: 'DUELO · TIROS LIBRES',
+};
+
 function startDuelMatch() {
+  const mode = duelCtx.mode ?? 'penales';
   show(match.el);
   match.start({
     playerTeam: teamById(duelCtx.myTeamId),
     rivalTeam: teamById(duelCtx.rivalTeamId),
     diff: 'duelo',
-    stageLabel: 'DUELO 1 VS 1',
+    mode,
+    stageLabel: DUEL_LABELS[mode] ?? DUEL_LABELS.penales,
     duel,
     isHost: duelCtx.isHost,
     profile: loadProfile(),
@@ -76,7 +84,9 @@ function closeDuel() {
 
 function handleDuelData(msg) {
   if (msg.t !== 'hello' || !duelCtx || duelCtx.rivalTeamId) return;
-  if (duelCtx.isHost) duel.send({ t: 'hello', team: duelCtx.myTeamId, profile: loadProfile() });
+  // El anfitrión define la disciplina del duelo; el invitado la adopta del hello
+  if (duelCtx.isHost) duel.send({ t: 'hello', team: duelCtx.myTeamId, profile: loadProfile(), mode: duelCtx.mode });
+  else duelCtx.mode = msg.mode ?? 'penales';
   duelCtx.rivalTeamId = msg.team;
   duelCtx.rivalProfile = msg.profile ?? null;
   startDuelMatch();
@@ -102,7 +112,7 @@ async function startHosting(config) {
   const { hostDuel } = await import('./net/duel.js');
   lobby.reset();
   show(lobby.el);
-  duelCtx = { isHost: true, myTeamId: config.teamId, rivalTeamId: null };
+  duelCtx = { isHost: true, myTeamId: config.teamId, rivalTeamId: null, mode: config.duelMode ?? 'penales' };
   duel = hostDuel({
     onCode(code) {
       lobby.showCode(code, `${location.origin}/#d=${code}`);
