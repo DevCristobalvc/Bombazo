@@ -7,7 +7,7 @@
  * - keeperDive, kickAnim, celebrate, shake, flash, reset.
  */
 import { sceneSVG } from '../art/stadium.js';
-import { zoneCenter, BALL_HOME, KEEPER_HOME } from '../core/zones.js';
+import { zoneCenter, zoneAt, BALL_HOME, KEEPER_HOME } from '../core/zones.js';
 import { analyzeSwipe, projectTarget, shotPath } from '../core/physics.js';
 import { fromHTML, sleep } from '../utils/dom.js';
 import './Pitch.css';
@@ -18,6 +18,7 @@ export function createPitch() {
   const keeper = el.querySelector('#keeper');
   const ball = el.querySelector('#ball');
   const aimDot = el.querySelector('#aim-dot');
+  const aimLine = el.querySelector('#aim-line');
 
   let resolveZone = null;
   let cancelSwipe = null;
@@ -41,6 +42,63 @@ export function createPitch() {
     });
   }
 
+  /** El arquero se desliza a la zona elegida mientras arrastras. */
+  let keeperGlideX = 0;
+  function keeperGlide(zone) {
+    const c = zoneCenter(zone);
+    keeperGlideX = (c.x - KEEPER_HOME.x) * 0.65;
+    keeper.style.transition = 'transform .16s ease-out';
+    keeper.style.transform = `translate(${keeperGlideX.toFixed(1)}px, 0px)`;
+  }
+
+  /**
+   * Elección del vuelo al atajar: toca una casilla O arrastra al arquero
+   * hasta donde quieres taparlo (se desliza siguiendo el dedo).
+   */
+  function pickDive() {
+    return new Promise((resolve) => {
+      svg.classList.add('aiming');
+      let dragging = false;
+      let lastZone = null;
+
+      const finish = (zone) => {
+        svg.removeEventListener('pointerdown', down);
+        svg.removeEventListener('pointermove', move);
+        svg.removeEventListener('pointerup', up);
+        resolve(zone);
+      };
+      resolveZone = finish; // el tap directo en una casilla sigue funcionando
+
+      const down = (e) => {
+        dragging = true;
+        move(e);
+      };
+      const move = (e) => {
+        if (!dragging) return;
+        const p = scenePoint(e);
+        const z = zoneAt(Math.min(299, Math.max(61, p.x)), Math.min(371, Math.max(153, p.y)));
+        if (z !== null && z !== lastZone) {
+          lastZone = z;
+          keeperGlide(z);
+        }
+      };
+      const up = () => {
+        if (!dragging) return;
+        dragging = false;
+        if (lastZone !== null && resolveZone) {
+          const r = resolveZone;
+          resolveZone = null;
+          svg.classList.remove('aiming');
+          svg.querySelector(`.zone[data-zone="${lastZone}"]`)?.classList.add('picked');
+          r(lastZone);
+        }
+      };
+      svg.addEventListener('pointerdown', down);
+      svg.addEventListener('pointermove', move);
+      svg.addEventListener('pointerup', up);
+    });
+  }
+
   /* ---------- Patear: gesto de swipe con física ---------- */
 
   /** Convierte coordenadas de pantalla a coordenadas de escena (viewBox 360×560,
@@ -59,7 +117,28 @@ export function createPitch() {
     aimDot.setAttribute('opacity', '0.9');
   }
 
-  const hideAimDot = () => aimDot.setAttribute('opacity', '0');
+  const hideAimDot = () => {
+    aimDot.setAttribute('opacity', '0');
+    aimLine.setAttribute('opacity', '0');
+  };
+
+  /** Dibuja la trayectoria proyectada del gesto actual (con su curva). */
+  function showAimLine(pts) {
+    const shot = analyzeSwipe(pts);
+    if (!shot) {
+      aimLine.setAttribute('opacity', '0');
+      return null;
+    }
+    const path = shotPath(shot);
+    let d = `M ${BALL_HOME.x} ${BALL_HOME.y}`;
+    for (let i = 1; i <= 12; i++) {
+      const p = path(i / 12);
+      d += ` L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
+    }
+    aimLine.setAttribute('d', d);
+    aimLine.setAttribute('opacity', '0.65');
+    return shot;
+  }
 
   function captureSwipe() {
     return new Promise((resolve) => {
@@ -76,7 +155,9 @@ export function createPitch() {
         if (!pts) return;
         const p = scenePoint(e);
         pts.push(p);
-        showAimDot(projectTarget(pts[0], p));
+        // La línea proyecta la trayectoria real (con curva); el punto marca el destino
+        const preview = showAimLine(pts);
+        showAimDot(preview ? { tx: preview.tx, ty: preview.ty } : projectTarget(pts[0], p));
       };
       const up = () => {
         if (!pts) return;
@@ -145,6 +226,7 @@ export function createPitch() {
     s.setProperty('--gk-hair', keeperTeam.hair);
   }
 
+  /** Estirada con física: parábola de salto con despegue, vuelo y caída. */
   function keeperDive(zone) {
     svg.classList.add('diving'); // pausa el balanceo de espera
     const c = zoneCenter(zone);
@@ -153,7 +235,22 @@ export function createPitch() {
     const dx = (c.x - KEEPER_HOME.x) * 0.92;
     const dy = row === 0 ? -66 : row === 1 ? -30 : -2;
     const angle = col === 0 ? -55 : col === 2 ? 55 : 0;
-    keeper.style.transform = `translate(${dx}px, ${dy}px) rotate(${angle}deg)`;
+    const startX = keeperGlideX; // si el arquero se deslizó, vuela desde ahí
+    const jump = row === 0 ? -34 : row === 1 ? -18 : -8;
+    const dur = 430;
+
+    keeper.style.transition = 'none';
+    const t0 = performance.now();
+    const step = (now) => {
+      const u = Math.min(1, (now - t0) / dur);
+      const e = 1 - (1 - u) ** 2; // impulso fuerte que se frena en el aire
+      const x = startX + (dx - startX) * e;
+      const y = dy * e + jump * Math.sin(Math.PI * u); // arco de gravedad
+      const r = angle * Math.min(1, u * 1.5);
+      keeper.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${r.toFixed(1)}deg)`;
+      if (u < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 
   /** Estela de cometa que deja el balón en vuelo. */
@@ -299,11 +396,13 @@ export function createPitch() {
 
   function reset() {
     svg.classList.remove('kick', 'diving');
+    keeperGlideX = 0;
+    keeper.style.transition = '';
     keeper.style.transform = '';
     ball.style.transition = '';
     ball.style.transform = '';
     svg.querySelectorAll('.zone.picked').forEach((r) => r.classList.remove('picked'));
   }
 
-  return { el, setKits, setWall, pickZone, captureSwipe, cornerCross, cancelAim, keeperDive, ballFlight, ballBounce, ballDeflect, kickAnim, celebrate, shake, flash, netRipple, reset };
+  return { el, setKits, setWall, pickZone, pickDive, captureSwipe, cornerCross, cancelAim, keeperDive, ballFlight, ballBounce, ballDeflect, kickAnim, celebrate, shake, flash, netRipple, reset };
 }

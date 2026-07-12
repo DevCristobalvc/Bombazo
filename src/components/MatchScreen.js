@@ -241,7 +241,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     setMsg(`Penal ${s.kicks.C.length + 1} — ¡Te toca atajar!`, 'Toca la casilla hacia donde volarás');
     updateBoard();
 
-    const dive = await pitch.pickZone();
+    const dive = await pitch.pickDive();
     if (dive === null || aborted) return;
     const intent = shooterPick(diff, dive);
     const cpuShot = applyWind(makeCpuShot(intent.zone, intent.offTarget), ctx.wind);
@@ -301,7 +301,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     setMsg(`Córner ${s.kicks.C.length + 1} — ¡Ataja el cabezazo!`, 'Toca la casilla hacia donde volarás');
     updateBoard();
 
-    const dive = await pitch.pickZone();
+    const dive = await pitch.pickDive();
     if (dive === null || aborted) return;
     const intent = shooterPick(diff, dive);
     const cpuShot = applyWind(makeCpuShot(intent.zone, intent.offTarget), ctx.wind);
@@ -369,7 +369,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     setMsg(`Tiro libre ${s.kicks.C.length + 1} — ¡Defiende!`, 'Toca la casilla hacia donde volarás');
     updateBoard();
 
-    const dive = await pitch.pickZone();
+    const dive = await pitch.pickDive();
     if (dive === null || aborted) return;
 
     // La CPU evita la barrera casi siempre... casi
@@ -433,7 +433,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     setMsg(`Penal ${s.kicks.C.length + 1} — ¡Te toca atajar!`, 'Toca la casilla hacia donde volarás');
     updateBoard();
 
-    const dive = await pitch.pickZone();
+    const dive = await pitch.pickDive();
     if (dive === null || aborted) return;
     ctx.duel.send({ t: 'dive', zone: dive });
 

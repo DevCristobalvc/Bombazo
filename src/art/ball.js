@@ -12,6 +12,6 @@ export function ballArt(r = 11) {
     <circle r="${r}" fill="#f8fafd" stroke="#c9cedb" stroke-width="1"/>
     ${patches}
     <circle r="${(r * 0.3).toFixed(1)}" fill="#2a2e38"/>
-    <circle cx="${(-r * 0.38).toFixed(1)}" cy="${(-r * 0.38).toFixed(1)}" r="${(r * 0.22).toFixed(1)}" fill="rgba(255,255,255,.75)"/>
+    <circle r="${r}" fill="url(#g-ball3d)"/>
   </g>`;
 }

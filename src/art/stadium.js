@@ -46,6 +46,17 @@ export function sceneSVG() {
         <stop offset=".68" stop-color="#000000" stop-opacity="0"/>
         <stop offset="1" stop-color="#000000" stop-opacity=".3"/>
       </radialGradient>
+      <!-- Luz de estadio desde arriba-izquierda: da volumen a los personajes -->
+      <linearGradient id="g-shade" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".16"/>
+        <stop offset=".5" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".22"/>
+      </linearGradient>
+      <radialGradient id="g-ball3d" cx=".35" cy=".3" r=".9">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
+        <stop offset=".45" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".3"/>
+      </radialGradient>
     </defs>
 
     <!-- cielo y reflectores -->
@@ -123,7 +134,8 @@ export function sceneSVG() {
       ${zoneRects()}
     </g>
 
-    <!-- punto de mira del swipe -->
+    <!-- guía del swipe: trayectoria proyectada + punto de mira -->
+    <path id="aim-line" fill="none" stroke="#ffd100" stroke-width="2.5" stroke-dasharray="6 7" opacity="0" pointer-events="none" stroke-linecap="round"/>
     <circle id="aim-dot" r="7" fill="none" stroke="#ffd100" stroke-width="2.5" stroke-dasharray="4 5" opacity="0" pointer-events="none"/>
   </svg>`;
 }

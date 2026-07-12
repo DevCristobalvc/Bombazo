@@ -14,6 +14,18 @@ export function heroSVG(team, profile = {}) {
   const number = profile.number ?? 10;
   return `
   <svg viewBox="0 0 220 300" role="img" aria-label="Tu jugador con la camiseta de ${team.name}">
+    <defs>
+      <linearGradient id="g-shade" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".16"/>
+        <stop offset=".5" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".22"/>
+      </linearGradient>
+      <radialGradient id="g-ball3d" cx=".35" cy=".3" r=".9">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>
+        <stop offset=".45" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".3"/>
+      </radialGradient>
+    </defs>
     <ellipse cx="110" cy="286" rx="58" ry="10" fill="rgba(0,0,0,.35)"/>
     <!-- piernas -->
     <rect x="84" y="212" width="17" height="58" rx="8" fill="${socks}"/>
@@ -45,6 +57,9 @@ export function heroSVG(team, profile = {}) {
     <circle cx="90" cy="80" r="4" fill="#e58f6f" opacity=".55"/>
     <circle cx="130" cy="80" r="4" fill="#e58f6f" opacity=".55"/>
     <path d="M98 84 Q110 94 122 84" stroke="#8a4b2d" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <!-- volumen: luz de estadio sobre torso y cabeza -->
+    <path d="M74 102 L146 102 L140 184 L80 184 Z" fill="url(#g-shade)"/>
+    <circle cx="110" cy="70" r="30" fill="url(#g-shade)"/>
     <!-- balón al pie -->
     <g transform="translate(158,268)">${ballArt(15)}</g>
   </svg>`;
@@ -70,6 +85,8 @@ export function shooterSVG() {
     <text class="sh-number" x="0" y="-98" text-anchor="middle" font-size="36" font-weight="900" fill="var(--sh-accent)" font-family="Nunito, sans-serif">10</text>
     <circle cx="0" cy="-164" r="17" fill="var(--sh-skin)"/>
     <path d="M-17 -164 a17 17 0 1 1 34 0 q0 9 -17 9 q-17 0 -17 -9 z" fill="var(--sh-hair)"/>
+    <path d="M-28 -148 L28 -148 L24 -76 L-24 -76 Z" fill="url(#g-shade)"/>
+    <circle cx="0" cy="-164" r="17" fill="url(#g-shade)"/>
   </g>`;
 }
 
@@ -97,5 +114,7 @@ export function keeperSVG() {
     <circle cx="-5" cy="-128" r="2.6" fill="#1c1f26"/>
     <circle cx="5" cy="-128" r="2.6" fill="#1c1f26"/>
     <path d="M-4 -118 L4 -118" stroke="#8a4b2d" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M-22 -112 L22 -112 L18 -62 L-18 -62 Z" fill="url(#g-shade)"/>
+    <circle cx="0" cy="-127" r="15" fill="url(#g-shade)"/>
   </g>`;
 }
