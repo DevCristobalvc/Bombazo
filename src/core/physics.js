@@ -112,6 +112,16 @@ export function wallBlocks(finalZone, curve) {
   return (finalZone === 4 || finalZone === 7) && Math.abs(curve) < 0.45;
 }
 
+/**
+ * Viento del partido: empuja el destino lateralmente. wind ∈ [-1, 1]
+ * (negativo = hacia la izquierda). El jugador compensa apuntando contra él.
+ */
+export function applyWind(shot, wind) {
+  if (!wind) return shot;
+  shot.tx = clamp(shot.tx + wind * 30, -30, 390);
+  return shot;
+}
+
 /** Tiro sintético de la CPU hacia una zona (o desviado por encima). */
 export function makeCpuShot(zone, offTarget) {
   const curve = (Math.random() * 2 - 1) * 0.55;

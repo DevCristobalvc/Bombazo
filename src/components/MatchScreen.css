@@ -51,6 +51,24 @@
   display: none;
 }
 
+/* Indicador de viento del partido */
+.wind-chip {
+  align-self: center;
+  font-size: 11.5px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  background: var(--c-panel);
+  border: 1px solid var(--c-line);
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+
+.wind-chip[hidden] {
+  display: none;
+}
+
 .phase-msg {
   text-align: center;
   min-height: 40px;

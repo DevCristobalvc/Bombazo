@@ -9,7 +9,7 @@
 import { createShootout, registerKick, registerHabit, winner, isSuddenDeath, score } from '../core/shootout.js';
 import { keeperPick, shooterPick } from '../core/ai.js';
 import { zoneAt, zoneNearest } from '../core/zones.js';
-import { makeCpuShot, cornerCrossPath, headerShot, wallBlocks } from '../core/physics.js';
+import { makeCpuShot, cornerCrossPath, headerShot, wallBlocks, applyWind } from '../core/physics.js';
 import { recordShot } from '../core/stats.js';
 import { createPitch } from './Pitch.js';
 import { createScoreboard } from './Scoreboard.js';
@@ -50,6 +50,7 @@ export function createMatchScreen({ onFinish, onExit }) {
       <button class="btn-exit" aria-label="Salir al menú">✕</button>
       <button class="btn-sound" data-ref="sound" aria-label="Activar o silenciar sonido"></button>
       <div class="stage-chip" data-ref="stage" hidden></div>
+      <div class="wind-chip" data-ref="wind" hidden></div>
       <div class="phase-msg"><b data-ref="msg"></b><span data-ref="sub"></span></div>
       <div class="pitch-wrap" data-ref="wrap">
         <div class="swipe-hint" data-ref="hint" hidden>
@@ -78,6 +79,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   const msgEl = el.querySelector('[data-ref="msg"]');
   const subEl = el.querySelector('[data-ref="sub"]');
   const stageEl = el.querySelector('[data-ref="stage"]');
+  const windEl = el.querySelector('[data-ref="wind"]');
   const vsplashEl = el.querySelector('[data-ref="vsplash"]');
   const vstageEl = el.querySelector('[data-ref="vstage"]');
   const vleftEl = el.querySelector('[data-ref="vleft"]');
@@ -155,6 +157,7 @@ export function createMatchScreen({ onFinish, onExit }) {
         localStorage.setItem('bombazo:tut', '1');
       } catch { /* sin persistencia */ }
     }
+    applyWind(shot, ctx.wind);
     const finalZone = zoneAt(shot.tx, shot.ty);
     return { ...shot, finalZone, offTarget: finalZone === null };
   }
@@ -241,7 +244,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     const dive = await pitch.pickZone();
     if (dive === null || aborted) return;
     const intent = shooterPick(diff, dive);
-    const cpuShot = makeCpuShot(intent.zone, intent.offTarget);
+    const cpuShot = applyWind(makeCpuShot(intent.zone, intent.offTarget), ctx.wind);
     const finalZone = intent.offTarget ? null : zoneAt(cpuShot.tx, cpuShot.ty);
 
     await pitch.kickAnim();
@@ -278,7 +281,7 @@ export function createMatchScreen({ onFinish, onExit }) {
       return;
     }
 
-    const shot = headerShot(tap);
+    const shot = applyWind(headerShot(tap), ctx.wind);
     const finalZone = zoneAt(shot.tx, shot.ty);
     const readZone = finalZone ?? zoneNearest(shot.tx, shot.ty);
     const gkZone = keeperPick(ctx.diff, readZone, s.habits);
@@ -301,7 +304,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     const dive = await pitch.pickZone();
     if (dive === null || aborted) return;
     const intent = shooterPick(diff, dive);
-    const cpuShot = makeCpuShot(intent.zone, intent.offTarget);
+    const cpuShot = applyWind(makeCpuShot(intent.zone, intent.offTarget), ctx.wind);
     const finalZone = intent.offTarget ? null : zoneAt(cpuShot.tx, cpuShot.ty);
 
     sfx.kick();
@@ -330,6 +333,7 @@ export function createMatchScreen({ onFinish, onExit }) {
 
     const shot = await pitch.captureSwipe();
     if (!shot || aborted) return;
+    applyWind(shot, ctx.wind);
     const finalZone = zoneAt(shot.tx, shot.ty);
     const blocked = finalZone !== null && wallBlocks(finalZone, shot.curve);
 
@@ -375,7 +379,7 @@ export function createMatchScreen({ onFinish, onExit }) {
       intent = shooterPick(diff, dive);
       tries += 1;
     }
-    const cpuShot = makeCpuShot(intent.zone, intent.offTarget);
+    const cpuShot = applyWind(makeCpuShot(intent.zone, intent.offTarget), ctx.wind);
     const finalZone = intent.offTarget ? null : zoneAt(cpuShot.tx, cpuShot.ty);
     const blocked = finalZone !== null && wallBlocks(finalZone, cpuShot.curve);
 
@@ -450,9 +454,16 @@ export function createMatchScreen({ onFinish, onExit }) {
 
   async function start({ playerTeam, rivalTeam, diff, stageLabel = null, duel = null, isHost = true, mode = 'penales' }) {
     aborted = false;
-    ctx = { s: createShootout(), playerTeam, rivalTeam, diff, phase: 'shoot', duel, isHost, mode };
+    // Viento del partido (los duelos online se juegan "bajo techo": sin viento)
+    const wind = duel ? 0 : pick([-1, -0.5, 0, 0, 0, 0.5, 1]);
+    ctx = { s: createShootout(), playerTeam, rivalTeam, diff, phase: 'shoot', duel, isHost, mode, wind };
     stageEl.hidden = !stageLabel;
     stageEl.textContent = stageLabel ?? '';
+    windEl.hidden = wind === 0;
+    if (wind !== 0) {
+      const arrows = (wind > 0 ? '→' : '←').repeat(Math.abs(wind) > 0.5 ? 2 : 1);
+      windEl.textContent = `Viento ${arrows}`;
+    }
     pitch.setWall(mode === 'libres');
     pitch.reset();
     updateBoard();
