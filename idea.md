@@ -251,7 +251,7 @@ Decisiones:
 - [x] Llave visual del torneo en la pantalla final (ronda superada / siguiente / pendientes) y revancha de duelo 1 vs 1 sobre la misma conexión
 
 ### 🌌 Fase 3 — El cielo es el límite (backlog de ideas)
-- [ ] **Customización del personaje**: piel, pelo, nombre y dorsal en la camiseta
+- [x] **Customización del personaje (v1)**: tono de piel (6), color de pelo (6) y dorsal (7/9/10/11/23/99) desde el menú, persistido en localStorage y aplicado al héroe y al pateador en todos los modos; en los duelos 1 vs 1 el rival ve tu personaje (el perfil viaja en el hello). Pendiente: nombre en la camiseta y peinados.
 - [x] **Modo torneo (v1)**: camino al título de 4 rondas eliminatorias contra las otras selecciones, con rótulo de ronda dorado
 - [ ] **Modo torneo (v2)**: llave completa de octavos → final con los 16 clasificados reales del Mundial 2026 y vista de bracket
 - [ ] Más selecciones (los 16 de octavos completos) y kits alternos

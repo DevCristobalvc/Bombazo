@@ -8,6 +8,7 @@ import { flagSVG } from '../art/flags.js';
 import { logoSVG } from '../art/logo.js';
 import { icon, flames } from '../art/icons.js';
 import { loadStats } from '../core/stats.js';
+import { loadProfile, saveProfile, SKINS, HAIRS, NUMBERS } from '../core/profile.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
@@ -46,6 +47,12 @@ export function createMenuScreen({ onPlay }) {
           <h2 class="panel-title">Dificultad</h2>
           <div class="chips" data-ref="diffs"></div>
         </div>
+        <h2 class="panel-title">Tu jugador</h2>
+        <div class="profile-row">
+          <div class="dot-picker" data-ref="skins" title="Tono de piel"></div>
+          <div class="dot-picker" data-ref="hairs" title="Color de pelo"></div>
+        </div>
+        <div class="chips" data-ref="numbers"></div>
         <button class="btn-big" data-ref="play">¡A LA CANCHA!</button>
         <p class="howto"><b>Desliza</b> desde el balón hacia el arco para rematar — curva el gesto para darle efecto. Para <b>atajar</b>, toca la casilla. Empate = muerte súbita.</p>
       </div>
@@ -84,6 +91,19 @@ export function createMenuScreen({ onPlay }) {
       .join('');
   }
 
+  function renderProfile() {
+    const p = loadProfile();
+    refs.skins.innerHTML = SKINS.map(
+      (c) => `<button class="dot-swatch ${p.skin === c ? 'is-selected' : ''}" data-kind="skin" data-value="${c}" style="background:${c}" aria-label="Tono de piel"></button>`
+    ).join('');
+    refs.hairs.innerHTML = HAIRS.map(
+      (c) => `<button class="dot-swatch hair ${p.hair === c ? 'is-selected' : ''}" data-kind="hair" data-value="${c}" style="background:${c}" aria-label="Color de pelo"></button>`
+    ).join('');
+    refs.numbers.innerHTML = NUMBERS.map(
+      (n) => `<button class="chip chip-num ${p.number === n ? 'is-selected' : ''}" data-num="${n}">${n}</button>`
+    ).join('');
+  }
+
   function render() {
     refs.modes.innerHTML = MODES.map(
       (m) => `<button class="chip ${m.id === state.mode ? 'is-selected' : ''}" data-id="${m.id}">${icon(m.icon, 15)} ${m.label}</button>`
@@ -96,7 +116,7 @@ export function createMenuScreen({ onPlay }) {
     refs.diffs.innerHTML = DIFFICULTIES.map(
       (d) => `<button class="chip ${d.id === state.diff ? 'is-selected' : ''}" data-id="${d.id}">${flames(d.level)} ${d.label}</button>`
     ).join('');
-    refs.hero.innerHTML = heroSVG(teamById(state.teamId));
+    refs.hero.innerHTML = heroSVG(teamById(state.teamId), loadProfile());
     const player = teamById(state.teamId);
     const rival = teamById(state.rivalId);
     const diff = DIFFICULTIES.find((d) => d.id === state.diff);
@@ -111,8 +131,25 @@ export function createMenuScreen({ onPlay }) {
             : state.mode === 'libres'
               ? `${player.short} <i class="vs">VS</i> ${rival.short} · Tiros libres · ${diff.label}`
               : `${player.short} <i class="vs">VS</i> ${rival.short} · ${diff.label}`;
+    renderProfile();
     renderStats();
   }
+
+  /** Personalización: piel, pelo y dorsal (repetir un color lo devuelve al de la selección). */
+  el.addEventListener('click', (e) => {
+    const swatch = e.target.closest('.dot-swatch');
+    const num = e.target.closest('.chip-num');
+    if (!swatch && !num) return;
+    const p = loadProfile();
+    if (swatch) {
+      const { kind, value } = swatch.dataset;
+      p[kind] = p[kind] === value ? null : value;
+    } else {
+      p.number = Number(num.dataset.num);
+    }
+    saveProfile(p);
+    render();
+  });
 
   refs.modes.addEventListener('click', (e) => {
     const chip = e.target.closest('.chip');

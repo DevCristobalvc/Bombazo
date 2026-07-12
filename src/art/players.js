@@ -7,9 +7,11 @@
  */
 import { ballArt } from './ball.js';
 
-export function heroSVG(team) {
+export function heroSVG(team, profile = {}) {
   const { shirt, accent, shorts, socks } = team.kit;
-  const { skin, hair } = team;
+  const skin = profile.skin ?? team.skin;
+  const hair = profile.hair ?? team.hair;
+  const number = profile.number ?? 10;
   return `
   <svg viewBox="0 0 220 300" role="img" aria-label="Tu jugador con la camiseta de ${team.name}">
     <ellipse cx="110" cy="286" rx="58" ry="10" fill="rgba(0,0,0,.35)"/>
@@ -32,7 +34,7 @@ export function heroSVG(team) {
     <circle cx="58" cy="150" r="8.5" fill="${skin}"/>
     <circle cx="162" cy="150" r="8.5" fill="${skin}"/>
     <path d="M96 102 L110 114 L124 102 Z" fill="${accent}"/>
-    <text x="110" y="160" text-anchor="middle" font-size="34" font-weight="900" fill="${accent}" font-family="Nunito, sans-serif">10</text>
+    <text x="110" y="160" text-anchor="middle" font-size="34" font-weight="900" fill="${accent}" font-family="Nunito, sans-serif">${number}</text>
     <!-- cabeza -->
     <circle cx="110" cy="70" r="30" fill="${skin}" stroke="rgba(8,10,20,.2)" stroke-width="1.5"/>
     <path d="M78 62 Q82 28 110 28 Q138 28 142 62 Q126 42 110 46 Q94 42 78 62 Z" fill="${hair}"/>
@@ -65,7 +67,7 @@ export function shooterSVG() {
     <path d="M28 -148 L44 -118 L31 -111 L23 -132 Z" fill="var(--sh-accent)"/>
     <circle cx="-38" cy="-107" r="6" fill="var(--sh-skin)"/>
     <circle cx="38" cy="-107" r="6" fill="var(--sh-skin)"/>
-    <text x="0" y="-98" text-anchor="middle" font-size="36" font-weight="900" fill="var(--sh-accent)" font-family="Nunito, sans-serif">10</text>
+    <text class="sh-number" x="0" y="-98" text-anchor="middle" font-size="36" font-weight="900" fill="var(--sh-accent)" font-family="Nunito, sans-serif">10</text>
     <circle cx="0" cy="-164" r="17" fill="var(--sh-skin)"/>
     <path d="M-17 -164 a17 17 0 1 1 34 0 q0 9 -17 9 q-17 0 -17 -9 z" fill="var(--sh-hair)"/>
   </g>`;

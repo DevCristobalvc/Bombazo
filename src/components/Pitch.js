@@ -120,8 +120,13 @@ export function createPitch() {
 
   /* ---------- Vestuario y animaciones ---------- */
 
-  function setKits({ shooterTeam, keeperTeam }) {
+  function setKits({ shooterTeam, keeperTeam, shooterProfile = null }) {
     const s = el.style;
+    // Personalización del pateador (piel, pelo, dorsal) cuando aplica
+    const shSkin = shooterProfile?.skin ?? shooterTeam.skin;
+    const shHair = shooterProfile?.hair ?? shooterTeam.hair;
+    const numberEl = svg.querySelector('#shooter .sh-number');
+    if (numberEl) numberEl.textContent = shooterProfile?.number ?? 10;
     // La barrera defiende: viste el uniforme de campo del equipo del arquero
     s.setProperty('--wl-shirt', keeperTeam.kit.shirt);
     s.setProperty('--wl-shorts', keeperTeam.kit.shorts);
@@ -132,8 +137,8 @@ export function createPitch() {
     s.setProperty('--sh-accent', shooterTeam.kit.accent);
     s.setProperty('--sh-shorts', shooterTeam.kit.shorts);
     s.setProperty('--sh-socks', shooterTeam.kit.socks);
-    s.setProperty('--sh-skin', shooterTeam.skin);
-    s.setProperty('--sh-hair', shooterTeam.hair);
+    s.setProperty('--sh-skin', shSkin);
+    s.setProperty('--sh-hair', shHair);
     s.setProperty('--gk-shirt', keeperTeam.gk.shirt);
     s.setProperty('--gk-accent', keeperTeam.gk.accent);
     s.setProperty('--gk-skin', keeperTeam.skin);

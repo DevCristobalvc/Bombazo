@@ -7,6 +7,7 @@ import './styles/base.css';
 import { teamById } from './data/teams.js';
 import { createTournament, currentRival, currentStage, advance, isChampion, STAGES } from './core/tournament.js';
 import { recordResult } from './core/stats.js';
+import { loadProfile } from './core/profile.js';
 import { createMenuScreen } from './components/MenuScreen.js';
 import { createMatchScreen } from './components/MatchScreen.js';
 import { createEndScreen } from './components/EndScreen.js';
@@ -35,6 +36,7 @@ function startQuickMatch() {
     diff: session.diff,
     mode: cfg.mode,
     stageLabel: cfg.stageLabel,
+    profile: loadProfile(),
   });
 }
 
@@ -46,6 +48,7 @@ function startTournamentMatch() {
     rivalTeam: teamById(currentRival(t)),
     diff: session.diff,
     stageLabel: currentStage(t),
+    profile: loadProfile(),
   });
 }
 
@@ -58,6 +61,8 @@ function startDuelMatch() {
     stageLabel: 'DUELO 1 VS 1',
     duel,
     isHost: duelCtx.isHost,
+    profile: loadProfile(),
+    rivalProfile: duelCtx.rivalProfile ?? null,
   });
 }
 
@@ -71,8 +76,9 @@ function closeDuel() {
 
 function handleDuelData(msg) {
   if (msg.t !== 'hello' || !duelCtx || duelCtx.rivalTeamId) return;
-  if (duelCtx.isHost) duel.send({ t: 'hello', team: duelCtx.myTeamId });
+  if (duelCtx.isHost) duel.send({ t: 'hello', team: duelCtx.myTeamId, profile: loadProfile() });
   duelCtx.rivalTeamId = msg.team;
+  duelCtx.rivalProfile = msg.profile ?? null;
   startDuelMatch();
 }
 
@@ -114,7 +120,7 @@ async function startJoining({ teamId, code }) {
   duelCtx = { isHost: false, myTeamId: teamId, rivalTeamId: null };
   duel = joinDuel(code, {
     onOpen() {
-      duel.send({ t: 'hello', team: teamId });
+      duel.send({ t: 'hello', team: teamId, profile: loadProfile() });
       joinScr.setStatus('Conectado. Esperando al anfitrión…');
     },
     onData: handleDuelData,

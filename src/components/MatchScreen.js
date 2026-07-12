@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Pantalla de partido: orquesta la tanda completa.
  * Los remates usan física real (core/physics): el jugador desliza desde el
  * balón hacia el arco — dirección = puntería, velocidad = potencia y la
@@ -138,7 +138,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   async function aimMyShot() {
     const { s, playerTeam, rivalTeam } = ctx;
     ctx.phase = 'shoot';
-    pitch.setKits({ shooterTeam: playerTeam, keeperTeam: rivalTeam });
+    pitch.setKits({ shooterTeam: playerTeam, keeperTeam: rivalTeam, shooterProfile: ctx.profile });
     setMsg(`Penal ${s.kicks.P.length + 1} — ¡Tú pateas!`, 'Desliza hacia el arco · curva el gesto para darle efecto');
     updateBoard();
 
@@ -237,7 +237,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   async function cpuKick() {
     const { s, playerTeam, rivalTeam, diff } = ctx;
     ctx.phase = 'save';
-    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam });
+    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
     setMsg(`Penal ${s.kicks.C.length + 1} — ¡Te toca atajar!`, 'Toca la casilla hacia donde volarás');
     updateBoard();
 
@@ -263,7 +263,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   async function myCornerKick() {
     const { s, playerTeam, rivalTeam } = ctx;
     ctx.phase = 'shoot';
-    pitch.setKits({ shooterTeam: playerTeam, keeperTeam: rivalTeam });
+    pitch.setKits({ shooterTeam: playerTeam, keeperTeam: rivalTeam, shooterProfile: ctx.profile });
     setMsg(`Córner ${s.kicks.P.length + 1} — ¡Remata de cabeza!`, 'Toca justo cuando el centro pase por donde quieres');
     updateBoard();
 
@@ -297,7 +297,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   async function theirCornerKick() {
     const { s, playerTeam, rivalTeam, diff } = ctx;
     ctx.phase = 'save';
-    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam });
+    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
     setMsg(`Córner ${s.kicks.C.length + 1} — ¡Ataja el cabezazo!`, 'Toca la casilla hacia donde volarás');
     updateBoard();
 
@@ -327,7 +327,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   async function myFreeKick() {
     const { s, playerTeam, rivalTeam } = ctx;
     ctx.phase = 'shoot';
-    pitch.setKits({ shooterTeam: playerTeam, keeperTeam: rivalTeam });
+    pitch.setKits({ shooterTeam: playerTeam, keeperTeam: rivalTeam, shooterProfile: ctx.profile });
     setMsg(`Tiro libre ${s.kicks.P.length + 1} — ¡Supera la barrera!`, 'Por arriba o con mucha curva: la barrera tapa el centro');
     updateBoard();
 
@@ -365,7 +365,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   async function theirFreeKick() {
     const { s, playerTeam, rivalTeam, diff } = ctx;
     ctx.phase = 'save';
-    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam });
+    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
     setMsg(`Tiro libre ${s.kicks.C.length + 1} — ¡Defiende!`, 'Toca la casilla hacia donde volarás');
     updateBoard();
 
@@ -429,7 +429,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   async function theirDuelKick() {
     const { s, playerTeam, rivalTeam } = ctx;
     ctx.phase = 'save';
-    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam });
+    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
     setMsg(`Penal ${s.kicks.C.length + 1} — ¡Te toca atajar!`, 'Toca la casilla hacia donde volarás');
     updateBoard();
 
@@ -452,11 +452,11 @@ export function createMatchScreen({ onFinish, onExit }) {
 
   /* ---------- Orquestación ---------- */
 
-  async function start({ playerTeam, rivalTeam, diff, stageLabel = null, duel = null, isHost = true, mode = 'penales' }) {
+  async function start({ playerTeam, rivalTeam, diff, stageLabel = null, duel = null, isHost = true, mode = 'penales', profile = null, rivalProfile = null }) {
     aborted = false;
     // Viento del partido (los duelos online se juegan "bajo techo": sin viento)
     const wind = duel ? 0 : pick([-1, -0.5, 0, 0, 0, 0.5, 1]);
-    ctx = { s: createShootout(), playerTeam, rivalTeam, diff, phase: 'shoot', duel, isHost, mode, wind };
+    ctx = { s: createShootout(), playerTeam, rivalTeam, diff, phase: 'shoot', duel, isHost, mode, wind, profile, rivalProfile };
     stageEl.hidden = !stageLabel;
     stageEl.textContent = stageLabel ?? '';
     windEl.hidden = wind === 0;
