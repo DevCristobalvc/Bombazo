@@ -5,12 +5,13 @@
  */
 import { fromHTML } from '../utils/dom.js';
 import { flagSVG } from '../art/flags.js';
+import { icon } from '../art/icons.js';
 import { pick } from '../utils/random.js';
 import { sfx } from '../audio/sfx.js';
 import './EndScreen.css';
 
 const WIN_LINES = [
-  '¡Qué tanda te mandaste! 🎉',
+  '¡Qué tanda te mandaste!',
   'La hinchada se queda contigo.',
   'Sangre fría desde los once pasos.',
 ];
@@ -47,14 +48,15 @@ export function createEndScreen({ onAction }) {
 
   function show(result, opts = {}) {
     const { won, playerTeam, rivalTeam } = result;
-    const emoji = opts.emoji ?? (won ? '🏆' : '😭');
+    const iconName = opts.icon ?? (won ? 'trophy' : 'sadball');
+    const iconTone = iconName === 'trophy' ? 'gold' : iconName === 'ticket' ? 'gold' : 'muted';
     const title = opts.title ?? (won ? '¡CAMPEÓN!' : 'ELIMINADO…');
     const sub = opts.sub ?? (won ? pick(WIN_LINES) : pick(LOSE_LINES));
     const primary = opts.primary ?? { act: 'rematch', label: 'REVANCHA' };
     const celebrate = opts.confetti ?? false;
 
     card.innerHTML = `
-      <div class="end-emoji">${emoji}</div>
+      <div class="end-icon ${iconTone}">${icon(iconName, 72)}</div>
       <h2 class="end-title">${title}</h2>
       <div class="end-score">
         ${flagSVG(playerTeam.id, 34, 22)}

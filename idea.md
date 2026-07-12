@@ -19,17 +19,15 @@ Principios de diseño:
 
 ---
 
-## 2. Equipos (v1)
+## 2. Equipos
 
-Los 5 clasificados a octavos disponibles en la primera versión. **Colombia es el equipo por defecto** del jugador.
+**Los 16 clasificados reales a octavos de final del Mundial 2026** (ronda jugada del 4 al 7 de julio de 2026, fuente: Al Jazeera / FIFA). **Colombia es el equipo por defecto** del jugador.
 
-| Equipo | Código | Camiseta | Acento | Pantaloneta | Medias | Bandera |
-|---|---|---|---|---|---|---|
-| 🇨🇴 Colombia (default) | COL | Amarillo `#FFD100` | Azul `#003893` | Azul `#003893` | Rojo `#C8102E` | Tricolor horizontal (amarillo 50%, azul 25%, rojo 25%) |
-| 🇪🇸 España | ESP | Rojo `#C8102E` | Amarillo `#FFC72C` | Azul oscuro `#1A2A6C` | Rojo | Rojo-amarillo-rojo horizontal |
-| 🇵🇹 Portugal | POR | Vino `#B00A24` | Verde `#046A38` | Verde | Vino | Verde 2/5 + rojo 3/5 vertical, esfera amarilla |
-| 🇫🇷 Francia | FRA | Azul `#0055A4` | Blanco `#FFFFFF` | Blanco | Rojo `#EF4135` | Azul-blanco-rojo vertical |
-| 🇨🇭 Suiza | SUI | Rojo `#DA291C` | Blanco | Blanco | Rojo | Rojo con cruz blanca |
+Colombia · Argentina · Brasil · México · USA · Canadá · Paraguay · España · Portugal · Francia · Inglaterra · Bélgica · Suiza · Noruega · Marruecos · Egipto
+
+Los cruces reales de octavos fueron: Canadá–Marruecos, Paraguay–Francia, Brasil–Noruega, México–Inglaterra, Portugal–España, USA–Bélgica, Argentina–Egipto y Suiza–Colombia.
+
+Cada equipo define en `src/data/teams.js`: kit de campo (camiseta, acento, pantaloneta, medias), kit de arquero contrastante, tono de piel y pelo del personaje. Su bandera simplificada vive en `src/art/flags.js`.
 
 Reglas de selección:
 
@@ -239,7 +237,10 @@ Decisiones:
 - [x] Vibración háptica en móvil (gol, atajada, gol en contra)
 - [x] Barra de potencia al patear (timing skill): verde = remate perfecto y más rápido, rojo = riesgo de desvío o tiro afuera
 - [x] Identidad de marca: logo SVG (balón como "O" + explosión), favicon/íconos propios (192/512/apple-touch), manifest y og:image para compartir
-- [ ] Estadísticas de sesión (efectividad, zona favorita) y racha de victorias en `localStorage`
+- [x] Cero emojis: todos reemplazados por íconos SVG propios (rayo, trofeo, llamas de dificultad, altavoz, ticket, balón triste)
+- [x] Los 16 equipos reales de octavos del Mundial 2026 habilitados, con kits, arqueros y banderas propias
+- [x] Estadísticas persistentes: victorias, derrotas, racha y récord en `localStorage`, visibles en el menú
+- [ ] Estadísticas avanzadas (efectividad por zona, zona favorita)
 - [ ] PWA completa: service worker para jugar offline (manifest ya listo)
 
 ### 🌌 Fase 3 — El cielo es el límite (backlog de ideas)

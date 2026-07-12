@@ -143,6 +143,29 @@ button {
   display: block;
 }
 
+.chip svg.icon {
+  border-radius: 0;
+  color: var(--c-accent);
+}
+
+.flames {
+  display: inline-flex;
+  gap: 1px;
+  color: var(--c-accent-2);
+}
+
+.flames svg.icon {
+  color: inherit;
+}
+
+/* Selección de equipos: dos filas que scrollean juntas en horizontal */
+.chips.two-rows {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, auto);
+  justify-content: start;
+}
+
 /* --- Botones --- */
 .btn-big {
   width: 100%;

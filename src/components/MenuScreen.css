@@ -37,6 +37,24 @@
   letter-spacing: 1px;
 }
 
+.vs-line .vs {
+  font-style: normal;
+  background: var(--c-accent);
+  color: #3a2600;
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 11px;
+  vertical-align: 1px;
+}
+
+.stats-line {
+  text-align: center;
+  color: var(--c-muted);
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 15px;
+}
+
 /* Zona de scroll interna de emergencia: si la pantalla es muy baja,
    solo scrollea el panel, nunca la página. */
 .menu-screen .panel {

@@ -13,6 +13,7 @@ import { createPowerBar } from './PowerBar.js';
 import { fromHTML, sleep } from '../utils/dom.js';
 import { pick } from '../utils/random.js';
 import { sfx, isMuted, setMuted } from '../audio/sfx.js';
+import { icon } from '../art/icons.js';
 import './MatchScreen.css';
 
 /** Vibración háptica donde exista (móvil). */
@@ -23,12 +24,12 @@ const buzz = (pattern) => {
 };
 
 const COPY = {
-  goalPlayer: ['¡GOOOOL!', '¡BOMBAZO! 💥', '¡GOLAZO! 🔥', '¡LA CLAVÓ!'],
-  savedShot: ['¡ATAJADO! 🧤', '¡TE LA SACÓ!', '¡VOLÓ EL ARQUERO!'],
-  playerMiss: ['¡AFUERA! 😱', '¡A LAS NUBES!', '¡POR ENCIMA DEL ARCO!'],
-  playerSave: ['¡ATAJADÓN! 🧤', '¡QUÉ MANOS!', '¡MONUMENTAL!'],
-  cpuGoal: ['GOL DEL RIVAL…', 'LA MANDÓ ADENTRO 😖', 'NADA QUE HACER'],
-  cpuMiss: ['¡AFUERA! 🎉', '¡A LAS NUBES!', '¡LA TIRÓ A LA TRIBUNA!'],
+  goalPlayer: ['¡GOOOOL!', '¡BOMBAZO!', '¡GOLAZO!', '¡LA CLAVÓ!'],
+  savedShot: ['¡ATAJADO!', '¡TE LA SACÓ!', '¡VOLÓ EL ARQUERO!'],
+  playerMiss: ['¡AFUERA!', '¡A LAS NUBES!', '¡POR ENCIMA DEL ARCO!'],
+  playerSave: ['¡ATAJADÓN!', '¡QUÉ MANOS!', '¡MONUMENTAL!'],
+  cpuGoal: ['GOL DEL RIVAL…', 'LA MANDÓ ADENTRO', 'NADA QUE HACER'],
+  cpuMiss: ['¡AFUERA!', '¡A LAS NUBES!', '¡LA TIRÓ A LA TRIBUNA!'],
 };
 
 export function createMatchScreen({ onFinish, onExit }) {
@@ -60,7 +61,7 @@ export function createMatchScreen({ onFinish, onExit }) {
 
   const soundBtn = el.querySelector('[data-ref="sound"]');
   const renderSoundBtn = () => {
-    soundBtn.textContent = isMuted() ? '🔇' : '🔊';
+    soundBtn.innerHTML = icon(isMuted() ? 'soundOff' : 'soundOn', 16);
   };
   soundBtn.addEventListener('click', () => {
     setMuted(!isMuted());
@@ -219,7 +220,7 @@ export function createMatchScreen({ onFinish, onExit }) {
       if (isSuddenDeath(ctx.s) && !suddenAnnounced) {
         suddenAnnounced = true;
         sfx.sudden();
-        await announcer.say('¡MUERTE SÚBITA! ⚡', 'info', 1200);
+        await announcer.say('¡MUERTE SÚBITA!', 'info', 1200);
       }
     }
 

@@ -1,17 +1,19 @@
 /**
- * Pantalla de menú: héroe con la camiseta viva, selección de equipo,
- * rival y dificultad. Emite onPlay({ teamId, rivalId, diff }).
+ * Pantalla de menú: héroe con la camiseta viva, modo de juego, selección
+ * de equipo, rival y dificultad. Emite onPlay({ mode, teamId, rivalId, diff }).
  */
 import { TEAMS, DIFFICULTIES, teamById } from '../data/teams.js';
 import { heroSVG } from '../art/players.js';
 import { flagSVG } from '../art/flags.js';
 import { logoSVG } from '../art/logo.js';
+import { icon, flames } from '../art/icons.js';
+import { loadStats } from '../core/stats.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
 const MODES = [
-  { id: 'rapido', label: 'Partido rápido', emoji: '⚡' },
-  { id: 'torneo', label: 'Torneo', emoji: '🏆' },
+  { id: 'rapido', label: 'Partido rápido', icon: 'bolt' },
+  { id: 'torneo', label: 'Torneo', icon: 'trophy' },
 ];
 
 export function createMenuScreen({ onPlay }) {
@@ -23,14 +25,15 @@ export function createMenuScreen({ onPlay }) {
       <p class="tagline">Tanda de penales · Mundial 2026</p>
       <div class="hero" data-ref="hero"></div>
       <p class="vs-line" data-ref="vs"></p>
+      <p class="stats-line" data-ref="stats"></p>
       <div class="panel">
         <h2 class="panel-title">Modo de juego</h2>
         <div class="chips" data-ref="modes"></div>
         <h2 class="panel-title">Tu selección</h2>
-        <div class="chips" data-ref="teams"></div>
+        <div class="chips two-rows" data-ref="teams"></div>
         <div data-ref="rivalBlock">
           <h2 class="panel-title">Rival</h2>
-          <div class="chips" data-ref="rivals"></div>
+          <div class="chips two-rows" data-ref="rivals"></div>
         </div>
         <h2 class="panel-title">Dificultad</h2>
         <div class="chips" data-ref="diffs"></div>
@@ -50,15 +53,23 @@ export function createMenuScreen({ onPlay }) {
     </button>`;
   }
 
+  function renderStats() {
+    const s = loadStats();
+    refs.stats.textContent =
+      s.wins + s.losses > 0
+        ? `Victorias ${s.wins} · Derrotas ${s.losses} · Racha ${s.streak} · Récord ${s.best}`
+        : '';
+  }
+
   function render() {
     refs.modes.innerHTML = MODES.map(
-      (m) => `<button class="chip ${m.id === state.mode ? 'is-selected' : ''}" data-id="${m.id}">${m.emoji} ${m.label}</button>`
+      (m) => `<button class="chip ${m.id === state.mode ? 'is-selected' : ''}" data-id="${m.id}">${icon(m.icon, 15)} ${m.label}</button>`
     ).join('');
     refs.teams.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.teamId, false)).join('');
     refs.rivals.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.rivalId, t.id === state.teamId)).join('');
     refs.rivalBlock.style.display = state.mode === 'torneo' ? 'none' : '';
     refs.diffs.innerHTML = DIFFICULTIES.map(
-      (d) => `<button class="chip ${d.id === state.diff ? 'is-selected' : ''}" data-id="${d.id}">${d.emoji} ${d.label}</button>`
+      (d) => `<button class="chip ${d.id === state.diff ? 'is-selected' : ''}" data-id="${d.id}">${flames(d.level)} ${d.label}</button>`
     ).join('');
     refs.hero.innerHTML = heroSVG(teamById(state.teamId));
     const player = teamById(state.teamId);
@@ -66,8 +77,9 @@ export function createMenuScreen({ onPlay }) {
     const diff = DIFFICULTIES.find((d) => d.id === state.diff);
     refs.vs.innerHTML =
       state.mode === 'torneo'
-        ? `${player.short} · 🏆 4 rondas al título · ${diff.label} ${diff.emoji}`
-        : `${player.short} 🆚 ${rival.short} · ${diff.label} ${diff.emoji}`;
+        ? `${player.short} · Torneo: 4 rondas al título · ${diff.label}`
+        : `${player.short} <i class="vs">VS</i> ${rival.short} · ${diff.label}`;
+    renderStats();
   }
 
   refs.modes.addEventListener('click', (e) => {
@@ -104,5 +116,5 @@ export function createMenuScreen({ onPlay }) {
   refs.play.addEventListener('click', () => onPlay({ ...state }));
 
   render();
-  return { el };
+  return { el, refresh: renderStats };
 }

@@ -6,6 +6,7 @@ import './styles/tokens.css';
 import './styles/base.css';
 import { teamById } from './data/teams.js';
 import { createTournament, currentRival, currentStage, advance, isChampion, STAGES } from './core/tournament.js';
+import { recordResult } from './core/stats.js';
 import { createMenuScreen } from './components/MenuScreen.js';
 import { createMatchScreen } from './components/MatchScreen.js';
 import { createEndScreen } from './components/EndScreen.js';
@@ -47,6 +48,7 @@ const menu = createMenuScreen({
 
 const match = createMatchScreen({
   onFinish(result) {
+    recordResult(result.won);
     show(end.el);
     if (session.mode !== 'torneo') {
       end.show(result, {
@@ -59,7 +61,7 @@ const match = createMatchScreen({
     const t = session.tournament;
     if (!result.won) {
       end.show(result, {
-        emoji: '😭',
+        icon: 'sadball',
         title: 'ELIMINADO',
         sub: `El sueño terminó en ${currentStage(t)}. El torneo no perdona.`,
         primary: { act: 'new-tournament', label: 'NUEVO TORNEO' },
@@ -70,15 +72,15 @@ const match = createMatchScreen({
     advance(t);
     if (isChampion(t)) {
       end.show(result, {
-        emoji: '🏆',
+        icon: 'trophy',
         title: '¡CAMPEÓN DEL TORNEO!',
-        sub: 'Cuatro rondas, cero excusas. ¡Bombazo mundial! 🌎',
+        sub: 'Cuatro rondas, cero excusas. Bombazo mundial.',
         confetti: true,
         primary: { act: 'new-tournament', label: 'NUEVO TORNEO' },
       });
     } else {
       end.show(result, {
-        emoji: '🎟️',
+        icon: 'ticket',
         title: '¡CLASIFICADO!',
         sub: `Superaste ${STAGES[t.stage - 1]}. Ahora: ${currentStage(t)} contra ${teamById(currentRival(t)).name}.`,
         primary: { act: 'next', label: 'SIGUIENTE PARTIDO' },
@@ -86,6 +88,7 @@ const match = createMatchScreen({
     }
   },
   onExit() {
+    menu.refresh();
     show(menu.el);
   },
 });
@@ -93,6 +96,7 @@ const match = createMatchScreen({
 const end = createEndScreen({
   onAction(act) {
     if (act === 'menu') {
+      menu.refresh();
       show(menu.el);
     } else if (act === 'rematch') {
       startQuickMatch();

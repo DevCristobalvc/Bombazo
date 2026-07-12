@@ -1,6 +1,7 @@
 /**
- * Equipos de la v1 (octavos del Mundial 2026).
- * Agregar una selección nueva = agregar una entrada aquí + su bandera en art/flags.js.
+ * Los 16 equipos que llegaron a octavos de final del Mundial 2026 (datos
+ * reales, ronda jugada del 4 al 7 de julio de 2026).
+ * Agregar una selección = agregar una entrada aquí + su bandera en art/flags.js.
  * `kit` viste al jugador de campo; `gk` viste al arquero (siempre contrastante).
  */
 export const TEAMS = [
@@ -12,6 +13,60 @@ export const TEAMS = [
     gk: { shirt: '#00B894', accent: '#0B3D33' },
     skin: '#C68642',
     hair: '#231208',
+  },
+  {
+    id: 'arg',
+    name: 'Argentina',
+    short: 'ARG',
+    kit: { shirt: '#75AADB', accent: '#FFFFFF', shorts: '#1B1B1B', socks: '#FFFFFF' },
+    gk: { shirt: '#0EAD69', accent: '#05402A' },
+    skin: '#E8B98A',
+    hair: '#2E1A0C',
+  },
+  {
+    id: 'bra',
+    name: 'Brasil',
+    short: 'BRA',
+    kit: { shirt: '#FFDF00', accent: '#009C3B', shorts: '#002776', socks: '#FFFFFF' },
+    gk: { shirt: '#9B5DE5', accent: '#2E1652' },
+    skin: '#A9714B',
+    hair: '#160D05',
+  },
+  {
+    id: 'mex',
+    name: 'México',
+    short: 'MEX',
+    kit: { shirt: '#006847', accent: '#FFFFFF', shorts: '#FFFFFF', socks: '#CE1126' },
+    gk: { shirt: '#F15BB5', accent: '#511238' },
+    skin: '#B57C50',
+    hair: '#1B0E04',
+  },
+  {
+    id: 'usa',
+    name: 'USA',
+    short: 'USA',
+    kit: { shirt: '#FFFFFF', accent: '#BF0A30', shorts: '#002868', socks: '#FFFFFF' },
+    gk: { shirt: '#00BBF9', accent: '#03384A' },
+    skin: '#E0AC69',
+    hair: '#4A2E14',
+  },
+  {
+    id: 'can',
+    name: 'Canadá',
+    short: 'CAN',
+    kit: { shirt: '#D80621', accent: '#FFFFFF', shorts: '#D80621', socks: '#D80621' },
+    gk: { shirt: '#FEE440', accent: '#4A3F02' },
+    skin: '#F1C27D',
+    hair: '#5C3A16',
+  },
+  {
+    id: 'par',
+    name: 'Paraguay',
+    short: 'PAR',
+    kit: { shirt: '#D52B1E', accent: '#FFFFFF', shorts: '#0038A8', socks: '#0038A8' },
+    gk: { shirt: '#FF9F1C', accent: '#4D2E05' },
+    skin: '#C68642',
+    hair: '#1E1105',
   },
   {
     id: 'esp',
@@ -41,6 +96,24 @@ export const TEAMS = [
     hair: '#120A02',
   },
   {
+    id: 'eng',
+    name: 'Inglaterra',
+    short: 'ENG',
+    kit: { shirt: '#FFFFFF', accent: '#1B2A4A', shorts: '#1B2A4A', socks: '#FFFFFF' },
+    gk: { shirt: '#EF476F', accent: '#4E0F1F' },
+    skin: '#F1C27D',
+    hair: '#8B5A2B',
+  },
+  {
+    id: 'bel',
+    name: 'Bélgica',
+    short: 'BEL',
+    kit: { shirt: '#EF3340', accent: '#FDDA24', shorts: '#1A1A1A', socks: '#EF3340' },
+    gk: { shirt: '#06D6A0', accent: '#023B2C' },
+    skin: '#E8B98A',
+    hair: '#3E2A15',
+  },
+  {
     id: 'sui',
     name: 'Suiza',
     short: 'SUI',
@@ -49,12 +122,39 @@ export const TEAMS = [
     skin: '#F1C27D',
     hair: '#6B3A1F',
   },
+  {
+    id: 'nor',
+    name: 'Noruega',
+    short: 'NOR',
+    kit: { shirt: '#C8102E', accent: '#FFFFFF', shorts: '#00205B', socks: '#C8102E' },
+    gk: { shirt: '#63C132', accent: '#1E4210' },
+    skin: '#F8D5B0',
+    hair: '#C9A227',
+  },
+  {
+    id: 'mar',
+    name: 'Marruecos',
+    short: 'MAR',
+    kit: { shirt: '#C1272D', accent: '#006233', shorts: '#006233', socks: '#C1272D' },
+    gk: { shirt: '#FFD166', accent: '#4D3A05' },
+    skin: '#B57C50',
+    hair: '#160D05',
+  },
+  {
+    id: 'egy',
+    name: 'Egipto',
+    short: 'EGY',
+    kit: { shirt: '#CE1126', accent: '#FFFFFF', shorts: '#1A1A1A', socks: '#CE1126' },
+    gk: { shirt: '#4CC9F0', accent: '#0B3D4E' },
+    skin: '#C68642',
+    hair: '#160D05',
+  },
 ];
 
 export const teamById = (id) => TEAMS.find((t) => t.id === id);
 
 export const DIFFICULTIES = [
-  { id: 'facil', label: 'Fácil', emoji: '😅' },
-  { id: 'medio', label: 'Medio', emoji: '😼' },
-  { id: 'imposible', label: 'Imposible', emoji: '💀' },
+  { id: 'facil', label: 'Fácil', level: 1 },
+  { id: 'medio', label: 'Medio', level: 2 },
+  { id: 'imposible', label: 'Imposible', level: 3 },
 ];

@@ -29,8 +29,10 @@
   border-radius: 50%;
   border: 2px solid var(--c-line);
   background: var(--c-panel);
-  font-size: 14px;
   cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: var(--c-text);
 }
 
 .stage-chip {
