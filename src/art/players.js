@@ -7,11 +7,28 @@
  */
 import { ballArt } from './ball.js';
 
+/** Peinados — vista frontal (héroe del menú), cabeza en (110, 70) r=30. */
+const HAIR_FRONT = {
+  clasico: (c) => `<path d="M78 62 Q82 28 110 28 Q138 28 142 62 Q126 42 110 46 Q94 42 78 62 Z" fill="${c}"/>`,
+  rapado: (c) => `<path d="M82 54 A30 30 0 0 1 138 54 Q124 44 110 46 Q96 44 82 54 Z" fill="${c}"/>`,
+  afro: (c) => `<circle cx="110" cy="46" r="26" fill="${c}"/><circle cx="89" cy="57" r="12" fill="${c}"/><circle cx="131" cy="57" r="12" fill="${c}"/>`,
+  punk: (c) => `<path d="M82 56 A30 30 0 0 1 138 56 Q124 46 110 48 Q96 46 82 56 Z" fill="${c}"/><path d="M100 46 L104 24 L108 43 L112 22 L116 43 L120 26 L123 47 Q110 41 100 46 Z" fill="${c}"/>`,
+};
+
+/** Peinados — vista de espaldas (pateador en cancha), cabeza en (0, -164) r=17. */
+const HAIR_BACK = {
+  clasico: (c) => `<path d="M-17 -164 a17 17 0 1 1 34 0 q0 9 -17 9 q-17 0 -17 -9 z" fill="${c}"/>`,
+  rapado: (c) => `<path d="M-17 -164 a17 17 0 1 1 34 0 q0 3 -17 3 q-17 0 -17 -3 z" fill="${c}"/>`,
+  afro: (c) => `<circle cx="0" cy="-166" r="21" fill="${c}"/>`,
+  punk: (c) => `<path d="M-17 -164 a17 17 0 1 1 34 0 q0 3 -17 3 q-17 0 -17 -3 z" fill="${c}"/><path d="M-6 -177 L-3 -193 L0 -178 L3 -194 L6 -177 Z" fill="${c}"/>`,
+};
+
 export function heroSVG(team, profile = {}) {
   const { shirt, accent, shorts, socks } = team.kit;
   const skin = profile.skin ?? team.skin;
   const hair = profile.hair ?? team.hair;
   const number = profile.number ?? 10;
+  const hairFront = (HAIR_FRONT[profile.style] ?? HAIR_FRONT.clasico)(hair);
   return `
   <svg viewBox="0 0 220 300" role="img" aria-label="Tu jugador con la camiseta de ${team.name}">
     <defs>
@@ -49,7 +66,7 @@ export function heroSVG(team, profile = {}) {
     <text x="110" y="160" text-anchor="middle" font-size="34" font-weight="900" fill="${accent}" font-family="Nunito, sans-serif">${number}</text>
     <!-- cabeza -->
     <circle cx="110" cy="70" r="30" fill="${skin}" stroke="rgba(8,10,20,.2)" stroke-width="1.5"/>
-    <path d="M78 62 Q82 28 110 28 Q138 28 142 62 Q126 42 110 46 Q94 42 78 62 Z" fill="${hair}"/>
+    ${hairFront}
     <path d="M92 60 Q95 57 102 58" stroke="#1c1f26" stroke-width="2.4" fill="none" stroke-linecap="round"/>
     <path d="M118 58 Q125 57 128 60" stroke="#1c1f26" stroke-width="2.4" fill="none" stroke-linecap="round"/>
     <circle cx="99" cy="70" r="3.4" fill="#1c1f26"/>
@@ -82,9 +99,12 @@ export function shooterSVG() {
     <path d="M28 -148 L44 -118 L31 -111 L23 -132 Z" fill="var(--sh-accent)"/>
     <circle cx="-38" cy="-107" r="6" fill="var(--sh-skin)"/>
     <circle cx="38" cy="-107" r="6" fill="var(--sh-skin)"/>
-    <text class="sh-number" x="0" y="-98" text-anchor="middle" font-size="36" font-weight="900" fill="var(--sh-accent)" font-family="Nunito, sans-serif">10</text>
+    <text class="sh-name" x="0" y="-129" text-anchor="middle" font-size="10.5" font-weight="900" fill="var(--sh-accent)" letter-spacing="1" font-family="Nunito, sans-serif"></text>
+    <text class="sh-number" x="0" y="-96" text-anchor="middle" font-size="34" font-weight="900" fill="var(--sh-accent)" font-family="Nunito, sans-serif">10</text>
     <circle cx="0" cy="-164" r="17" fill="var(--sh-skin)"/>
-    <path d="M-17 -164 a17 17 0 1 1 34 0 q0 9 -17 9 q-17 0 -17 -9 z" fill="var(--sh-hair)"/>
+    ${Object.entries(HAIR_BACK)
+      .map(([id, fn]) => `<g class="hairv hairv-${id}">${fn('var(--sh-hair)')}</g>`)
+      .join('')}
     <path d="M-28 -148 L28 -148 L24 -76 L-24 -76 Z" fill="url(#g-shade)"/>
     <circle cx="0" cy="-164" r="17" fill="url(#g-shade)"/>
   </g>`;

@@ -8,7 +8,7 @@ import { flagSVG } from '../art/flags.js';
 import { logoSVG } from '../art/logo.js';
 import { icon, flames } from '../art/icons.js';
 import { loadStats } from '../core/stats.js';
-import { loadProfile, saveProfile, SKINS, HAIRS, NUMBERS } from '../core/profile.js';
+import { loadProfile, saveProfile, SKINS, HAIRS, NUMBERS, HAIRSTYLES } from '../core/profile.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
@@ -62,7 +62,9 @@ export function createMenuScreen({ onPlay }) {
           <div class="dot-picker" data-ref="skins" title="Tono de piel"></div>
           <div class="dot-picker" data-ref="hairs" title="Color de pelo"></div>
         </div>
+        <div class="chips" data-ref="styles"></div>
         <div class="chips" data-ref="numbers"></div>
+        <input class="name-input" data-ref="name" maxlength="10" placeholder="TU NOMBRE EN LA CAMISETA" autocomplete="off" spellcheck="false">
         <button class="btn-big" data-ref="play">¡A LA CANCHA!</button>
         <p class="howto"><b>Desliza</b> desde el balón hacia el arco para rematar — curva el gesto para darle efecto. Para <b>atajar</b>, toca la casilla. Empate = muerte súbita.</p>
       </div>
@@ -112,6 +114,10 @@ export function createMenuScreen({ onPlay }) {
     refs.numbers.innerHTML = NUMBERS.map(
       (n) => `<button class="chip chip-num ${p.number === n ? 'is-selected' : ''}" data-num="${n}">${n}</button>`
     ).join('');
+    refs.styles.innerHTML = HAIRSTYLES.map(
+      (h) => `<button class="chip ${p.style === h.id ? 'is-selected' : ''}" data-style="${h.id}">${h.label}</button>`
+    ).join('');
+    if (document.activeElement !== refs.name) refs.name.value = p.name ?? '';
   }
 
   function render() {
@@ -149,20 +155,31 @@ export function createMenuScreen({ onPlay }) {
     renderStats();
   }
 
-  /** Personalización: piel, pelo y dorsal (repetir un color lo devuelve al de la selección). */
+  /** Personalización: piel, pelo, peinado y dorsal (repetir un color lo devuelve al de la selección). */
   el.addEventListener('click', (e) => {
     const swatch = e.target.closest('.dot-swatch');
     const num = e.target.closest('.chip-num');
-    if (!swatch && !num) return;
+    const style = e.target.closest('[data-style]');
+    if (!swatch && !num && !style) return;
     const p = loadProfile();
     if (swatch) {
       const { kind, value } = swatch.dataset;
       p[kind] = p[kind] === value ? null : value;
-    } else {
+    } else if (num) {
       p.number = Number(num.dataset.num);
+    } else {
+      p.style = style.dataset.style;
     }
     saveProfile(p);
     render();
+  });
+
+  /** Nombre en la camiseta: guarda sin re-renderizar (no pierde el foco). */
+  refs.name.addEventListener('input', () => {
+    const p = loadProfile();
+    p.name = refs.name.value.trim();
+    saveProfile(p);
+    refs.hero.innerHTML = heroSVG(teamById(state.teamId), p);
   });
 
   refs.modes.addEventListener('click', (e) => {

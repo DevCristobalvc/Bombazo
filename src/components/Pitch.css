@@ -60,6 +60,19 @@
   cursor: pointer;
 }
 
+/* Peinados del pateador: solo se muestra el del perfil (default clásico) */
+.hairv {
+  display: none;
+}
+
+svg[data-sh-style='clasico'] .hairv-clasico,
+svg:not([data-sh-style]) .hairv-clasico,
+svg[data-sh-style='rapado'] .hairv-rapado,
+svg[data-sh-style='afro'] .hairv-afro,
+svg[data-sh-style='punk'] .hairv-punk {
+  display: block;
+}
+
 /* Barrera de tiros libres: oculta salvo en ese modo; salta con el remate */
 #wall {
   display: none;

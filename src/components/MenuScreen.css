@@ -153,6 +153,34 @@
   font-variant-numeric: tabular-nums;
 }
 
+.name-input {
+  width: 100%;
+  margin-top: 8px;
+  padding: 11px 14px;
+  border-radius: var(--radius-m);
+  border: 2px solid var(--c-line);
+  background: #0c1836;
+  color: var(--c-text);
+  font-family: var(--font-ui);
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.name-input::placeholder {
+  color: var(--c-muted);
+  opacity: 0.6;
+  letter-spacing: 1px;
+}
+
+.name-input:focus {
+  outline: none;
+  border-color: var(--c-accent);
+}
+
 @media (max-height: 720px) {
   .howto {
     display: none;

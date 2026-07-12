@@ -208,6 +208,9 @@ export function createPitch() {
     const shHair = shooterProfile?.hair ?? shooterTeam.hair;
     const numberEl = svg.querySelector('#shooter .sh-number');
     if (numberEl) numberEl.textContent = shooterProfile?.number ?? 10;
+    const nameEl = svg.querySelector('#shooter .sh-name');
+    if (nameEl) nameEl.textContent = (shooterProfile?.name ?? '').toUpperCase();
+    svg.dataset.shStyle = shooterProfile?.style ?? 'clasico';
     // La barrera defiende: viste el uniforme de campo del equipo del arquero
     s.setProperty('--wl-shirt', keeperTeam.kit.shirt);
     s.setProperty('--wl-shorts', keeperTeam.kit.shorts);

@@ -251,7 +251,7 @@ Decisiones:
 - [x] Llave visual del torneo en la pantalla final (ronda superada / siguiente / pendientes) y revancha de duelo 1 vs 1 sobre la misma conexión
 
 ### 🌌 Fase 3 — El cielo es el límite (backlog de ideas)
-- [x] **Customización del personaje (v1)**: tono de piel (6), color de pelo (6) y dorsal (7/9/10/11/23/99) desde el menú, persistido en localStorage y aplicado al héroe y al pateador en todos los modos; en los duelos 1 vs 1 el rival ve tu personaje (el perfil viaja en el hello). Pendiente: nombre en la camiseta y peinados.
+- [x] **Customización del personaje (v2)**: tono de piel (6), color de pelo (6), **peinado** (clásico/rapado/afro/punk), dorsal (7/9/10/11/23/99) y **nombre en la camiseta** (en la espalda, encima del dorsal, como una camiseta real). Persistido en localStorage, aplicado al héroe y al pateador en todos los modos; en los duelos 1 vs 1 el rival ve tu personaje completo.
 - [x] **Modo torneo (v1)**: camino al título de 4 rondas eliminatorias contra las otras selecciones, con rótulo de ronda dorado
 - [x] **Modo torneo (v2)**: llave real — arrancas contra tu rival verdadero de octavos del Mundial 2026 (Colombia vs Suiza, Francia vs Paraguay…), los demás cruces se simulan al avanzar y tu próximo rival emerge del bracket; las rondas futuras aparecen "Por definir". Test puro en `scripts/tournament-check.mjs`.
 - [ ] Más selecciones (los 16 de octavos completos) y kits alternos
