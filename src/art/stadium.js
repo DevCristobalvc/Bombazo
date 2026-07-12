@@ -67,10 +67,13 @@ export function sceneSVG() {
     <circle cx="30" cy="0" r="70" fill="#ffffff" opacity=".05"/>
     <circle cx="330" cy="0" r="70" fill="#ffffff" opacity=".05"/>
     <circle cx="180" cy="-20" r="90" fill="#ffffff" opacity=".03"/>
-    <g fill="#fffbe0" opacity=".9">
-      <circle cx="60" cy="30" r="1.2"/><circle cx="120" cy="14" r="1.4"/><circle cx="230" cy="22" r="1.2"/>
-      <circle cx="290" cy="38" r="1.4"/><circle cx="180" cy="44" r="1.1"/><circle cx="330" cy="70" r="1.2"/>
-      <circle cx="40" cy="80" r="1.1"/>
+    <g class="stars-a" fill="#fffbe0">
+      <circle cx="60" cy="30" r="1.2"/><circle cx="230" cy="22" r="1.2"/>
+      <circle cx="180" cy="44" r="1.1"/><circle cx="40" cy="80" r="1.1"/>
+    </g>
+    <g class="stars-b" fill="#fffbe0">
+      <circle cx="120" cy="14" r="1.4"/><circle cx="290" cy="38" r="1.4"/>
+      <circle cx="330" cy="70" r="1.2"/>
     </g>
 
     <!-- tribuna -->
@@ -80,7 +83,7 @@ export function sceneSVG() {
 
     <!-- valla publicitaria -->
     <rect x="0" y="332" width="360" height="40" fill="#0d3b66"/>
-    <text x="180" y="360" text-anchor="middle" font-family="'Luckiest Guy', 'Arial Black', sans-serif" font-size="22" fill="#ffd100" letter-spacing="4">★ BOMBAZO ★ BOMBAZO ★</text>
+    <text class="adtext" x="-30" y="360" font-family="'Luckiest Guy', 'Arial Black', sans-serif" font-size="22" fill="#ffd100" letter-spacing="4">★ BOMBAZO ★ BOMBAZO ★ BOMBAZO ★</text>
 
     <!-- césped -->
     <rect x="0" y="372" width="360" height="188" fill="url(#g-grass)"/>

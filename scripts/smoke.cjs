@@ -54,22 +54,24 @@ async function assertNoPageScroll(page, label, failures) {
   await page.screenshot({ path: path.join(OUT, '2-menu-espana.png') });
   await page.click('.chips [data-id="col"]');
 
-  // jugar
+  // jugar: primero la presentación VS, luego la fase de puntería
   await page.click('.btn-big');
-  await page.waitForTimeout(400);
-  await page.screenshot({ path: path.join(OUT, '3-partido-patear.png') });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: path.join(OUT, '3-vs-splash.png') });
+  await page.waitForSelector('#scene.aiming', { timeout: 15000 });
+  await page.screenshot({ path: path.join(OUT, '3a-partido-patear.png') });
   await assertNoPageScroll(page, 'partido 390x844', failures);
 
   // patear a la esquina superior izquierda: zona + barra de potencia
   await page.click('.zone[data-zone="0"]', { force: true });
-  await page.waitForTimeout(350);
+  await page.waitForSelector('.powerbar:not([hidden])', { timeout: 10000 });
   await page.screenshot({ path: path.join(OUT, '3b-powerbar.png') });
   await page.click('.powerbar', { force: true });
   await page.waitForTimeout(900);
   await page.screenshot({ path: path.join(OUT, '4-tiro-resultado.png') });
-  await page.waitForTimeout(1600);
 
   // fase de atajar
+  await page.waitForSelector('#scene.aiming', { timeout: 15000 });
   await page.screenshot({ path: path.join(OUT, '5-atajar.png') });
   await page.click('.zone[data-zone="8"]', { force: true });
   await page.waitForTimeout(700);
@@ -82,8 +84,10 @@ async function assertNoPageScroll(page, label, failures) {
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(OUT, '8-menu-torneo.png') });
   await page.click('.btn-big');
-  await page.waitForTimeout(500);
-  await page.screenshot({ path: path.join(OUT, '9-torneo-partido.png') });
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: path.join(OUT, '9-torneo-vs.png') });
+  await page.waitForSelector('#scene.aiming', { timeout: 15000 });
+  await page.screenshot({ path: path.join(OUT, '9a-torneo-partido.png') });
   await assertNoPageScroll(page, 'torneo 390x844', failures);
 
   // partido en teléfono pequeño

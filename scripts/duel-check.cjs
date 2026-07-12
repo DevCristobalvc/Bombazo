@@ -29,24 +29,28 @@ const URL = 'http://localhost:4173/';
   await guest.click('.join-screen .chips [data-id="esp"]');
   await guest.click('.join-screen .btn-big');
 
-  // Ambos deben entrar al partido
+  // Ambos deben entrar al partido (tras la presentación VS)
   await host.waitForSelector('.match-screen.active', { timeout: 25000 });
   await guest.waitForSelector('.match-screen.active', { timeout: 25000 });
   console.log('ambos en partido');
 
   // Penal 1: el anfitrión patea (zona 0 + barra), el invitado ataja (zona 8)
+  await host.waitForSelector('#scene.aiming', { timeout: 15000 });
   await host.click('.zone[data-zone="0"]', { force: true });
-  await host.waitForTimeout(300);
+  await guest.waitForSelector('#scene.aiming', { timeout: 15000 });
   await guest.click('.zone[data-zone="8"]', { force: true });
+  await host.waitForSelector('.powerbar:not([hidden])', { timeout: 10000 });
   await host.click('.powerbar', { force: true });
   await host.waitForTimeout(2500);
   await host.screenshot({ path: path.join(OUT, 'duel-3-host-shot.png') });
   await guest.screenshot({ path: path.join(OUT, 'duel-4-guest-save.png') });
 
   // Penal 2: el invitado patea, el anfitrión ataja
+  await guest.waitForSelector('#scene.aiming', { timeout: 15000 });
   await guest.click('.zone[data-zone="4"]', { force: true });
-  await guest.waitForTimeout(300);
+  await host.waitForSelector('#scene.aiming', { timeout: 15000 });
   await host.click('.zone[data-zone="4"]', { force: true });
+  await guest.waitForSelector('.powerbar:not([hidden])', { timeout: 10000 });
   await guest.click('.powerbar', { force: true });
   await guest.waitForTimeout(2500);
 

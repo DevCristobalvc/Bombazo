@@ -242,6 +242,10 @@ Decisiones:
 - [x] Estadísticas persistentes: victorias, derrotas, racha y récord en `localStorage`, visibles en el menú
 - [x] PWA completa: service worker (vite-plugin-pwa/Workbox) con precache de la app y cache de fuentes — instalable y jugable offline
 - [x] Ritmo más ágil: anuncios y pausas entre penales recortados (partida completa en ~90 segundos)
+- [x] Pantalla VS estilo arcade antes de cada partido: banderas que entran deslizándose, rótulo de ronda y silbatazo
+- [x] Escena viva: el arquero se balancea esperando, el pateador respira, las estrellas titilan y la valla publicitaria se desliza
+- [x] Impacto de gol: sacudida de pantalla y destello blanco; transiciones animadas entre pantallas; foco de luz dorado tras el héroe del menú
+- [x] Detalles pro de móvil: sin selección de texto accidental ni menú contextual de long-press
 - [ ] Estadísticas avanzadas (efectividad por zona, zona favorita)
 
 ### 🌌 Fase 3 — El cielo es el límite (backlog de ideas)

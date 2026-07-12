@@ -1,6 +1,8 @@
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 html,
@@ -19,6 +21,7 @@ body {
   display: flex;
   justify-content: center;
   touch-action: manipulation;
+  -webkit-touch-callout: none;
 }
 
 #app {
@@ -41,6 +44,18 @@ body {
 
 .screen.active {
   display: flex;
+  animation: screen-in 0.28s ease-out;
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 h1, h2, h3, p {

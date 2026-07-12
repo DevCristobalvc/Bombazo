@@ -18,6 +18,7 @@ import { fromHTML, sleep } from '../utils/dom.js';
 import { pick } from '../utils/random.js';
 import { sfx, isMuted, setMuted } from '../audio/sfx.js';
 import { icon } from '../art/icons.js';
+import { flagSVG } from '../art/flags.js';
 import './MatchScreen.css';
 
 /** Vibración háptica donde exista (móvil). */
@@ -49,6 +50,14 @@ export function createMatchScreen({ onFinish, onExit }) {
       <div class="stage-chip" data-ref="stage" hidden></div>
       <div class="phase-msg"><b data-ref="msg"></b><span data-ref="sub"></span></div>
       <div class="pitch-wrap" data-ref="wrap"></div>
+      <div class="vs-splash" data-ref="vsplash" hidden>
+        <div class="vsp-stage" data-ref="vstage"></div>
+        <div class="vsp-row">
+          <div class="vsp-side from-left" data-ref="vleft"></div>
+          <div class="vsp-mid">VS</div>
+          <div class="vsp-side from-right" data-ref="vright"></div>
+        </div>
+      </div>
     </section>`);
 
   el.prepend(scoreboard.el);
@@ -57,6 +66,21 @@ export function createMatchScreen({ onFinish, onExit }) {
   const msgEl = el.querySelector('[data-ref="msg"]');
   const subEl = el.querySelector('[data-ref="sub"]');
   const stageEl = el.querySelector('[data-ref="stage"]');
+  const vsplashEl = el.querySelector('[data-ref="vsplash"]');
+  const vstageEl = el.querySelector('[data-ref="vstage"]');
+  const vleftEl = el.querySelector('[data-ref="vleft"]');
+  const vrightEl = el.querySelector('[data-ref="vright"]');
+
+  /** Presentación estilo arcade: los dos equipos entran antes del partido. */
+  async function showVsSplash(playerTeam, rivalTeam, stageLabel) {
+    vstageEl.textContent = stageLabel ?? 'TANDA DE PENALES';
+    vleftEl.innerHTML = `${flagSVG(playerTeam.id, 84, 56)}<b>${playerTeam.short}</b>`;
+    vrightEl.innerHTML = `${flagSVG(rivalTeam.id, 84, 56)}<b>${rivalTeam.short}</b>`;
+    vsplashEl.hidden = false;
+    void vsplashEl.offsetWidth; // reinicia las animaciones de entrada
+    await sleep(1250);
+    vsplashEl.hidden = true;
+  }
 
   el.querySelector('.btn-exit').addEventListener('click', () => {
     stop();
@@ -126,6 +150,8 @@ export function createMatchScreen({ onFinish, onExit }) {
       sfx.goal();
       buzz(80);
       pitch.celebrate();
+      pitch.flash();
+      pitch.shake();
     } else if (offTarget) {
       sfx.fail();
       buzz(25);
@@ -148,6 +174,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     if (goal) {
       sfx.fail();
       buzz([40, 50, 40]);
+      pitch.shake();
     } else if (offTarget) {
       sfx.cheer();
       buzz(40);
@@ -157,6 +184,7 @@ export function createMatchScreen({ onFinish, onExit }) {
       sfx.cheer();
       buzz(60);
       pitch.celebrate();
+      pitch.shake();
     }
     registerKick(ctx.s, 'C', goal);
     updateBoard();
@@ -283,6 +311,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     stageEl.hidden = !stageLabel;
     stageEl.textContent = stageLabel ?? '';
     pitch.reset();
+    updateBoard();
+    await showVsSplash(playerTeam, rivalTeam, stageLabel);
+    if (aborted) return;
     sfx.whistle();
     let suddenAnnounced = false;
 
@@ -314,6 +345,7 @@ export function createMatchScreen({ onFinish, onExit }) {
 
   function finish(walkover) {
     const s = ctx.s;
+    aborted = true; // el partido terminó: bloquea walkovers o picks tardíos
     onFinish({
       won: walkover ? true : winner(s) === 'P',
       walkover,

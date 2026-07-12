@@ -22,6 +22,10 @@
   opacity: 1;
 }
 
+.sb-row.is-active .sb-name {
+  color: var(--c-accent);
+}
+
 .sb-flag svg {
   display: block;
   border-radius: 3px;

@@ -14,13 +14,15 @@
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
 }
 
-/* El héroe absorbe el espacio flexible: crece o encoge para que nada desborde */
+/* El héroe absorbe el espacio flexible: crece o encoge para que nada desborde,
+   con un foco de luz dorado de estadio detrás */
 .hero {
   flex: 1 1 auto;
   min-height: 70px;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: radial-gradient(ellipse 52% 46% at 50% 60%, rgba(255, 209, 0, 0.13), transparent 70%);
 }
 
 .hero svg {

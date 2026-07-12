@@ -59,6 +59,7 @@ export function createPitch() {
   }
 
   function keeperDive(zone) {
+    svg.classList.add('diving'); // pausa el balanceo de espera
     const c = zoneCenter(zone);
     const col = zone % 3;
     const row = Math.floor(zone / 3);
@@ -97,13 +98,29 @@ export function createPitch() {
     setTimeout(() => svg.classList.remove('celebrate'), 1100);
   }
 
+  /** Sacudida de impacto en la escena. */
+  function shake() {
+    el.classList.remove('shake');
+    void el.offsetWidth;
+    el.classList.add('shake');
+    setTimeout(() => el.classList.remove('shake'), 450);
+  }
+
+  /** Destello blanco de gol propio. */
+  function flash() {
+    el.classList.remove('flash-on');
+    void el.offsetWidth;
+    el.classList.add('flash-on');
+    setTimeout(() => el.classList.remove('flash-on'), 380);
+  }
+
   function reset() {
-    svg.classList.remove('kick');
+    svg.classList.remove('kick', 'diving');
     keeper.style.transform = '';
     ball.style.transform = '';
     ball.classList.remove('fast');
     svg.querySelectorAll('.zone.picked').forEach((r) => r.classList.remove('picked'));
   }
 
-  return { el, setKits, pickZone, cancelAim, keeperDive, ballTo, ballBounce, ballOver, kickAnim, celebrate, reset };
+  return { el, setKits, pickZone, cancelAim, keeperDive, ballTo, ballBounce, ballOver, kickAnim, celebrate, shake, flash, reset };
 }
