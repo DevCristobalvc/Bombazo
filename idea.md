@@ -246,7 +246,9 @@ Decisiones:
 - [x] Escena viva: el arquero se balancea esperando, el pateador respira, las estrellas titilan y la valla publicitaria se desliza
 - [x] Impacto de gol: sacudida de pantalla y destello blanco; transiciones animadas entre pantallas; foco de luz dorado tras el héroe del menú
 - [x] Detalles pro de móvil: sin selección de texto accidental ni menú contextual de long-press
-- [ ] Estadísticas avanzadas (efectividad por zona, zona favorita)
+- [x] Estadísticas avanzadas: mapa de calor de puntería por zona del arco en el menú (verde/ámbar/rojo según efectividad)
+- [x] Juice de físicas: estela de cometa del balón en vuelo y red que ondea con cada gol
+- [x] Llave visual del torneo en la pantalla final (ronda superada / siguiente / pendientes) y revancha de duelo 1 vs 1 sobre la misma conexión
 
 ### 🌌 Fase 3 — El cielo es el límite (backlog de ideas)
 - [ ] **Customización del personaje**: piel, pelo, nombre y dorsal en la camiseta

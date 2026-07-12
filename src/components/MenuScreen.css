@@ -14,11 +14,11 @@
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
 }
 
-/* El héroe absorbe el espacio flexible: crece o encoge para que nada desborde,
-   con un foco de luz dorado de estadio detrás */
+/* El héroe SOLO toma el espacio sobrante (base 0): si el resto del menú
+   crece, él se encoge primero y nada desborda. Foco de luz dorado detrás. */
 .hero {
-  flex: 1 1 auto;
-  min-height: 70px;
+  flex: 1 1 0;
+  min-height: 96px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -57,11 +57,48 @@
   min-height: 15px;
 }
 
-/* Zona de scroll interna de emergencia: si la pantalla es muy baja,
-   solo scrollea el panel, nunca la página. */
+/* Mapa de calor de puntería (mini arco 3x3) */
+.heatmap-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.heatmap-row[hidden] {
+  display: none;
+}
+
+.heatmap-label {
+  color: var(--c-muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(3, 13px);
+  gap: 2px;
+  padding: 3px;
+  border: 1.5px solid var(--c-line);
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+}
+
+.heat-cell {
+  height: 9px;
+  border-radius: 2px;
+  background: rgba(38, 64, 127, 0.5);
+}
+
+/* Zona de scroll interna: el panel nunca ocupa más del 56% del viewport,
+   así el héroe conserva presencia; si no cabe, scrollea el panel, nunca la página. */
 .menu-screen .panel {
   flex-shrink: 1;
   min-height: 0;
+  max-height: 56dvh;
   overflow-y: auto;
 }
 

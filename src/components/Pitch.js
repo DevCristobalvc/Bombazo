@@ -144,22 +144,45 @@ export function createPitch() {
     keeper.style.transform = `translate(${dx}px, ${dy}px) rotate(${angle}deg)`;
   }
 
+  /** Estela de cometa que deja el balón en vuelo. */
+  const ballAnchor = ball.parentElement;
+  function spawnTrail(x, y, scale) {
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', x.toFixed(1));
+    dot.setAttribute('cy', y.toFixed(1));
+    dot.setAttribute('r', (5 * scale).toFixed(1));
+    dot.setAttribute('class', 'trail');
+    svg.insertBefore(dot, ballAnchor);
+    setTimeout(() => dot.remove(), 300);
+  }
+
   /** Vuelo físico del balón (requestAnimationFrame sobre core/physics). */
   function ballFlight(shot) {
     const path = shotPath(shot);
     ball.style.transition = 'none';
     return new Promise((resolve) => {
       const t0 = performance.now();
+      let frame = 0;
       const step = (now) => {
         const u = Math.min(1, (now - t0) / shot.dur);
         const p = path(u);
         const s = 1 - 0.38 * u;
         ball.style.transform = `translate(${(p.x - BALL_HOME.x).toFixed(1)}px, ${(p.y - BALL_HOME.y).toFixed(1)}px) scale(${s.toFixed(3)})`;
+        if (frame % 2 === 0 && u > 0.05 && u < 0.95) spawnTrail(p.x, p.y, s);
+        frame += 1;
         if (u < 1) requestAnimationFrame(step);
         else resolve();
       };
       requestAnimationFrame(step);
     });
+  }
+
+  /** La red ondea cuando el balón la sacude. */
+  function netRipple() {
+    svg.classList.remove('ripple');
+    void svg.getBoundingClientRect();
+    svg.classList.add('ripple');
+    setTimeout(() => svg.classList.remove('ripple'), 450);
   }
 
   /** Rebote tras la atajada (vuelve a transición CSS). */
@@ -206,5 +229,5 @@ export function createPitch() {
     svg.querySelectorAll('.zone.picked').forEach((r) => r.classList.remove('picked'));
   }
 
-  return { el, setKits, pickZone, captureSwipe, cancelAim, keeperDive, ballFlight, ballBounce, kickAnim, celebrate, shake, flash, reset };
+  return { el, setKits, pickZone, captureSwipe, cancelAim, keeperDive, ballFlight, ballBounce, kickAnim, celebrate, shake, flash, netRipple, reset };
 }

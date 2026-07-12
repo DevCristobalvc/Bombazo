@@ -10,6 +10,7 @@ import { createShootout, registerKick, registerHabit, winner, isSuddenDeath, sco
 import { keeperPick, shooterPick } from '../core/ai.js';
 import { zoneAt, zoneNearest } from '../core/zones.js';
 import { makeCpuShot } from '../core/physics.js';
+import { recordShot } from '../core/stats.js';
 import { createPitch } from './Pitch.js';
 import { createScoreboard } from './Scoreboard.js';
 import { createAnnouncer } from './Announcer.js';
@@ -132,12 +133,14 @@ export function createMatchScreen({ onFinish, onExit }) {
 
   /** Resultado + festejo de un penal propio. */
   async function settleMyKick({ goal, offTarget, ballZone }) {
+    if (!offTarget) recordShot(ballZone, goal); // mapa de calor de puntería
     if (goal) {
       sfx.goal();
       buzz(80);
       pitch.celebrate();
       pitch.flash();
       pitch.shake();
+      pitch.netRipple();
     } else if (offTarget) {
       sfx.fail();
       buzz(25);
@@ -161,6 +164,7 @@ export function createMatchScreen({ onFinish, onExit }) {
       sfx.fail();
       buzz([40, 50, 40]);
       pitch.shake();
+      pitch.netRipple();
     } else if (offTarget) {
       sfx.cheer();
       buzz(40);

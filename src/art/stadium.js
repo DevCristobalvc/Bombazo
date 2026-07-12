@@ -83,7 +83,7 @@ export function sceneSVG() {
     <ellipse cx="180" cy="466" rx="8" ry="3" fill="#e8ecf4" opacity=".8"/>
 
     <!-- red y arco -->
-    <rect x="60" y="152" width="240" height="220" fill="url(#p-net)"/>
+    <rect class="goal-net" x="60" y="152" width="240" height="220" fill="url(#p-net)"/>
     <path d="M60 152 L84 176 M300 152 L276 176" stroke="rgba(255,255,255,.25)" stroke-width="2"/>
     <rect x="52" y="146" width="9" height="228" rx="3" fill="#f4f6fb"/>
     <rect x="299" y="146" width="9" height="228" rx="3" fill="#f4f6fb"/>

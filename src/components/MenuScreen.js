@@ -27,6 +27,10 @@ export function createMenuScreen({ onPlay }) {
       <div class="hero" data-ref="hero"></div>
       <p class="vs-line" data-ref="vs"></p>
       <p class="stats-line" data-ref="stats"></p>
+      <div class="heatmap-row" data-ref="heatrow" hidden>
+        <span class="heatmap-label">Tu puntería</span>
+        <div class="heatmap" data-ref="heat" title="Efectividad por zona del arco"></div>
+      </div>
       <div class="panel">
         <h2 class="panel-title">Modo de juego</h2>
         <div class="chips" data-ref="modes"></div>
@@ -62,6 +66,20 @@ export function createMenuScreen({ onPlay }) {
       s.wins + s.losses > 0
         ? `Victorias ${s.wins} · Derrotas ${s.losses} · Racha ${s.streak} · Récord ${s.best}`
         : '';
+
+    // Mapa de calor: efectividad de tus remates por zona del arco
+    const hasShots = s.zones.some((z) => z.shots > 0);
+    refs.heatrow.hidden = !hasShots;
+    if (!hasShots) return;
+    refs.heat.innerHTML = s.zones
+      .map((z) => {
+        if (!z.shots) return '<i class="heat-cell"></i>';
+        const pct = z.goals / z.shots;
+        const color = pct >= 0.66 ? '55, 214, 122' : pct >= 0.33 ? '255, 178, 0' : '255, 91, 91';
+        const alpha = 0.25 + 0.75 * Math.min(1, z.shots / 6);
+        return `<i class="heat-cell" style="background: rgba(${color}, ${alpha})" title="${z.goals}/${z.shots} goles"></i>`;
+      })
+      .join('');
   }
 
   function render() {
