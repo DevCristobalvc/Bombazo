@@ -68,6 +68,47 @@ const guard = (fn) => (...args) => {
   } catch { /* dispositivo sin audio: el juego sigue */ }
 };
 
+/* Murmullo continuo de la tribuna durante el partido (loop de ruido filtrado). */
+let ambience = null;
+
+export function startAmbience() {
+  if (muted || ambience) return;
+  try {
+    const a = audio();
+    const len = Math.floor(a.sampleRate * 2);
+    const buffer = a.createBuffer(1, len, a.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    const src = a.createBufferSource();
+    src.buffer = buffer;
+    src.loop = true;
+    const filter = a.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 480;
+    const gain = a.createGain();
+    gain.gain.setValueAtTime(0.0001, a.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.022, a.currentTime + 1.2);
+    src.connect(filter).connect(gain).connect(a.destination);
+    src.start();
+    ambience = { src, gain };
+  } catch { /* sin audio */ }
+}
+
+export function stopAmbience() {
+  if (!ambience) return;
+  try {
+    const a = audio();
+    ambience.gain.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + 0.6);
+    const { src } = ambience;
+    setTimeout(() => {
+      try {
+        src.stop();
+      } catch { /* ya detenido */ }
+    }, 700);
+  } catch { /* sin audio */ }
+  ambience = null;
+}
+
 export const sfx = {
   /** Silbatazo de inicio. */
   whistle: guard(() => {

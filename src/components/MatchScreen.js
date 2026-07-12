@@ -16,7 +16,7 @@ import { createScoreboard } from './Scoreboard.js';
 import { createAnnouncer } from './Announcer.js';
 import { fromHTML, sleep } from '../utils/dom.js';
 import { pick } from '../utils/random.js';
-import { sfx, isMuted, setMuted } from '../audio/sfx.js';
+import { sfx, isMuted, setMuted, startAmbience, stopAmbience } from '../audio/sfx.js';
 import { icon } from '../art/icons.js';
 import { flagSVG } from '../art/flags.js';
 import './MatchScreen.css';
@@ -103,6 +103,8 @@ export function createMatchScreen({ onFinish, onExit }) {
   soundBtn.addEventListener('click', () => {
     setMuted(!isMuted());
     renderSoundBtn();
+    if (isMuted()) stopAmbience();
+    else if (isRunning()) startAmbience();
   });
   renderSoundBtn();
 
@@ -304,6 +306,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     await showVsSplash(playerTeam, rivalTeam, stageLabel);
     if (aborted) return;
     sfx.whistle();
+    startAmbience();
     let suddenAnnounced = false;
 
     while (!aborted) {
@@ -335,6 +338,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   function finish(walkover) {
     const s = ctx.s;
     aborted = true; // el partido terminó: bloquea walkovers o picks tardíos
+    stopAmbience();
     onFinish({
       won: walkover ? true : winner(s) === 'P',
       walkover,
@@ -359,6 +363,7 @@ export function createMatchScreen({ onFinish, onExit }) {
   function stop() {
     aborted = true;
     pitch.cancelAim();
+    stopAmbience();
   }
 
   const isRunning = () => ctx !== null && !aborted;
