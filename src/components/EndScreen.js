@@ -40,7 +40,7 @@ export function createEndScreen({ onAction }) {
         <div class="eb-row ${b.state}">
           <span class="eb-icon">${b.state === 'won' ? icon('check', 13) : b.state === 'lost' ? icon('x', 13) : ''}</span>
           <span class="eb-stage">${b.label}</span>
-          <span class="eb-team">${flagSVG(b.team.id, 24, 16)} ${b.team.short}</span>
+          <span class="eb-team">${b.team ? `${flagSVG(b.team.id, 24, 16)} ${b.team.short}` : 'Por definir'}</span>
         </div>`
       )
       .join('')}</div>`;

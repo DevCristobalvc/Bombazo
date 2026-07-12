@@ -157,11 +157,12 @@ const menu = createMenuScreen({
   },
 });
 
-/** Llave visual del torneo: estado de cada ronda según el avance. */
+/** Llave visual del torneo: estado de cada ronda según el avance.
+    Los rivales futuros aún no existen (emergen del bracket simulado). */
 function buildBracket(t, lostCurrent) {
-  return t.rivals.map((rivalId, i) => ({
-    label: STAGES[i],
-    team: teamById(rivalId),
+  return STAGES.map((label, i) => ({
+    label,
+    team: t.rivals[i] ? teamById(t.rivals[i]) : null,
     state: i < t.stage ? 'won' : i === t.stage ? (lostCurrent ? 'lost' : 'next') : 'pending',
   }));
 }
