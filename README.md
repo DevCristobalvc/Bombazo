@@ -10,7 +10,7 @@ Juego web arcade de **tandas de penales** estilo Copa Mundial FIFA 2026. Mobile-
 
 ## Estado
 
-✅ **v1 lanzada como web + PWA.** Tanda completa contra la máquina con los 16 equipos reales de octavos del Mundial 2026, 3 dificultades, formato FIFA (corte anticipado + muerte súbita), modo torneo de 4 rondas, barra de potencia con timing, sonido sintetizado y estadísticas persistentes. Roadmap siguiente en `idea.md`: físicas de tiro (córners, tiros libres, swipe con efecto) y distribución en tiendas (TWA/Capacitor).
+✅ **v1 lanzada como web + PWA.** Tanda completa con los 16 equipos reales de octavos del Mundial 2026, 3 dificultades, formato FIFA (corte anticipado + muerte súbita), modo torneo de 4 rondas, **duelo 1 vs 1 online por QR** (WebRTC peer-to-peer, sin backend), barra de potencia con timing, sonido sintetizado y estadísticas persistentes. Roadmap siguiente en `idea.md`: físicas de tiro (córners, tiros libres, swipe con efecto) y distribución en tiendas (TWA/Capacitor).
 
 ## Cómo correr
 

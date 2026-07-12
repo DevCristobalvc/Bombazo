@@ -16,6 +16,10 @@ const PATHS = {
     '<rect x="2.5" y="7" width="19" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 7v10" stroke="currentColor" stroke-width="2" stroke-dasharray="2.6 2.6"/>',
   sadball:
     '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.8" cy="9.8" r="1.4" fill="currentColor"/><circle cx="15.2" cy="9.8" r="1.4" fill="currentColor"/><path d="M8.4 16.2c1.2-1.8 6-1.8 7.2 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>',
+  versus:
+    '<circle cx="7.5" cy="7.5" r="3.2" fill="currentColor"/><path d="M2 18.5c.7-3.4 3-5.2 5.5-5.2s4.8 1.8 5.5 5.2z" fill="currentColor"/><circle cx="17" cy="9" r="2.7" fill="currentColor"/><path d="M13.4 18.5c.6-2.9 1.9-4.4 3.6-4.4 1.9 0 3.4 1.5 4 4.4z" fill="currentColor"/>',
+  qr:
+    '<path d="M3 3h7v7H3V3zm2 2v3h3V5H5zm9-2h7v7h-7V3zm2 2v3h3V5h-3zM3 14h7v7H3v-7zm2 2v3h3v-3H5zm12-2h4v2h-2v2h-2v-4zm-3 0h2v3h-2v-3zm3 5h2v2h-2v-2zm3-1h1v3h-3v-2h2v-1z" fill="currentColor"/>',
 };
 
 export function icon(name, size = 18) {

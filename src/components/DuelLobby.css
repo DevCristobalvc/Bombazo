@@ -1,0 +1,66 @@
+.lobby-screen {
+  justify-content: center;
+}
+
+.lobby-card {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.lobby-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: var(--c-accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lobby-status {
+  color: var(--c-muted);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.lobby-qr {
+  background: #f4f7fb;
+  border-radius: var(--radius-m);
+  padding: 8px;
+  min-height: 100px;
+  display: grid;
+  place-items: center;
+}
+
+.lobby-qr:empty {
+  display: none;
+}
+
+.lobby-qr canvas {
+  display: block;
+  border-radius: 8px;
+}
+
+.lobby-code {
+  font-family: var(--font-display);
+  font-size: 30px;
+  letter-spacing: 8px;
+  color: var(--c-text);
+}
+
+.lobby-hint {
+  color: var(--c-muted);
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.lobby-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}

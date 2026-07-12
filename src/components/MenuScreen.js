@@ -14,6 +14,7 @@ import './MenuScreen.css';
 const MODES = [
   { id: 'rapido', label: 'Partido rápido', icon: 'bolt' },
   { id: 'torneo', label: 'Torneo', icon: 'trophy' },
+  { id: 'duelo', label: '1 vs 1', icon: 'versus' },
 ];
 
 export function createMenuScreen({ onPlay }) {
@@ -35,8 +36,10 @@ export function createMenuScreen({ onPlay }) {
           <h2 class="panel-title">Rival</h2>
           <div class="chips two-rows" data-ref="rivals"></div>
         </div>
-        <h2 class="panel-title">Dificultad</h2>
-        <div class="chips" data-ref="diffs"></div>
+        <div data-ref="diffBlock">
+          <h2 class="panel-title">Dificultad</h2>
+          <div class="chips" data-ref="diffs"></div>
+        </div>
         <button class="btn-big" data-ref="play">¡A LA CANCHA!</button>
         <p class="howto">Toca una casilla del arco para <b>patear</b> o <b>atajar</b>, y frena la barra en el verde. Empate = muerte súbita.</p>
       </div>
@@ -67,7 +70,8 @@ export function createMenuScreen({ onPlay }) {
     ).join('');
     refs.teams.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.teamId, false)).join('');
     refs.rivals.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.rivalId, t.id === state.teamId)).join('');
-    refs.rivalBlock.style.display = state.mode === 'torneo' ? 'none' : '';
+    refs.rivalBlock.style.display = state.mode === 'rapido' ? '' : 'none';
+    refs.diffBlock.style.display = state.mode === 'duelo' ? 'none' : '';
     refs.diffs.innerHTML = DIFFICULTIES.map(
       (d) => `<button class="chip ${d.id === state.diff ? 'is-selected' : ''}" data-id="${d.id}">${flames(d.level)} ${d.label}</button>`
     ).join('');
@@ -75,10 +79,13 @@ export function createMenuScreen({ onPlay }) {
     const player = teamById(state.teamId);
     const rival = teamById(state.rivalId);
     const diff = DIFFICULTIES.find((d) => d.id === state.diff);
+    refs.play.textContent = state.mode === 'duelo' ? 'CREAR SALA' : '¡A LA CANCHA!';
     refs.vs.innerHTML =
       state.mode === 'torneo'
         ? `${player.short} · Torneo: 4 rondas al título · ${diff.label}`
-        : `${player.short} <i class="vs">VS</i> ${rival.short} · ${diff.label}`;
+        : state.mode === 'duelo'
+          ? `${player.short} · Duelo 1 vs 1 · El rival escanea tu QR`
+          : `${player.short} <i class="vs">VS</i> ${rival.short} · ${diff.label}`;
     renderStats();
   }
 
