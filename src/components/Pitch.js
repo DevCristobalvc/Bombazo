@@ -122,6 +122,12 @@ export function createPitch() {
 
   function setKits({ shooterTeam, keeperTeam }) {
     const s = el.style;
+    // La barrera defiende: viste el uniforme de campo del equipo del arquero
+    s.setProperty('--wl-shirt', keeperTeam.kit.shirt);
+    s.setProperty('--wl-shorts', keeperTeam.kit.shorts);
+    s.setProperty('--wl-socks', keeperTeam.kit.socks);
+    s.setProperty('--wl-skin', keeperTeam.skin);
+    s.setProperty('--wl-hair', keeperTeam.hair);
     s.setProperty('--sh-shirt', shooterTeam.kit.shirt);
     s.setProperty('--sh-accent', shooterTeam.kit.accent);
     s.setProperty('--sh-shorts', shooterTeam.kit.shorts);
@@ -176,6 +182,19 @@ export function createPitch() {
         else resolve();
       };
       requestAnimationFrame(step);
+    });
+  }
+
+  /** Muestra u oculta la barrera (modo tiros libres). */
+  function setWall(visible) {
+    svg.classList.toggle('with-wall', visible);
+  }
+
+  /** Rebote del balón al estrellarse contra la barrera. */
+  function ballDeflect() {
+    ball.style.transition = '';
+    requestAnimationFrame(() => {
+      ball.style.transform = `translate(${(Math.random() * 70 - 35).toFixed(0)}px, -6px) scale(1)`;
     });
   }
 
@@ -281,5 +300,5 @@ export function createPitch() {
     svg.querySelectorAll('.zone.picked').forEach((r) => r.classList.remove('picked'));
   }
 
-  return { el, setKits, pickZone, captureSwipe, cornerCross, cancelAim, keeperDive, ballFlight, ballBounce, kickAnim, celebrate, shake, flash, netRipple, reset };
+  return { el, setKits, setWall, pickZone, captureSwipe, cornerCross, cancelAim, keeperDive, ballFlight, ballBounce, ballDeflect, kickAnim, celebrate, shake, flash, netRipple, reset };
 }

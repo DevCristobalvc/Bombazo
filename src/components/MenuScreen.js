@@ -14,6 +14,7 @@ import './MenuScreen.css';
 const MODES = [
   { id: 'rapido', label: 'Penales', icon: 'bolt' },
   { id: 'corners', label: 'Córners', icon: 'flag' },
+  { id: 'libres', label: 'Tiros libres', icon: 'wall' },
   { id: 'torneo', label: 'Torneo', icon: 'trophy' },
   { id: 'duelo', label: '1 vs 1', icon: 'versus' },
 ];
@@ -89,7 +90,7 @@ export function createMenuScreen({ onPlay }) {
     ).join('');
     refs.teams.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.teamId, false)).join('');
     refs.rivals.innerHTML = TEAMS.map((t) => teamChip(t, t.id === state.rivalId, t.id === state.teamId)).join('');
-    const vsAI = state.mode === 'rapido' || state.mode === 'corners';
+    const vsAI = state.mode === 'rapido' || state.mode === 'corners' || state.mode === 'libres';
     refs.rivalBlock.style.display = vsAI ? '' : 'none';
     refs.diffBlock.style.display = state.mode === 'duelo' ? 'none' : '';
     refs.diffs.innerHTML = DIFFICULTIES.map(
@@ -107,7 +108,9 @@ export function createMenuScreen({ onPlay }) {
           ? `${player.short} · Duelo 1 vs 1 · El rival escanea tu QR`
           : state.mode === 'corners'
             ? `${player.short} <i class="vs">VS</i> ${rival.short} · Córners · ${diff.label}`
-            : `${player.short} <i class="vs">VS</i> ${rival.short} · ${diff.label}`;
+            : state.mode === 'libres'
+              ? `${player.short} <i class="vs">VS</i> ${rival.short} · Tiros libres · ${diff.label}`
+              : `${player.short} <i class="vs">VS</i> ${rival.short} · ${diff.label}`;
     renderStats();
   }
 

@@ -46,6 +46,25 @@
   cursor: pointer;
 }
 
+/* Barrera de tiros libres: oculta salvo en ese modo; salta con el remate */
+#wall {
+  display: none;
+}
+
+.scene.with-wall #wall {
+  display: block;
+}
+
+.scene.with-wall.kick .wall-man {
+  animation: wall-jump 0.55s ease-out;
+}
+
+@keyframes wall-jump {
+  30% {
+    transform: translateY(-24px);
+  }
+}
+
 .scene.guide .gridlines {
   opacity: 0.5;
 }

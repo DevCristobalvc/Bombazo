@@ -9,7 +9,7 @@
 import { createShootout, registerKick, registerHabit, winner, isSuddenDeath, score } from '../core/shootout.js';
 import { keeperPick, shooterPick } from '../core/ai.js';
 import { zoneAt, zoneNearest } from '../core/zones.js';
-import { makeCpuShot, cornerCrossPath, headerShot } from '../core/physics.js';
+import { makeCpuShot, cornerCrossPath, headerShot, wallBlocks } from '../core/physics.js';
 import { recordShot } from '../core/stats.js';
 import { createPitch } from './Pitch.js';
 import { createScoreboard } from './Scoreboard.js';
@@ -36,6 +36,8 @@ const COPY = {
   cpuGoal: ['GOL DEL RIVAL…', 'LA MANDÓ ADENTRO', 'NADA QUE HACER'],
   cpuMiss: ['¡AFUERA!', '¡A LAS NUBES!', '¡LA TIRÓ A LA TRIBUNA!'],
   crossLost: ['¡PASÓ DE LARGO!', '¡SE FUE EL CENTRO!', '¡NADIE LA PEINÓ!'],
+  wallBlockMine: ['¡A LA BARRERA!', '¡LA TAPÓ LA BARRERA!', '¡MURO INFRANQUEABLE!'],
+  wallBlockTheirs: ['¡TU BARRERA LA SACÓ!', '¡CHOCÓ CON EL MURO!'],
 };
 
 export function createMatchScreen({ onFinish, onExit }) {
@@ -317,6 +319,89 @@ export function createMatchScreen({ onFinish, onExit }) {
     await settleTheirKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? intent.zone });
   }
 
+  /* ---------- Modo Tiros libres: la barrera tapa el centro ---------- */
+
+  async function myFreeKick() {
+    const { s, playerTeam, rivalTeam } = ctx;
+    ctx.phase = 'shoot';
+    pitch.setKits({ shooterTeam: playerTeam, keeperTeam: rivalTeam });
+    setMsg(`Tiro libre ${s.kicks.P.length + 1} — ¡Supera la barrera!`, 'Por arriba o con mucha curva: la barrera tapa el centro');
+    updateBoard();
+
+    const shot = await pitch.captureSwipe();
+    if (!shot || aborted) return;
+    const finalZone = zoneAt(shot.tx, shot.ty);
+    const blocked = finalZone !== null && wallBlocks(finalZone, shot.curve);
+
+    if (blocked) {
+      await pitch.kickAnim();
+      sfx.kick();
+      await pitch.ballFlight({ tx: Math.min(220, Math.max(140, shot.tx)), ty: 412, curve: shot.curve, dur: 170 });
+      pitch.ballDeflect();
+      sfx.save();
+      buzz(25);
+      registerKick(s, 'P', false);
+      updateBoard();
+      await announcer.say(pick(COPY.wallBlockMine), 'miss');
+      pitch.reset();
+      await sleep(240);
+      return;
+    }
+
+    const readZone = finalZone ?? zoneNearest(shot.tx, shot.ty);
+    const gkZone = keeperPick(ctx.diff, readZone, s.habits);
+    await pitch.kickAnim();
+    sfx.kick();
+    pitch.keeperDive(gkZone);
+    await pitch.ballFlight(shot);
+    const goal = finalZone !== null && finalZone !== gkZone;
+    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? readZone });
+  }
+
+  async function theirFreeKick() {
+    const { s, playerTeam, rivalTeam, diff } = ctx;
+    ctx.phase = 'save';
+    pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam });
+    setMsg(`Tiro libre ${s.kicks.C.length + 1} — ¡Defiende!`, 'Toca la casilla hacia donde volarás');
+    updateBoard();
+
+    const dive = await pitch.pickZone();
+    if (dive === null || aborted) return;
+
+    // La CPU evita la barrera casi siempre... casi
+    let intent = shooterPick(diff, dive);
+    let tries = 0;
+    while (!intent.offTarget && [4, 7].includes(intent.zone) && tries < 3) {
+      intent = shooterPick(diff, dive);
+      tries += 1;
+    }
+    const cpuShot = makeCpuShot(intent.zone, intent.offTarget);
+    const finalZone = intent.offTarget ? null : zoneAt(cpuShot.tx, cpuShot.ty);
+    const blocked = finalZone !== null && wallBlocks(finalZone, cpuShot.curve);
+
+    await pitch.kickAnim();
+    sfx.kick();
+
+    if (blocked) {
+      await pitch.ballFlight({ tx: cpuShot.tx, ty: 412, curve: cpuShot.curve, dur: 170 });
+      pitch.ballDeflect();
+      sfx.save();
+      sfx.cheer();
+      buzz(40);
+      registerKick(s, 'C', false);
+      updateBoard();
+      await announcer.say(pick(COPY.wallBlockTheirs), 'save');
+      pitch.reset();
+      await sleep(240);
+      return;
+    }
+
+    pitch.keeperDive(dive);
+    await pitch.ballFlight(cpuShot);
+    const goal = finalZone !== null && finalZone !== dive;
+    await settleTheirKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? intent.zone });
+  }
+
   /* ---------- Rival humano (duelo WebRTC) ---------- */
 
   async function myDuelKick() {
@@ -368,6 +453,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     ctx = { s: createShootout(), playerTeam, rivalTeam, diff, phase: 'shoot', duel, isHost, mode };
     stageEl.hidden = !stageLabel;
     stageEl.textContent = stageLabel ?? '';
+    pitch.setWall(mode === 'libres');
     pitch.reset();
     updateBoard();
     await showVsSplash(playerTeam, rivalTeam, stageLabel);
@@ -384,7 +470,9 @@ export function createMatchScreen({ onFinish, onExit }) {
           ? [myDuelKick, theirDuelKick]
           : mode === 'corners'
             ? [myCornerKick, theirCornerKick]
-            : [playerKickVsAI, cpuKick];
+            : mode === 'libres'
+              ? [myFreeKick, theirFreeKick]
+              : [playerKickVsAI, cpuKick];
 
       await legs[0]();
       if (aborted) return;

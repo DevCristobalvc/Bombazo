@@ -89,6 +89,23 @@ export function sceneSVG() {
     <rect x="299" y="146" width="9" height="228" rx="3" fill="#f4f6fb"/>
     <rect x="52" y="146" width="256" height="9" rx="3" fill="#f4f6fb"/>
 
+    <!-- barrera (solo en tiros libres): viste los colores del equipo que defiende -->
+    <g id="wall" transform="translate(180 424)">
+      ${[-34, 0, 34]
+        .map(
+          (dx) => `
+      <g transform="translate(${dx} 0)"><g class="wall-man">
+        <rect x="-9" y="-34" width="18" height="22" rx="5" fill="var(--wl-shirt)" stroke="rgba(8,10,20,.25)" stroke-width="1"/>
+        <rect x="-8" y="-13" width="16" height="8" rx="3" fill="var(--wl-shorts)"/>
+        <rect x="-7" y="-5" width="5" height="5" fill="var(--wl-socks)"/>
+        <rect x="2" y="-5" width="5" height="5" fill="var(--wl-socks)"/>
+        <circle cx="0" cy="-41" r="8" fill="var(--wl-skin)"/>
+        <path d="M-8 -41 a8 8 0 1 1 16 0 q0 4.5 -8 4.5 q-8 0 -8 -4.5 z" fill="var(--wl-hair)"/>
+      </g></g>`
+        )
+        .join('')}
+    </g>
+
     <!-- actores -->
     <g transform="translate(180 371)"><g id="keeper">${keeperSVG()}</g></g>
     <g transform="translate(126 556) scale(.66)"><g id="shooter">${shooterSVG()}</g></g>

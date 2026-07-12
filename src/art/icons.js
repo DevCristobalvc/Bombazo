@@ -22,6 +22,8 @@ const PATHS = {
     '<path d="M3 3h7v7H3V3zm2 2v3h3V5H5zm9-2h7v7h-7V3zm2 2v3h3V5h-3zM3 14h7v7H3v-7zm2 2v3h3v-3H5zm12-2h4v2h-2v2h-2v-4zm-3 0h2v3h-2v-3zm3 5h2v2h-2v-2zm3-1h1v3h-3v-2h2v-1z" fill="currentColor"/>',
   flag:
     '<path d="M6.5 21V3.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M6.5 4.5h11.5l-3 4 3 4H6.5z" fill="currentColor"/>',
+  wall:
+    '<rect x="3" y="14.5" width="8.4" height="6" rx="1" fill="currentColor"/><rect x="12.6" y="14.5" width="8.4" height="6" rx="1" fill="currentColor"/><rect x="7.8" y="7.5" width="8.4" height="6" rx="1" fill="currentColor"/>',
   check:
     '<path d="M4.5 12.5l5 5 10-11" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
   x:

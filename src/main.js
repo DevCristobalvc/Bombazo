@@ -20,15 +20,21 @@ let duelCtx = null; // { isHost, myTeamId, rivalTeamId }
 
 /* ---------- Partidos ---------- */
 
+const QUICK_MODES = {
+  corners: { mode: 'corners', stageLabel: 'CÓRNERS' },
+  libres: { mode: 'libres', stageLabel: 'TIROS LIBRES' },
+  rapido: { mode: 'penales', stageLabel: null },
+};
+
 function startQuickMatch() {
-  const corners = session.mode === 'corners';
+  const cfg = QUICK_MODES[session.mode] ?? QUICK_MODES.rapido;
   show(match.el);
   match.start({
     playerTeam: teamById(session.teamId),
     rivalTeam: teamById(session.rivalId),
     diff: session.diff,
-    mode: corners ? 'corners' : 'penales',
-    stageLabel: corners ? 'CÓRNERS' : null,
+    mode: cfg.mode,
+    stageLabel: cfg.stageLabel,
   });
 }
 

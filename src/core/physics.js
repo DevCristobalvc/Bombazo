@@ -104,6 +104,14 @@ export function headerShot(point) {
   };
 }
 
+/**
+ * Tiros libres: la barrera tapa la columna central a media y baja altura.
+ * Se supera por arriba (fila alta) o rodeándola con curva suficiente.
+ */
+export function wallBlocks(finalZone, curve) {
+  return (finalZone === 4 || finalZone === 7) && Math.abs(curve) < 0.45;
+}
+
 /** Tiro sintético de la CPU hacia una zona (o desviado por encima). */
 export function makeCpuShot(zone, offTarget) {
   const curve = (Math.random() * 2 - 1) * 0.55;
