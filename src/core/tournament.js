@@ -9,7 +9,8 @@ import { shuffle } from '../utils/random.js';
 export const STAGES = ['Octavos de final', 'Cuartos de final', 'Semifinal', 'GRAN FINAL'];
 
 export function createTournament(playerTeamId) {
-  const rivals = shuffle(TEAMS.filter((t) => t.id !== playerTeamId).map((t) => t.id));
+  // 4 rivales sorteados entre las demás selecciones: una por ronda
+  const rivals = shuffle(TEAMS.filter((t) => t.id !== playerTeamId).map((t) => t.id)).slice(0, STAGES.length);
   return { playerTeamId, rivals, stage: 0 };
 }
 

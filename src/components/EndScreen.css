@@ -40,6 +40,9 @@
   flex-direction: column;
   gap: 12px;
   align-items: center;
+  overflow-y: auto;
+  min-height: 0;
+  max-height: 100%;
 }
 
 .end-icon {
@@ -90,6 +93,76 @@
   flex-direction: column;
   gap: 6px;
   align-items: center;
+}
+
+/* Llave del torneo: el camino al título */
+.end-bracket {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.eb-row {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-s);
+  background: rgba(12, 24, 54, 0.7);
+  border: 1px solid transparent;
+  font-size: 12.5px;
+  font-weight: 800;
+}
+
+.eb-stage {
+  text-align: left;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+
+.eb-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.eb-team svg {
+  border-radius: 2px;
+}
+
+.eb-row.won .eb-icon {
+  color: var(--c-good);
+}
+
+.eb-row.lost .eb-icon {
+  color: var(--c-bad);
+}
+
+.eb-row.lost {
+  border-color: rgba(255, 91, 91, 0.4);
+}
+
+.eb-row.next {
+  border-color: var(--c-accent);
+}
+
+.eb-row.next .eb-stage {
+  color: var(--c-accent);
+}
+
+.eb-row.pending {
+  opacity: 0.55;
+}
+
+.end-status {
+  color: var(--c-muted);
+  font-size: 12.5px;
+  font-weight: 800;
+  min-height: 16px;
 }
 
 .end-actions {

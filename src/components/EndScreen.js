@@ -6,6 +6,7 @@
 import { fromHTML } from '../utils/dom.js';
 import { flagSVG } from '../art/flags.js';
 import { icon } from '../art/icons.js';
+// bracketHTML y setStatus dan soporte a torneo (llave) y duelos (revancha)
 import { pick } from '../utils/random.js';
 import { sfx } from '../audio/sfx.js';
 import './EndScreen.css';
@@ -30,6 +31,19 @@ export function createEndScreen({ onAction }) {
 
   const recapRow = (kicks) =>
     `<div class="sb-dots">${kicks.map((k) => `<i class="dot ${k ? 'goal' : 'fail'}"></i>`).join('')}</div>`;
+
+  /** Llave del torneo: tu camino al título ronda a ronda. */
+  const bracketHTML = (bracket) =>
+    `<div class="end-bracket">${bracket
+      .map(
+        (b) => `
+        <div class="eb-row ${b.state}">
+          <span class="eb-icon">${b.state === 'won' ? icon('check', 13) : b.state === 'lost' ? icon('x', 13) : ''}</span>
+          <span class="eb-stage">${b.label}</span>
+          <span class="eb-team">${flagSVG(b.team.id, 24, 16)} ${b.team.short}</span>
+        </div>`
+      )
+      .join('')}</div>`;
 
   /** Lluvia de confeti con los colores del equipo campeón. */
   function confetti(colors) {
@@ -70,10 +84,12 @@ export function createEndScreen({ onAction }) {
         ${recapRow(result.kicksP)}
         ${recapRow(result.kicksC)}
       </div>
+      ${opts.bracket ? bracketHTML(opts.bracket) : ''}
       <div class="end-actions">
         <button class="btn-big" data-act="${primary.act}">${primary.label}</button>
         <button class="btn-ghost" data-act="menu">Menú</button>
-      </div>`;
+      </div>
+      <p class="end-status" data-ref="status"></p>`;
 
     if (celebrate) {
       sfx.fanfare();
@@ -91,5 +107,11 @@ export function createEndScreen({ onAction }) {
     onAction(btn.dataset.act);
   });
 
-  return { el, show };
+  /** Mensaje de estado bajo los botones (ej. "esperando revancha…"). */
+  function setStatus(text) {
+    const status = card.querySelector('[data-ref="status"]');
+    if (status) status.textContent = text;
+  }
+
+  return { el, show, setStatus };
 }

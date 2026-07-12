@@ -94,6 +94,43 @@ const URL = 'http://localhost:4173/';
 
   await host.screenshot({ path: path.join(OUT, 'duel-5-host-round2.png') });
   console.log(consistent ? 'OK: duelo sincronizado en ambos lados' : 'FALLO: marcadores inconsistentes');
+
+  // Jugar hasta el final de la tanda (acciones aleatorias en ambos lados)
+  const act = async (page) => {
+    if (await page.$('#scene.guide')) {
+      await swipeShot(page, 80 + Math.random() * 200, 180 + Math.random() * 170);
+      return;
+    }
+    if (await page.$('#scene.aiming')) {
+      const z = Math.floor(Math.random() * 9);
+      await page.click(`.zone[data-zone="${z}"]`, { force: true }).catch(() => {});
+    }
+  };
+  let ended = false;
+  for (let i = 0; i < 120; i++) {
+    if ((await host.$('.end-screen.active')) && (await guest.$('.end-screen.active'))) {
+      ended = true;
+      break;
+    }
+    await act(host);
+    await act(guest);
+    await host.waitForTimeout(350);
+  }
+  console.log(ended ? 'OK: la tanda completa terminó en ambos lados' : 'FALLO: la tanda no terminó');
+  await host.screenshot({ path: path.join(OUT, 'duel-6-final.png') });
+
+  // Revancha sobre la misma conexión: ambos la piden y arranca otro partido
+  let rematchOk = false;
+  if (ended) {
+    await host.click('[data-act="duel-rematch"]');
+    await guest.click('[data-act="duel-rematch"]');
+    rematchOk = await Promise.all([
+      host.waitForSelector('.match-screen.active', { timeout: 15000 }).then(() => true),
+      guest.waitForSelector('.match-screen.active', { timeout: 15000 }).then(() => true),
+    ]).then(() => true).catch(() => false);
+  }
+  console.log(rematchOk ? 'OK: revancha iniciada en ambos lados' : 'FALLO: revancha no inició');
+
   await browser.close();
-  process.exit(consistent ? 0 : 1);
+  process.exit(consistent && ended && rematchOk ? 0 : 1);
 })().catch((e) => { console.error('FALLO:', e.message); process.exit(1); });

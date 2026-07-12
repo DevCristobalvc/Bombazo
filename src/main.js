@@ -72,9 +72,12 @@ function handleDuelClose() {
     // El rival se fue a mitad del duelo
     match.walkover();
   } else if (duelCtx && !match.isRunning()) {
-    // Se cayó la conexión en la sala o al final: volver al menú si estamos esperando
     if (lobby.el.classList.contains('active') || joinScr.el.classList.contains('active')) {
+      // Se cayó la conexión en la sala: volver al menú
       backToMenu();
+    } else if (end.el.classList.contains('active')) {
+      // El rival se fue desde la pantalla final: ya no hay revancha posible
+      end.setStatus('El rival abandonó la sala.');
     }
   }
   duel = null;
@@ -129,12 +132,22 @@ const menu = createMenuScreen({
   },
 });
 
+/** Llave visual del torneo: estado de cada ronda según el avance. */
+function buildBracket(t, lostCurrent) {
+  return t.rivals.map((rivalId, i) => ({
+    label: STAGES[i],
+    team: teamById(rivalId),
+    state: i < t.stage ? 'won' : i === t.stage ? (lostCurrent ? 'lost' : 'next') : 'pending',
+  }));
+}
+
 const match = createMatchScreen({
   onFinish(result) {
     recordResult(result.won);
     show(end.el);
 
     if (duelCtx) {
+      const canRematch = !result.walkover && duel;
       end.show(result, {
         icon: result.won ? 'trophy' : 'sadball',
         title: result.walkover ? 'RIVAL DESCONECTADO' : result.won ? '¡GANASTE EL DUELO!' : 'PERDISTE EL DUELO',
@@ -144,9 +157,9 @@ const match = createMatchScreen({
             ? 'Cara a cara y te quedaste con el bombazo.'
             : 'Tu rival estuvo más fino. Pide la revancha.',
         confetti: result.won && !result.walkover,
-        primary: { act: 'menu', label: 'MENÚ' },
+        primary: canRematch ? { act: 'duel-rematch', label: 'REVANCHA' } : { act: 'menu', label: 'MENÚ' },
       });
-      closeDuel();
+      if (!canRematch) closeDuel();
       return;
     }
 
@@ -164,6 +177,7 @@ const match = createMatchScreen({
         icon: 'sadball',
         title: 'ELIMINADO',
         sub: `El sueño terminó en ${currentStage(t)}. El torneo no perdona.`,
+        bracket: buildBracket(t, true),
         primary: { act: 'new-tournament', label: 'NUEVO TORNEO' },
       });
       return;
@@ -176,6 +190,7 @@ const match = createMatchScreen({
         title: '¡CAMPEÓN DEL TORNEO!',
         sub: 'Cuatro rondas, cero excusas. Bombazo mundial.',
         confetti: true,
+        bracket: buildBracket(t, false),
         primary: { act: 'new-tournament', label: 'NUEVO TORNEO' },
       });
     } else {
@@ -183,6 +198,7 @@ const match = createMatchScreen({
         icon: 'ticket',
         title: '¡CLASIFICADO!',
         sub: `Superaste ${STAGES[t.stage - 1]}. Ahora: ${currentStage(t)} contra ${teamById(currentRival(t)).name}.`,
+        bracket: buildBracket(t, false),
         primary: { act: 'next', label: 'SIGUIENTE PARTIDO' },
       });
     }
@@ -193,12 +209,37 @@ const match = createMatchScreen({
   },
 });
 
+let awaitingRematch = false;
+
+/** Revancha de duelo sobre la misma conexión: ambos deben pedirla. */
+async function requestDuelRematch() {
+  if (!duel) {
+    backToMenu();
+    return;
+  }
+  if (awaitingRematch) return;
+  awaitingRematch = true;
+  end.setStatus('Esperando la revancha del rival…');
+  duel.send({ t: 'rematch' });
+  const answer = await duel.next('rematch');
+  awaitingRematch = false;
+  if (!answer || !duel) {
+    end.setStatus('El rival abandonó la sala.');
+    return;
+  }
+  end.setStatus('');
+  startDuelMatch();
+}
+
 const end = createEndScreen({
   onAction(act) {
     if (act === 'menu') {
+      closeDuel();
       backToMenu();
     } else if (act === 'rematch') {
       startQuickMatch();
+    } else if (act === 'duel-rematch') {
+      requestDuelRematch();
     } else if (act === 'next') {
       startTournamentMatch();
     } else if (act === 'new-tournament') {
