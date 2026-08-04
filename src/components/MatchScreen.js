@@ -3,13 +3,14 @@
  * Los remates usan física real (core/physics): el jugador desliza desde el
  * balón hacia el arco — dirección = puntería, velocidad = potencia y la
  * curvatura del gesto = efecto. Fallar el arco es posible por puntería
- * propia, sin dados. Atajar sigue siendo tocar una casilla.
+ * propia, sin dados. Atajar es arrastrar al arquero a un punto libre del arco:
+ * la atajada la decide la distancia (alcance del arquero), no una casilla.
  * Rivales: IA local (core/ai) o humano por WebRTC (net/duel).
  */
 import { createShootout, registerKick, registerHabit, winner, isSuddenDeath, score } from '../core/shootout.js';
-import { keeperPick, shooterPick } from '../core/ai.js';
-import { zoneAt, zoneNearest } from '../core/zones.js';
-import { makeCpuShot, cornerCrossPath, headerShot, wallBlocks, applyWind } from '../core/physics.js';
+import { keeperAim, shooterAim } from '../core/ai.js';
+import { zoneAt, zoneNearest, inGoal } from '../core/zones.js';
+import { cpuAimShot, isSaved, cornerCrossPath, headerShot, wallBlocks, applyWind } from '../core/physics.js';
 import { recordShot } from '../core/stats.js';
 import { createPitch } from './Pitch.js';
 import { createScoreboard } from './Scoreboard.js';
@@ -245,39 +246,38 @@ export function createMatchScreen({ onFinish, onExit }) {
     const shot = await aimMyShot();
     if (!shot) return;
     if (shot.finalZone !== null) registerHabit(ctx.s, shot.finalZone);
-    // El arquero lee la zona (real o la más cercana si el tiro va afuera)
-    const readZone = shot.finalZone ?? zoneNearest(shot.tx, shot.ty);
-    const gkZone = keeperPick(ctx.diff, readZone, ctx.s.habits);
+    // El arquero lee el punto del tiro con el error de su dificultad
+    const keeper = keeperAim(ctx.diff, shot, ctx.s.habits);
 
     await pitch.kickAnim();
     sfx.kick();
-    pitch.keeperDive(gkZone);
+    pitch.keeperDive(keeper);
     await pitch.ballFlight(shot);
 
-    const goal = !shot.offTarget && shot.finalZone !== gkZone;
-    await settleMyKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? readZone });
+    const goal = !shot.offTarget && !isSaved(shot, keeper);
+    await settleMyKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   async function cpuKick() {
     const { s, playerTeam, rivalTeam, diff } = ctx;
     ctx.phase = 'save';
     pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
-    setMsg(`Penal ${s.kicks.C.length + 1} — ¡Te toca atajar!`, 'Toca la casilla hacia donde volarás');
+    setMsg(`Penal ${s.kicks.C.length + 1} — ¡Te toca atajar!`, 'Arrastra a tu arquero hacia donde volarás');
     updateBoard();
 
     const dive = await pitch.pickDive();
     if (dive === null || aborted) return;
-    const intent = shooterPick(diff, dive);
-    const cpuShot = applyWind(makeCpuShot(intent.zone, intent.offTarget), ctx.wind);
-    const finalZone = intent.offTarget ? null : zoneAt(cpuShot.tx, cpuShot.ty);
+    const aim = shooterAim(diff, dive);
+    const cpuShot = applyWind(cpuAimShot(aim, aim.offTarget), ctx.wind);
+    const off = aim.offTarget || !inGoal(cpuShot.tx, cpuShot.ty);
 
     await pitch.kickAnim();
     sfx.kick();
     pitch.keeperDive(dive);
     await pitch.ballFlight(cpuShot);
 
-    const goal = finalZone !== null && finalZone !== dive;
-    await settleTheirKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? intent.zone });
+    const goal = !off && !isSaved(cpuShot, dive);
+    await settleTheirKick({ goal, offTarget: off, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
   }
 
   /* ---------- Modo Córners: cabezazo con timing ---------- */
@@ -306,30 +306,29 @@ export function createMatchScreen({ onFinish, onExit }) {
     }
 
     const shot = applyWind(headerShot(tap), ctx.wind);
-    const finalZone = zoneAt(shot.tx, shot.ty);
-    const readZone = finalZone ?? zoneNearest(shot.tx, shot.ty);
-    const gkZone = keeperPick(ctx.diff, readZone, s.habits);
+    const off = !inGoal(shot.tx, shot.ty);
+    const keeper = keeperAim(ctx.diff, shot, s.habits);
 
     sfx.kick();
-    pitch.keeperDive(gkZone);
+    pitch.keeperDive(keeper);
     await pitch.ballFlight(shot, { x: tap.x, y: tap.y });
 
-    const goal = finalZone !== null && finalZone !== gkZone;
-    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? readZone });
+    const goal = !off && !isSaved(shot, keeper);
+    await settleMyKick({ goal, offTarget: off, ballZone: zoneNearest(shot.tx, shot.ty) });
   }
 
   async function theirCornerKick() {
     const { s, playerTeam, rivalTeam, diff } = ctx;
     ctx.phase = 'save';
     pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
-    setMsg(`Córner ${s.kicks.C.length + 1} — ¡Ataja el cabezazo!`, 'Toca la casilla hacia donde volarás');
+    setMsg(`Córner ${s.kicks.C.length + 1} — ¡Ataja el cabezazo!`, 'Arrastra a tu arquero hacia donde volarás');
     updateBoard();
 
     const dive = await pitch.pickDive();
     if (dive === null || aborted) return;
-    const intent = shooterPick(diff, dive);
-    const cpuShot = applyWind(makeCpuShot(intent.zone, intent.offTarget), ctx.wind);
-    const finalZone = intent.offTarget ? null : zoneAt(cpuShot.tx, cpuShot.ty);
+    const aim = shooterAim(diff, dive);
+    const cpuShot = applyWind(cpuAimShot(aim, aim.offTarget), ctx.wind);
+    const off = aim.offTarget || !inGoal(cpuShot.tx, cpuShot.ty);
 
     sfx.kick();
     // El centro rival viaja hasta el punto de remate y ahí llega el cabezazo
@@ -342,8 +341,8 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(dive);
     await pitch.ballFlight(cpuShot, headPoint);
 
-    const goal = finalZone !== null && finalZone !== dive;
-    await settleTheirKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? intent.zone });
+    const goal = !off && !isSaved(cpuShot, dive);
+    await settleTheirKick({ goal, offTarget: off, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
   }
 
   /* ---------- Modo Tiros libres: la barrera tapa el centro ---------- */
@@ -376,35 +375,35 @@ export function createMatchScreen({ onFinish, onExit }) {
       return;
     }
 
-    const readZone = finalZone ?? zoneNearest(shot.tx, shot.ty);
-    const gkZone = keeperPick(ctx.diff, readZone, s.habits);
+    const keeper = keeperAim(ctx.diff, shot, s.habits);
     await pitch.kickAnim();
     sfx.kick();
-    pitch.keeperDive(gkZone);
+    pitch.keeperDive(keeper);
     await pitch.ballFlight(shot);
-    const goal = finalZone !== null && finalZone !== gkZone;
-    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? readZone });
+    const goal = finalZone !== null && !isSaved(shot, keeper);
+    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   async function theirFreeKick() {
     const { s, playerTeam, rivalTeam, diff } = ctx;
     ctx.phase = 'save';
     pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
-    setMsg(`Tiro libre ${s.kicks.C.length + 1} — ¡Defiende!`, 'Toca la casilla hacia donde volarás');
+    setMsg(`Tiro libre ${s.kicks.C.length + 1} — ¡Defiende!`, 'Arrastra a tu arquero hacia donde volarás');
     updateBoard();
 
     const dive = await pitch.pickDive();
     if (dive === null || aborted) return;
 
-    // La CPU evita la barrera casi siempre... casi
-    let intent = shooterPick(diff, dive);
+    // La CPU evita la barrera (columna central) casi siempre... casi
+    let aim = shooterAim(diff, dive);
+    let cpuShot = applyWind(cpuAimShot(aim, aim.offTarget), ctx.wind);
     let tries = 0;
-    while (!intent.offTarget && [4, 7].includes(intent.zone) && tries < 3) {
-      intent = shooterPick(diff, dive);
+    while (!aim.offTarget && [4, 7].includes(zoneNearest(cpuShot.tx, cpuShot.ty)) && tries < 3) {
+      aim = shooterAim(diff, dive);
+      cpuShot = applyWind(cpuAimShot(aim, aim.offTarget), ctx.wind);
       tries += 1;
     }
-    const cpuShot = applyWind(makeCpuShot(intent.zone, intent.offTarget), ctx.wind);
-    const finalZone = intent.offTarget ? null : zoneAt(cpuShot.tx, cpuShot.ty);
+    const finalZone = aim.offTarget || !inGoal(cpuShot.tx, cpuShot.ty) ? null : zoneNearest(cpuShot.tx, cpuShot.ty);
     const blocked = finalZone !== null && wallBlocks(finalZone, cpuShot.curve);
 
     await pitch.kickAnim();
@@ -426,8 +425,8 @@ export function createMatchScreen({ onFinish, onExit }) {
 
     pitch.keeperDive(dive);
     await pitch.ballFlight(cpuShot);
-    const goal = finalZone !== null && finalZone !== dive;
-    await settleTheirKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? intent.zone });
+    const goal = finalZone !== null && !isSaved(cpuShot, dive);
+    await settleTheirKick({ goal, offTarget: finalZone === null, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
   }
 
   /* ---------- Rival humano (duelo WebRTC) ---------- */
@@ -443,23 +442,23 @@ export function createMatchScreen({ onFinish, onExit }) {
 
     await pitch.kickAnim();
     sfx.kick();
-    pitch.keeperDive(dive.zone);
+    pitch.keeperDive(dive);
     await pitch.ballFlight(shot);
 
-    const goal = !shot.offTarget && shot.finalZone !== dive.zone;
-    await settleMyKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? dive.zone });
+    const goal = !shot.offTarget && !isSaved(shot, dive);
+    await settleMyKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   async function theirDuelKick() {
     const { s, playerTeam, rivalTeam } = ctx;
     ctx.phase = 'save';
     pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
-    setMsg(`Penal ${s.kicks.C.length + 1} — ¡Te toca atajar!`, 'Toca la casilla hacia donde volarás');
+    setMsg(`Penal ${s.kicks.C.length + 1} — ¡Te toca atajar!`, 'Arrastra a tu arquero hacia donde volarás');
     updateBoard();
 
     const dive = await pitch.pickDive();
     if (dive === null || aborted) return;
-    ctx.duel.send({ t: 'dive', zone: dive });
+    ctx.duel.send({ t: 'dive', x: dive.x, y: dive.y });
 
     setMsg('Esperando el remate…', 'El rival está pateando');
     const shot = await ctx.duel.next('shot');
@@ -470,8 +469,8 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(dive);
     await pitch.ballFlight(shot);
 
-    const goal = !shot.offTarget && shot.finalZone !== dive;
-    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? dive });
+    const goal = !shot.offTarget && !isSaved(shot, dive);
+    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   /* ---------- Modo 2 jugadores (mismo teléfono, hot-seat) ---------- */
@@ -499,7 +498,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     // El remate queda en secreto hasta que el arquero elija su vuelo
     await showHandoff(`ATAJA ${keeperTeam.short}`, 'Pásale el teléfono al arquero');
     if (aborted) return;
-    setMsg(`¡Ataja ${keeperTeam.short}!`, 'Toca la casilla o arrastra a tu arquero');
+    setMsg(`¡Ataja ${keeperTeam.short}!`, 'Arrastra a tu arquero a donde vuelas');
     const dive = await pitch.pickDive();
     if (dive === null || aborted) return;
 
@@ -507,8 +506,8 @@ export function createMatchScreen({ onFinish, onExit }) {
     sfx.kick();
     pitch.keeperDive(dive);
     await pitch.ballFlight(shot);
-    const goal = finalZone !== null && finalZone !== dive;
-    const outcome = { goal, offTarget: finalZone === null, ballZone: finalZone ?? dive };
+    const goal = finalZone !== null && !isSaved(shot, dive);
+    const outcome = { goal, offTarget: finalZone === null, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) };
     if (shooterIsP1) await settleMyKick(outcome);
     else await settleTheirKick(outcome);
   }
@@ -549,22 +548,22 @@ export function createMatchScreen({ onFinish, onExit }) {
       await sleep(240);
       return;
     }
-    pitch.keeperDive(dive.zone);
+    pitch.keeperDive(dive);
     await pitch.ballFlight(shot);
-    const goal = finalZone !== null && finalZone !== dive.zone;
-    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? dive.zone });
+    const goal = finalZone !== null && !isSaved(shot, dive);
+    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   async function theirDuelFreeKick() {
     const { s, playerTeam, rivalTeam } = ctx;
     ctx.phase = 'save';
     pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
-    setMsg(`Tiro libre ${s.kicks.C.length + 1} — ¡Defiende!`, 'Toca la casilla o arrastra a tu arquero');
+    setMsg(`Tiro libre ${s.kicks.C.length + 1} — ¡Defiende!`, 'Arrastra a tu arquero hacia donde volarás');
     updateBoard();
 
     const dive = await pitch.pickDive();
     if (dive === null || aborted) return;
-    ctx.duel.send({ t: 'dive', zone: dive });
+    ctx.duel.send({ t: 'dive', x: dive.x, y: dive.y });
 
     setMsg('Esperando el remate…', 'El rival está pateando');
     const shot = await ctx.duel.next('shot');
@@ -587,8 +586,8 @@ export function createMatchScreen({ onFinish, onExit }) {
     }
     pitch.keeperDive(dive);
     await pitch.ballFlight(shot);
-    const goal = !shot.offTarget && shot.finalZone !== dive;
-    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? dive });
+    const goal = !shot.offTarget && !isSaved(shot, dive);
+    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   /* ---------- Duelo: córners ---------- */
@@ -627,22 +626,22 @@ export function createMatchScreen({ onFinish, onExit }) {
     if (dive === null || aborted) return;
 
     sfx.kick();
-    pitch.keeperDive(dive.zone);
+    pitch.keeperDive(dive);
     await pitch.ballFlight(shot, { x: tap.x, y: tap.y });
-    const goal = finalZone !== null && finalZone !== dive.zone;
-    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? dive.zone });
+    const goal = finalZone !== null && !isSaved(shot, dive);
+    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   async function theirDuelCornerKick() {
     const { s, playerTeam, rivalTeam } = ctx;
     ctx.phase = 'save';
     pitch.setKits({ shooterTeam: rivalTeam, keeperTeam: playerTeam, shooterProfile: ctx.rivalProfile });
-    setMsg(`Córner ${s.kicks.C.length + 1} — ¡Ataja el cabezazo!`, 'Toca la casilla o arrastra a tu arquero');
+    setMsg(`Córner ${s.kicks.C.length + 1} — ¡Ataja el cabezazo!`, 'Arrastra a tu arquero hacia donde volarás');
     updateBoard();
 
     const dive = await pitch.pickDive();
     if (dive === null || aborted) return;
-    ctx.duel.send({ t: 'dive', zone: dive });
+    ctx.duel.send({ t: 'dive', x: dive.x, y: dive.y });
 
     setMsg('Esperando el remate…', 'El rival está rematando el córner');
     const shot = await ctx.duel.next('shot');
@@ -665,8 +664,8 @@ export function createMatchScreen({ onFinish, onExit }) {
     sfx.kick();
     pitch.keeperDive(dive);
     await pitch.ballFlight(shot, { x: shot.headX ?? headPoint.x, y: shot.headY ?? headPoint.y });
-    const goal = !shot.offTarget && shot.finalZone !== dive;
-    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? dive });
+    const goal = !shot.offTarget && !isSaved(shot, dive);
+    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   /* ---------- Orquestación ---------- */

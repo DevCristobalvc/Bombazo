@@ -6,20 +6,6 @@
  */
 import { keeperSVG, shooterSVG } from './players.js';
 import { ballArt } from './ball.js';
-import { ZONE_NAMES } from '../core/zones.js';
-
-function zoneRects() {
-  let out = '';
-  for (let row = 0; row < 3; row++) {
-    for (let col = 0; col < 3; col++) {
-      const z = row * 3 + col;
-      const x = 60 + col * 80;
-      const y = (152 + row * 73.33).toFixed(1);
-      out += `<rect class="zone" data-zone="${z}" x="${x}" y="${y}" width="80" height="73.4" rx="6" role="button" aria-label="Zona ${ZONE_NAMES[z]}"><title>${ZONE_NAMES[z]}</title></rect>`;
-    }
-  }
-  return out;
-}
 
 export function sceneSVG() {
   return `
@@ -125,13 +111,11 @@ export function sceneSVG() {
     <!-- viñeta de profundidad -->
     <rect x="0" y="0" width="360" height="560" fill="url(#g-vignette)" pointer-events="none"/>
 
-    <!-- grilla de 9 zonas -->
-    <g id="zones">
-      <g class="gridlines" stroke="#ffd100" stroke-width="1.5" stroke-dasharray="5 6" fill="none">
-        <path d="M140 152 V372 M220 152 V372 M60 225.3 H300 M60 298.7 H300"/>
-        <rect x="60" y="152" width="240" height="220" rx="4"/>
-      </g>
-      ${zoneRects()}
+    <!-- retícula de estirada: marca el punto al que se lanzará el arquero -->
+    <g id="dive-reticle" opacity="0" pointer-events="none">
+      <circle r="17" fill="none" stroke="#33e0a1" stroke-width="2.5" stroke-dasharray="4 5"/>
+      <circle r="3.2" fill="#33e0a1"/>
+      <path d="M-24 0 h10 M14 0 h10 M0 -24 v10 M0 14 v10" stroke="#33e0a1" stroke-width="2.5" stroke-linecap="round"/>
     </g>
 
     <!-- guía del swipe: trayectoria proyectada + punto de mira -->

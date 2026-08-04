@@ -11,6 +11,20 @@ export const ZONE_Y = [189, 262, 335];
 export const BALL_HOME = { x: 180, y: 462 };
 export const KEEPER_HOME = { x: 180, y: 371 };
 
+/** Alcance de las manos del arquero (radio, px de escena). Define la atajada
+ *  en el modelo continuo: si el balón cae dentro de este radio del punto al
+ *  que se lanzó el arquero, la ataja. */
+export const KEEPER_REACH = 58;
+
+/** ¿El punto cae dentro de la boca del arco? (inverso de zoneAt===null). */
+export const inGoal = (x, y) => x >= GOAL.left && x <= GOAL.right && y >= GOAL.top && y <= GOAL.bottom;
+
+/** Limita un punto a la boca del arco (destino de estirada del arquero). */
+export const clampToGoal = (x, y) => ({
+  x: Math.min(GOAL.right, Math.max(GOAL.left, x)),
+  y: Math.min(GOAL.bottom, Math.max(GOAL.top, y)),
+});
+
 export const ZONE_NAMES = [
   'arriba a la izquierda', 'arriba al centro', 'arriba a la derecha',
   'media altura a la izquierda', 'al centro', 'media altura a la derecha',

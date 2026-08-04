@@ -5,9 +5,30 @@
  * el efecto (comba). La trayectoria es una Bézier cuadrática con leve arco
  * de gravedad; el punto de control se desplaza según la curva.
  */
-import { BALL_HOME, zoneCenter } from './zones.js';
+import { BALL_HOME, zoneCenter, KEEPER_REACH } from './zones.js';
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+/**
+ * Atajada continua: ¿el arquero (punto {x,y} al que se lanzó) alcanza el
+ * balón (destino tx,ty del tiro)? Es la nueva fuente de verdad del resultado,
+ * en lugar de comparar zonas. `reach` puede ampliarse (arquero con más nivel).
+ */
+export function isSaved(shot, keeper, reach = KEEPER_REACH) {
+  if (!keeper) return false;
+  return Math.hypot(shot.tx - keeper.x, shot.ty - keeper.y) <= reach;
+}
+
+/** Construye un tiro (tx,ty,curve,dur) que apunta a un punto continuo del
+ *  arco. Si offTarget, se va por encima del travesaño. Para la IA rematadora. */
+export function cpuAimShot(target, offTarget = false) {
+  const curve = (Math.random() * 2 - 1) * 0.5;
+  const dur = 330 + Math.random() * 150;
+  if (offTarget) {
+    return { tx: clamp(target.x + (Math.random() * 44 - 22), -30, 390), ty: 96 + Math.random() * 24, curve, dur };
+  }
+  return { tx: clamp(target.x, -20, 380), ty: clamp(target.y, 96, 372), curve, dur };
+}
 
 /** Alcance del gesto: cuánto viaja el objetivo por px deslizado. */
 const REACH = 1.12;

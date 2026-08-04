@@ -7,7 +7,7 @@
  * - keeperDive, kickAnim, celebrate, shake, flash, reset.
  */
 import { sceneSVG } from '../art/stadium.js';
-import { zoneCenter, zoneAt, BALL_HOME, KEEPER_HOME } from '../core/zones.js';
+import { zoneCenter, BALL_HOME, KEEPER_HOME, clampToGoal } from '../core/zones.js';
 import { analyzeSwipe, projectTarget, shotPath } from '../core/physics.js';
 import { fromHTML, sleep } from '../utils/dom.js';
 import './Pitch.css';
@@ -20,82 +20,74 @@ export function createPitch() {
   const aimDot = el.querySelector('#aim-dot');
   const aimLine = el.querySelector('#aim-line');
 
-  let resolveZone = null;
+  let resolveDive = null;
   let cancelSwipe = null;
 
-  /* ---------- Atajar: grilla de 9 zonas ---------- */
+  /* ---------- Atajar: arrastre continuo del arquero ---------- */
 
-  svg.querySelector('#zones').addEventListener('click', (event) => {
-    const rect = event.target.closest('.zone');
-    if (!rect || !resolveZone) return;
-    rect.classList.add('picked');
-    svg.classList.remove('aiming');
-    const resolve = resolveZone;
-    resolveZone = null;
-    resolve(Number(rect.dataset.zone));
-  });
-
-  function pickZone() {
-    return new Promise((resolve) => {
-      svg.classList.add('aiming');
-      resolveZone = resolve;
-    });
+  /** El arquero se desliza siguiendo el dedo hacia el punto {x,y}. */
+  let keeperGlideX = 0;
+  let keeperGlideY = 0;
+  function keeperGlide(point) {
+    keeperGlideX = (point.x - KEEPER_HOME.x) * 0.6;
+    keeperGlideY = (point.y - KEEPER_HOME.y) * 0.2;
+    keeper.style.transition = 'transform .1s ease-out';
+    keeper.style.transform = `translate(${keeperGlideX.toFixed(1)}px, ${keeperGlideY.toFixed(1)}px)`;
+    moveReticle(point);
   }
 
-  /** El arquero se desliza a la zona elegida mientras arrastras. */
-  let keeperGlideX = 0;
-  function keeperGlide(zone) {
-    const c = zoneCenter(zone);
-    keeperGlideX = (c.x - KEEPER_HOME.x) * 0.65;
-    keeper.style.transition = 'transform .16s ease-out';
-    keeper.style.transform = `translate(${keeperGlideX.toFixed(1)}px, 0px)`;
+  /** Retícula que marca a dónde se lanzará el arquero. */
+  const reticle = svg.querySelector('#dive-reticle');
+  function moveReticle(point) {
+    if (!reticle) return;
+    reticle.setAttribute('transform', `translate(${point.x.toFixed(1)} ${point.y.toFixed(1)})`);
+    reticle.setAttribute('opacity', '0.95');
+  }
+  function hideReticle() {
+    if (reticle) reticle.setAttribute('opacity', '0');
   }
 
   /**
-   * Elección del vuelo al atajar: toca una casilla O arrastra al arquero
-   * hasta donde quieres taparlo (se desliza siguiendo el dedo).
+   * Elección del vuelo al atajar (continua): arrastra al arquero a cualquier
+   * punto del arco, o toca directo. Resuelve el punto {x,y} o null si se cancela.
    */
   function pickDive() {
     return new Promise((resolve) => {
       svg.classList.add('aiming');
       let dragging = false;
-      let lastZone = null;
+      let last = null;
 
-      const finish = (zone) => {
+      const finish = (point) => {
         svg.removeEventListener('pointerdown', down);
         svg.removeEventListener('pointermove', move);
         svg.removeEventListener('pointerup', up);
-        resolve(zone);
+        svg.removeEventListener('pointercancel', up);
+        svg.classList.remove('aiming');
+        resolveDive = null;
+        resolve(point);
       };
-      resolveZone = finish; // el tap directo en una casilla sigue funcionando
+      resolveDive = () => { hideReticle(); finish(null); };
 
       const down = (e) => {
         dragging = true;
-        move(e);
+        last = clampToGoal(scenePoint(e).x, scenePoint(e).y);
+        keeperGlide(last);
       };
       const move = (e) => {
         if (!dragging) return;
         const p = scenePoint(e);
-        const z = zoneAt(Math.min(299, Math.max(61, p.x)), Math.min(371, Math.max(153, p.y)));
-        if (z !== null && z !== lastZone) {
-          lastZone = z;
-          keeperGlide(z);
-        }
+        last = clampToGoal(p.x, p.y);
+        keeperGlide(last);
       };
       const up = () => {
-        if (!dragging) return;
+        if (!dragging || !last) return;
         dragging = false;
-        if (lastZone !== null && resolveZone) {
-          const r = resolveZone;
-          resolveZone = null;
-          svg.classList.remove('aiming');
-          svg.querySelector(`.zone[data-zone="${lastZone}"]`)?.classList.add('picked');
-          r(lastZone);
-        }
+        finish(last);
       };
       svg.addEventListener('pointerdown', down);
       svg.addEventListener('pointermove', move);
       svg.addEventListener('pointerup', up);
+      svg.addEventListener('pointercancel', up);
     });
   }
 
@@ -190,11 +182,7 @@ export function createPitch() {
   /** Cancela cualquier interacción pendiente (salida del partido). */
   function cancelAim() {
     svg.classList.remove('aiming');
-    if (resolveZone) {
-      const resolve = resolveZone;
-      resolveZone = null;
-      resolve(null);
-    }
+    if (resolveDive) resolveDive();
     if (cancelSwipe) cancelSwipe();
     if (cancelCross) cancelCross();
   }
@@ -229,17 +217,18 @@ export function createPitch() {
     s.setProperty('--gk-hair', keeperTeam.hair);
   }
 
-  /** Estirada con física: parábola de salto con despegue, vuelo y caída. */
-  function keeperDive(zone) {
+  /** Estirada continua con física: vuela desde donde esté el arquero hasta el
+   *  punto {x,y} elegido, con impulso, arco de gravedad y rotación del cuerpo. */
+  function keeperDive(point) {
     svg.classList.add('diving'); // pausa el balanceo de espera
-    const c = zoneCenter(zone);
-    const col = zone % 3;
-    const row = Math.floor(zone / 3);
-    const dx = (c.x - KEEPER_HOME.x) * 0.92;
-    const dy = row === 0 ? -66 : row === 1 ? -30 : -2;
-    const angle = col === 0 ? -55 : col === 2 ? 55 : 0;
-    const startX = keeperGlideX; // si el arquero se deslizó, vuela desde ahí
-    const jump = row === 0 ? -34 : row === 1 ? -18 : -8;
+    hideReticle();
+    const dx = (point.x - KEEPER_HOME.x) * 0.92;
+    const rel = point.y - KEEPER_HOME.y; // negativo = hacia arriba del arco
+    const dy = Math.max(-72, Math.min(4, rel * 0.7 - 4));
+    const angle = Math.max(-62, Math.min(62, (point.x - KEEPER_HOME.x) * 0.62));
+    const startX = keeperGlideX; // si se deslizó siguiendo el dedo, vuela desde ahí
+    const startY = keeperGlideY;
+    const jump = point.y < KEEPER_HOME.y - 130 ? -34 : point.y < KEEPER_HOME.y - 60 ? -20 : -8;
     const dur = 430;
 
     keeper.style.transition = 'none';
@@ -248,7 +237,7 @@ export function createPitch() {
       const u = Math.min(1, (now - t0) / dur);
       const e = 1 - (1 - u) ** 2; // impulso fuerte que se frena en el aire
       const x = startX + (dx - startX) * e;
-      const y = dy * e + jump * Math.sin(Math.PI * u); // arco de gravedad
+      const y = startY + (dy - startY) * e + jump * Math.sin(Math.PI * u); // arco de gravedad
       const r = angle * Math.min(1, u * 1.5);
       keeper.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${r.toFixed(1)}deg)`;
       if (u < 1) requestAnimationFrame(step);
@@ -400,12 +389,13 @@ export function createPitch() {
   function reset() {
     svg.classList.remove('kick', 'diving');
     keeperGlideX = 0;
+    keeperGlideY = 0;
+    hideReticle();
     keeper.style.transition = '';
     keeper.style.transform = '';
     ball.style.transition = '';
     ball.style.transform = '';
-    svg.querySelectorAll('.zone.picked').forEach((r) => r.classList.remove('picked'));
   }
 
-  return { el, setKits, setWall, pickZone, pickDive, captureSwipe, cornerCross, cancelAim, keeperDive, ballFlight, ballBounce, ballDeflect, kickAnim, celebrate, shake, flash, netRipple, reset };
+  return { el, setKits, setWall, pickDive, captureSwipe, cornerCross, cancelAim, keeperDive, ballFlight, ballBounce, ballDeflect, kickAnim, celebrate, shake, flash, netRipple, reset };
 }

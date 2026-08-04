@@ -33,6 +33,19 @@ async function swipeShot(page, targetX, targetY) {
   await page.mouse.up();
 }
 
+/** Simula la atajada: arrastra al arquero desde su casa hasta un punto del arco. */
+async function dragKeeper(page, targetX, targetY) {
+  const [sx, sy] = await toClient(page, 180, 300);
+  const [tx, ty] = await toClient(page, targetX, targetY);
+  await page.mouse.move(sx, sy);
+  await page.mouse.down();
+  for (let i = 1; i <= 6; i++) {
+    await page.mouse.move(sx + ((tx - sx) * i) / 6, sy + ((ty - sy) * i) / 6);
+    await page.waitForTimeout(16);
+  }
+  await page.mouse.up();
+}
+
 async function assertNoPageScroll(page, label, failures) {
   const metrics = await page.evaluate(() => ({
     docScroll: document.documentElement.scrollHeight,
@@ -92,10 +105,10 @@ async function assertNoPageScroll(page, label, failures) {
   await page.waitForTimeout(900);
   await page.screenshot({ path: path.join(OUT, '4-tiro-resultado.png') });
 
-  // fase de atajar
+  // fase de atajar: arrastre continuo del arquero a un punto del arco
   await page.waitForSelector('#scene.aiming', { timeout: 15000 });
   await page.screenshot({ path: path.join(OUT, '5-atajar.png') });
-  await page.click('.zone[data-zone="8"]', { force: true });
+  await dragKeeper(page, 250, 320);
   await page.waitForTimeout(700);
   await page.screenshot({ path: path.join(OUT, '6-atajada-resultado.png') });
 

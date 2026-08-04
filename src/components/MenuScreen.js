@@ -67,7 +67,7 @@ export function createMenuScreen({ onPlay }) {
         <div class="chips" data-ref="numbers"></div>
         <input class="name-input" data-ref="name" maxlength="10" placeholder="TU NOMBRE EN LA CAMISETA" autocomplete="off" spellcheck="false">
         <button class="btn-big" data-ref="play">¡A LA CANCHA!</button>
-        <p class="howto"><b>Desliza</b> desde el balón hacia el arco para rematar — curva el gesto para darle efecto. Para <b>atajar</b>, toca la casilla. Empate = muerte súbita.</p>
+        <p class="howto"><b>Desliza</b> desde el balón hacia el arco para rematar — curva el gesto para darle efecto. Para <b>atajar</b>, arrastra a tu arquero a donde crees que va el balón. Empate = muerte súbita.</p>
       </div>
     </section>`);
 
