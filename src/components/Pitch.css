@@ -104,41 +104,14 @@ svg[data-sh-style='punk'] .hairv-punk {
   }
 }
 
-.scene.guide .gridlines {
-  opacity: 0.5;
+/* Al atajar, el cursor invita a arrastrar al arquero */
+.scene.aiming {
+  touch-action: none;
+  cursor: grab;
 }
 
-/* Grilla de 9 zonas: solo interactiva al atajar */
-.zone {
-  fill: transparent;
-  pointer-events: none;
-}
-
-.scene.aiming .zone {
-  pointer-events: auto;
-  cursor: pointer;
-}
-
-.scene.aiming .zone:hover,
-.scene.aiming .zone:active {
-  fill: rgba(255, 209, 0, 0.18);
-  stroke: #ffd100;
-  stroke-width: 2;
-}
-
-.zone.picked {
-  fill: rgba(255, 209, 0, 0.12);
-  stroke: #ffd100;
-  stroke-width: 2.5;
-}
-
-.gridlines {
-  opacity: 0;
-  transition: opacity 0.25s;
-}
-
-.scene.aiming .gridlines {
-  opacity: 0.5;
+.scene.aiming:active {
+  cursor: grabbing;
 }
 
 /* La multitud salta al celebrar */
