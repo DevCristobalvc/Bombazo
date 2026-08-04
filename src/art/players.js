@@ -121,12 +121,16 @@ export function keeperSVG() {
     <path d="M-22 -112 L22 -112 L18 -62 L-18 -62 Z" fill="var(--gk-shirt)" stroke="rgba(8,10,20,.25)" stroke-width="1.5"/>
     <path d="M-21.7 -107 L21.7 -107 L21.2 -100 L-21.2 -100 Z" fill="var(--gk-accent)" opacity=".8"/>
     <g transform="translate(-20,-104) rotate(-36)">
-      <rect x="-38" y="-6" width="40" height="12" rx="6" fill="var(--gk-shirt)"/>
-      <circle cx="-42" cy="0" r="8" fill="#f4f6fb" stroke="#c9cedb" stroke-width="1.5"/>
+      <rect x="-40" y="-6.5" width="42" height="13" rx="6.5" fill="var(--gk-shirt)"/>
+      <rect x="-42" y="-7.5" width="7" height="15" rx="2.5" fill="var(--gk-accent)"/>
+      <rect x="-54" y="-9.5" width="17" height="19" rx="6" fill="#f4f6fb" stroke="#c9cedb" stroke-width="1.5"/>
+      <path d="M-50 -9 v19 M-45.5 -9 v19" stroke="#c9cedb" stroke-width="1"/>
     </g>
     <g transform="translate(20,-104) rotate(36)">
-      <rect x="-2" y="-6" width="40" height="12" rx="6" fill="var(--gk-shirt)"/>
-      <circle cx="42" cy="0" r="8" fill="#f4f6fb" stroke="#c9cedb" stroke-width="1.5"/>
+      <rect x="-2" y="-6.5" width="42" height="13" rx="6.5" fill="var(--gk-shirt)"/>
+      <rect x="35" y="-7.5" width="7" height="15" rx="2.5" fill="var(--gk-accent)"/>
+      <rect x="37" y="-9.5" width="17" height="19" rx="6" fill="#f4f6fb" stroke="#c9cedb" stroke-width="1.5"/>
+      <path d="M42 -9 v19 M46.5 -9 v19" stroke="#c9cedb" stroke-width="1"/>
     </g>
     <text x="0" y="-76" text-anchor="middle" font-size="24" font-weight="900" fill="var(--gk-accent)" font-family="Nunito, sans-serif">1</text>
     <circle cx="0" cy="-127" r="15" fill="var(--gk-skin)"/>
