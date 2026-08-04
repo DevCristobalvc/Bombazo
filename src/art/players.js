@@ -99,6 +99,9 @@ export function shooterSVG() {
     <path d="M28 -148 L44 -118 L31 -111 L23 -132 Z" fill="var(--sh-accent)"/>
     <circle cx="-38" cy="-107" r="6" fill="var(--sh-skin)"/>
     <circle cx="38" cy="-107" r="6" fill="var(--sh-skin)"/>
+    <!-- brazos colgando desde el hombro -->
+    <rect class="sh-arm sh-arm-l" x="-42.5" y="-108" width="9" height="32" rx="4.5" fill="var(--sh-skin)"/>
+    <rect class="sh-arm sh-arm-r" x="33.5" y="-108" width="9" height="32" rx="4.5" fill="var(--sh-skin)"/>
     <text class="sh-name" x="0" y="-129" text-anchor="middle" font-size="10.5" font-weight="900" fill="var(--sh-accent)" letter-spacing="1" font-family="Nunito, sans-serif"></text>
     <text class="sh-number" x="0" y="-96" text-anchor="middle" font-size="34" font-weight="900" fill="var(--sh-accent)" font-family="Nunito, sans-serif">10</text>
     <circle cx="0" cy="-164" r="17" fill="var(--sh-skin)"/>
