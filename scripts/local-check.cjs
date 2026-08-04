@@ -29,6 +29,18 @@ const OUT = path.join(__dirname, '..', '.smoke');
     await page.mouse.up();
   };
 
+  const dragKeeper = async (tx0, ty0) => {
+    const [sx, sy] = await toClient(180, 300);
+    const [tx, ty] = await toClient(tx0, ty0);
+    await page.mouse.move(sx, sy);
+    await page.mouse.down();
+    for (let i = 1; i <= 6; i++) {
+      await page.mouse.move(sx + ((tx - sx) * i) / 6, sy + ((ty - sy) * i) / 6);
+      await page.waitForTimeout(16);
+    }
+    await page.mouse.up();
+  };
+
   const tapHandoff = async () => {
     await page.waitForSelector('.handoff:not([hidden])', { timeout: 15000 });
     await page.waitForTimeout(500);
@@ -45,7 +57,7 @@ const OUT = path.join(__dirname, '..', '.smoke');
   await page.screenshot({ path: path.join(OUT, 'local-1-handoff.png') });
   await tapHandoff(); // pásale el teléfono al arquero
   await page.waitForSelector('#scene.aiming', { timeout: 15000 });
-  await page.click('.zone[data-zone="8"]', { force: true });
+  await dragKeeper(260, 335);
   await page.waitForTimeout(2600);
 
   // Turno de P2 (FRA): handoff → remate → handoff → P1 ataja
@@ -54,7 +66,7 @@ const OUT = path.join(__dirname, '..', '.smoke');
   await swipeShot(260, 335);
   await tapHandoff();
   await page.waitForSelector('#scene.aiming', { timeout: 15000 });
-  await page.click('.zone[data-zone="4"]', { force: true });
+  await dragKeeper(180, 262);
   await page.waitForTimeout(2600);
   await page.screenshot({ path: path.join(OUT, 'local-2-round.png') });
 
