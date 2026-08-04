@@ -45,7 +45,19 @@
 }
 
 .scene.kick #shooter {
-  transform: translate(56px, -44px) rotate(12deg);
+  animation: shooter-strike 0.24s cubic-bezier(0.4, 0, 0.7, 1) forwards;
+}
+
+/* Amague hacia atrás y golpe hacia el balón */
+@keyframes shooter-strike {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  28% { transform: translate(-11px, 3px) rotate(-7deg); }
+  100% { transform: translate(58px, -46px) rotate(14deg); }
+}
+
+/* El balanceo de espera no debe pelear con el golpe */
+.scene.kick .shooter-art {
+  animation: none;
 }
 
 /* Fase de remate por swipe: guía visible, escena capturando el gesto */
