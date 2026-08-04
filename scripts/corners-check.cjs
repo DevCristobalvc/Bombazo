@@ -11,6 +11,26 @@ const OUT = path.join(__dirname, '..', '.smoke');
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 
+  const toClient = (sx, sy) =>
+    page.evaluate(([x, y]) => {
+      const svg = document.querySelector('#scene');
+      const r = svg.getBoundingClientRect();
+      const scale = Math.min(r.width / 360, r.height / 560);
+      return [r.left + (r.width - 360 * scale) / 2 + x * scale, r.top + (r.height - 560 * scale) / 2 + y * scale];
+    }, [sx, sy]);
+
+  const dragKeeper = async (tx0, ty0) => {
+    const [sx, sy] = await toClient(180, 300);
+    const [tx, ty] = await toClient(tx0, ty0);
+    await page.mouse.move(sx, sy);
+    await page.mouse.down();
+    for (let i = 1; i <= 6; i++) {
+      await page.mouse.move(sx + ((tx - sx) * i) / 6, sy + ((ty - sy) * i) / 6);
+      await page.waitForTimeout(16);
+    }
+    await page.mouse.up();
+  };
+
   await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
   await page.click('.chips [data-id="corners"]');
   await page.screenshot({ path: path.join(OUT, 'corners-1-menu.png') });
@@ -26,7 +46,7 @@ const OUT = path.join(__dirname, '..', '.smoke');
 
   // Defensa: atajar el cabezazo rival
   await page.waitForSelector('#scene.aiming', { timeout: 20000 });
-  await page.click('.zone[data-zone="4"]', { force: true });
+  await dragKeeper(180, 262);
   await page.waitForTimeout(2600);
   await page.screenshot({ path: path.join(OUT, 'corners-4-defensa.png') });
 
