@@ -227,14 +227,12 @@ svg[data-sh-style='punk'] .hairv-punk {
 }
 
 .scene.ripple .goal-net {
-  animation: net-ripple 0.42s ease-out;
+  animation: net-ripple 0.5s ease-out;
 }
 
 @keyframes net-ripple {
-  30% {
-    transform: scale(1.025, 1.05);
-  }
-  60% {
-    transform: scale(0.995, 0.99);
-  }
+  20% { transform: scale(1.045, 1.075); }
+  45% { transform: scale(0.982, 0.972); }
+  70% { transform: scale(1.014, 1.022); }
+  100% { transform: scale(1, 1); }
 }
