@@ -151,6 +151,7 @@ export function sceneSVG() {
     <!-- actores -->
     <g transform="translate(180 371)"><g id="keeper">${keeperSVG()}</g></g>
     <g transform="translate(126 556) scale(.66)"><g id="shooter">${shooterSVG()}</g></g>
+    <ellipse id="ball-shadow" cx="180" cy="472" rx="11" ry="3.6" fill="rgba(0,0,0,.34)" pointer-events="none"/>
     <g transform="translate(180 462)"><g id="ball">${ballArt(11)}</g></g>
 
     <!-- viñeta de profundidad -->

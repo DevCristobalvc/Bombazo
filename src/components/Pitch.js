@@ -17,6 +17,11 @@ export function createPitch() {
   const svg = el.querySelector('#scene');
   const keeper = el.querySelector('#keeper');
   const ball = el.querySelector('#ball');
+  const ballShadow = el.querySelector('#ball-shadow');
+  if (ballShadow) {
+    ballShadow.style.transformBox = 'fill-box';
+    ballShadow.style.transformOrigin = 'center';
+  }
   const aimDot = el.querySelector('#aim-dot');
   const aimLine = el.querySelector('#aim-line');
 
@@ -277,6 +282,11 @@ export function createPitch() {
         const p = path(u);
         const s = 1 - 0.38 * u;
         ball.style.transform = `translate(${(p.x - BALL_HOME.x).toFixed(1)}px, ${(p.y - BALL_HOME.y).toFixed(1)}px) scale(${s.toFixed(3)})`;
+        // La sombra se queda en el suelo, se achica y se desvanece al elevarse el balón
+        if (ballShadow) {
+          ballShadow.style.transform = `scale(${(1 - 0.72 * u).toFixed(3)})`;
+          ballShadow.style.opacity = (1 - 0.9 * u).toFixed(3);
+        }
         if (frame % every === 0 && u > 0.05 && u < 0.95) spawnTrail(p.x, p.y, s, power);
         frame += 1;
         if (u < 1) requestAnimationFrame(step);
@@ -423,6 +433,10 @@ export function createPitch() {
     keeper.style.transform = '';
     ball.style.transition = '';
     ball.style.transform = '';
+    if (ballShadow) {
+      ballShadow.style.transform = '';
+      ballShadow.style.opacity = '';
+    }
   }
 
   return { el, setKits, setWall, pickDive, captureSwipe, cornerCross, cancelAim, keeperDive, ballFlight, ballBounce, ballDeflect, kickAnim, celebrate, shake, flash, netRipple, reset };
