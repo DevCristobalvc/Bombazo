@@ -250,12 +250,14 @@ export function createPitch() {
 
   /** Estela de cometa que deja el balón en vuelo. */
   const ballAnchor = ball.parentElement;
-  function spawnTrail(x, y, scale) {
+  function spawnTrail(x, y, scale, power = 0.5) {
     const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     dot.setAttribute('cx', x.toFixed(1));
     dot.setAttribute('cy', y.toFixed(1));
-    dot.setAttribute('r', (5 * scale).toFixed(1));
+    // Un tiro potente deja una estela más gruesa y luminosa
+    dot.setAttribute('r', ((4.2 + power * 3.4) * scale).toFixed(1));
     dot.setAttribute('class', 'trail');
+    dot.setAttribute('opacity', (0.4 + power * 0.45).toFixed(2));
     svg.insertBefore(dot, ballAnchor);
     setTimeout(() => dot.remove(), 300);
   }
@@ -264,6 +266,8 @@ export function createPitch() {
       `from` permite rematar desde donde esté el balón (cabezazos de córner). */
   function ballFlight(shot, from) {
     const path = shotPath(shot, from);
+    const power = Math.min(1, Math.max(0, (560 - (shot.dur || 400)) / 310));
+    const every = power > 0.6 ? 1 : 2; // tiros potentes dejan estela más densa
     ball.style.transition = 'none';
     return new Promise((resolve) => {
       const t0 = performance.now();
@@ -273,7 +277,7 @@ export function createPitch() {
         const p = path(u);
         const s = 1 - 0.38 * u;
         ball.style.transform = `translate(${(p.x - BALL_HOME.x).toFixed(1)}px, ${(p.y - BALL_HOME.y).toFixed(1)}px) scale(${s.toFixed(3)})`;
-        if (frame % 2 === 0 && u > 0.05 && u < 0.95) spawnTrail(p.x, p.y, s);
+        if (frame % every === 0 && u > 0.05 && u < 0.95) spawnTrail(p.x, p.y, s, power);
         frame += 1;
         if (u < 1) requestAnimationFrame(step);
         else resolve();
