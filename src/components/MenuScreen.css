@@ -102,12 +102,15 @@
   overflow-y: auto;
 }
 
-/* CTA siempre a mano: fijo al fondo del panel scrolleable */
+/* CTA siempre a mano: footer a sangre fijo al fondo del panel scrolleable.
+   El fondo opaco + sombra en color panel tapan el howto que queda detrás. */
 .menu-screen .panel .btn-big {
   position: sticky;
-  bottom: -1px;
-  margin-top: 12px;
-  box-shadow: 0 -14px 18px -8px #0a1430;
+  bottom: -16px;
+  margin: 12px -16px -16px;
+  padding: 15px;
+  border-radius: 0 0 var(--radius-l) var(--radius-l);
+  box-shadow: 0 -18px 16px -4px var(--c-panel);
 }
 
 .howto {
