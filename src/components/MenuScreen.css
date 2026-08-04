@@ -102,6 +102,14 @@
   overflow-y: auto;
 }
 
+/* CTA siempre a mano: fijo al fondo del panel scrolleable */
+.menu-screen .panel .btn-big {
+  position: sticky;
+  bottom: -1px;
+  margin-top: 12px;
+  box-shadow: 0 -14px 18px -8px #0a1430;
+}
+
 .howto {
   margin-top: 10px;
   color: var(--c-muted);
