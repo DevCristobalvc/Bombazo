@@ -13,10 +13,12 @@
   z-index: 4;
   padding: 0 12px;
   text-shadow: 0 4px 0 rgba(0, 0, 0, 0.45), 0 8px 26px rgba(0, 0, 0, 0.6);
+  transform: scale(0.6);
+  transition: opacity 0.22s ease, transform 0.22s ease; /* salida con fundido, no de golpe */
 }
 
 .announcer.show {
-  animation: ann-pop 0.28s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+  animation: ann-pop 0.42s cubic-bezier(0.2, 1.5, 0.35, 1) forwards;
 }
 
 .announcer.goal { color: var(--c-accent); }
@@ -25,12 +27,19 @@
 .announcer.info { color: #ffffff; }
 
 @keyframes ann-pop {
-  from {
+  0% {
     opacity: 0;
-    transform: scale(0.3) rotate(-4deg);
+    transform: scale(0.3) rotate(-5deg);
   }
-  to {
+  55% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1.16) rotate(2deg);
+  }
+  75% {
+    transform: scale(0.96) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
   }
 }
