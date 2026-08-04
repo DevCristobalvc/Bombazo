@@ -10,6 +10,8 @@ const OUT = path.join(__dirname, '..', '.smoke');
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
 
+  // Abrir el personalizador (colapsado por defecto en v2)
+  await page.evaluate(() => { document.querySelector('.customizer').open = true; });
   // Elegir piel clara, pelo rubio, afro, dorsal 23 y nombre
   await page.click('[data-ref="skins"] .dot-swatch:first-child');
   await page.click('[data-ref="hairs"] .dot-swatch[data-value="#C9A227"]');

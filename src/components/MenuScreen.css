@@ -119,6 +119,31 @@
   line-height: 1.45;
 }
 
+/* Personalización colapsable: acorta el flujo primario (modo→equipo→jugar) */
+.customizer > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.customizer > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cz-hint {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--c-muted);
+  transition: opacity 0.15s;
+}
+
+.customizer[open] .cz-hint {
+  opacity: 0.55;
+}
+
 /* Editor de personaje: muestras de piel/pelo y dorsal */
 .profile-row {
   display: flex;

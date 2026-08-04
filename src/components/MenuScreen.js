@@ -58,14 +58,16 @@ export function createMenuScreen({ onPlay }) {
           <h2 class="panel-title">Dificultad</h2>
           <div class="chips" data-ref="diffs"></div>
         </div>
-        <h2 class="panel-title">Tu jugador</h2>
-        <div class="profile-row">
-          <div class="dot-picker" data-ref="skins" title="Tono de piel"></div>
-          <div class="dot-picker" data-ref="hairs" title="Color de pelo"></div>
-        </div>
-        <div class="chips" data-ref="styles"></div>
-        <div class="chips" data-ref="numbers"></div>
-        <input class="name-input" data-ref="name" maxlength="10" placeholder="TU NOMBRE EN LA CAMISETA" autocomplete="off" spellcheck="false">
+        <details class="customizer">
+          <summary class="panel-title">Tu jugador <span class="cz-hint">personalizar ▾</span></summary>
+          <div class="profile-row">
+            <div class="dot-picker" data-ref="skins" title="Tono de piel"></div>
+            <div class="dot-picker" data-ref="hairs" title="Color de pelo"></div>
+          </div>
+          <div class="chips" data-ref="styles"></div>
+          <div class="chips" data-ref="numbers"></div>
+          <input class="name-input" data-ref="name" maxlength="10" placeholder="TU NOMBRE EN LA CAMISETA" autocomplete="off" spellcheck="false">
+        </details>
         <p class="howto"><b>Desliza</b> desde el balón hacia el arco para rematar — curva el gesto para darle efecto. Para <b>atajar</b>, arrastra a tu arquero a donde crees que va el balón. Empate = muerte súbita.</p>
         <button class="btn-big" data-ref="play">¡A LA CANCHA!</button>
       </div>
