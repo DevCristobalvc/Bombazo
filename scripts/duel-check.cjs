@@ -56,11 +56,23 @@ const URL = 'http://localhost:4173/';
     await page.mouse.up();
   };
 
+  const dragKeeper = async (page, targetX, targetY) => {
+    const [sx, sy] = await toClient(page, 180, 300);
+    const [tx, ty] = await toClient(page, targetX, targetY);
+    await page.mouse.move(sx, sy);
+    await page.mouse.down();
+    for (let i = 1; i <= 6; i++) {
+      await page.mouse.move(sx + ((tx - sx) * i) / 6, sy + ((ty - sy) * i) / 6);
+      await page.waitForTimeout(16);
+    }
+    await page.mouse.up();
+  };
+
   // Penal 1: el anfitrión remata con swipe (esquina alta izquierda),
-  // el invitado ataja tocando la zona 8
+  // el invitado ataja arrastrando su arquero a la esquina baja derecha
   await host.waitForSelector('#scene.guide', { timeout: 15000 });
   await guest.waitForSelector('#scene.aiming', { timeout: 15000 });
-  await guest.click('.zone[data-zone="8"]', { force: true });
+  await dragKeeper(guest, 260, 335);
   await swipeShot(host, 100, 195);
   await host.waitForTimeout(2500);
   await host.screenshot({ path: path.join(OUT, 'duel-3-host-shot.png') });
@@ -69,7 +81,7 @@ const URL = 'http://localhost:4173/';
   // Penal 2: el invitado remata, el anfitrión ataja
   await guest.waitForSelector('#scene.guide', { timeout: 15000 });
   await host.waitForSelector('#scene.aiming', { timeout: 15000 });
-  await host.click('.zone[data-zone="4"]', { force: true });
+  await dragKeeper(host, 180, 262);
   await swipeShot(guest, 180, 262);
   await guest.waitForTimeout(2500);
 
@@ -102,8 +114,7 @@ const URL = 'http://localhost:4173/';
       return;
     }
     if (await page.$('#scene.aiming')) {
-      const z = Math.floor(Math.random() * 9);
-      await page.click(`.zone[data-zone="${z}"]`, { force: true }).catch(() => {});
+      await dragKeeper(page, 80 + Math.random() * 200, 180 + Math.random() * 170).catch(() => {});
     }
   };
   let ended = false;
