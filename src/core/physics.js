@@ -33,7 +33,7 @@ export function cpuAimShot(target, offTarget = false) {
 /** Alcance del gesto: cuánto viaja el objetivo por px deslizado. */
 const REACH = 1.12;
 /** Desplazamiento lateral máximo que aporta la comba (px de escena). */
-const CURVE_DRIFT = 36;
+const CURVE_DRIFT = 46;
 
 /** Proyecta el destino de un gesto (sin curva), siempre desde el balón. */
 export function projectTarget(start, end) {
@@ -84,8 +84,8 @@ export function shotPath(shot, from = BALL_HOME) {
   const px = -dy / len;
   const py = dx / len;
   const lift = Math.min(46, len * 0.12);
-  const cx = (from.x + shot.tx) / 2 + px * shot.curve * 55;
-  const cy = (from.y + shot.ty) / 2 + py * shot.curve * 55 - lift;
+  const cx = (from.x + shot.tx) / 2 + px * shot.curve * 74;
+  const cy = (from.y + shot.ty) / 2 + py * shot.curve * 74 - lift;
   return (u) => ({
     x: (1 - u) ** 2 * from.x + 2 * (1 - u) * u * cx + u ** 2 * shot.tx,
     y: (1 - u) ** 2 * from.y + 2 * (1 - u) * u * cy + u ** 2 * shot.ty,
