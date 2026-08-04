@@ -371,9 +371,30 @@ export function createPitch() {
     await sleep(220);
   }
 
-  /** La tribuna salta un instante (goles propios, atajadas heroicas). */
+  /** Lluvia de confeti de colores sobre el arco al celebrar. */
+  const CONFETTI = ['#ffd100', '#ff5b5b', '#33e0a1', '#7bdff2', '#ffffff'];
+  function spawnConfetti() {
+    for (let i = 0; i < 18; i++) {
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      const size = 4 + Math.random() * 4;
+      c.setAttribute('x', (44 + Math.random() * 272).toFixed(1));
+      c.setAttribute('y', (128 + Math.random() * 24).toFixed(1));
+      c.setAttribute('width', size.toFixed(1));
+      c.setAttribute('height', (size * 1.6).toFixed(1));
+      c.setAttribute('rx', '1');
+      c.setAttribute('fill', CONFETTI[i % CONFETTI.length]);
+      c.setAttribute('class', 'confetti');
+      c.style.setProperty('--dx', `${((Math.random() * 2 - 1) * 46).toFixed(0)}px`);
+      c.style.animationDelay = `${(Math.random() * 0.25).toFixed(2)}s`;
+      svg.appendChild(c);
+      setTimeout(() => c.remove(), 1600);
+    }
+  }
+
+  /** La tribuna salta un instante + confeti (goles propios, atajadas heroicas). */
   function celebrate() {
     svg.classList.add('celebrate');
+    spawnConfetti();
     setTimeout(() => svg.classList.remove('celebrate'), 1100);
   }
 

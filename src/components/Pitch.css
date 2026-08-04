@@ -207,6 +207,19 @@ svg[data-sh-style='punk'] .hairv-punk {
   to { opacity: 0; }
 }
 
+/* Confeti de celebración: cae desde arriba del arco y se desvanece */
+.confetti {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: confetti-fall 1.25s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes confetti-fall {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+  100% { opacity: 0; transform: translate(var(--dx, 0), 252px) rotate(340deg); }
+}
+
 /* Estela de cometa del balón en vuelo */
 .trail {
   fill: rgba(255, 255, 255, 0.55);
