@@ -273,6 +273,9 @@ export function createPitch() {
     const path = shotPath(shot, from);
     const power = Math.min(1, Math.max(0, (560 - (shot.dur || 400)) / 310));
     const every = power > 0.6 ? 1 : 2; // tiros potentes dejan estela más densa
+    // El balón gira: más vueltas con más potencia, sentido según la comba
+    const spinDir = (shot.curve ?? 0) >= 0 ? 1 : -1;
+    const spinTotal = (480 + power * 420) * spinDir;
     ball.style.transition = 'none';
     return new Promise((resolve) => {
       const t0 = performance.now();
@@ -281,7 +284,7 @@ export function createPitch() {
         const u = Math.min(1, (now - t0) / shot.dur);
         const p = path(u);
         const s = 1 - 0.38 * u;
-        ball.style.transform = `translate(${(p.x - BALL_HOME.x).toFixed(1)}px, ${(p.y - BALL_HOME.y).toFixed(1)}px) scale(${s.toFixed(3)})`;
+        ball.style.transform = `translate(${(p.x - BALL_HOME.x).toFixed(1)}px, ${(p.y - BALL_HOME.y).toFixed(1)}px) scale(${s.toFixed(3)}) rotate(${(spinTotal * u).toFixed(0)}deg)`;
         // La sombra se queda en el suelo, se achica y se desvanece al elevarse el balón
         if (ballShadow) {
           ballShadow.style.transform = `scale(${(1 - 0.72 * u).toFixed(3)})`;
