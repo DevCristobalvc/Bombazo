@@ -16,8 +16,9 @@ export function createJoinScreen({ onJoin, onCancel }) {
     <section class="screen join-screen">
       <div class="hero join-hero" data-ref="hero"></div>
       <div class="panel join-card">
-        <h2 class="lobby-title">${icon('versus', 22)} TE RETARON A UN DUELO</h2>
-        <p class="join-code">Sala <b data-ref="code"></b></p>
+        <h2 class="lobby-title" data-ref="title">${icon('versus', 22)} <span data-ref="titleText">TE RETARON A UN DUELO</span></h2>
+        <p class="join-code" data-ref="codeRow">Sala <b data-ref="code"></b></p>
+        <input class="name-input code-input" data-ref="codeInput" maxlength="6" placeholder="CÓDIGO DE LA SALA" autocomplete="off" spellcheck="false" hidden>
         <h3 class="panel-title">Tu selección</h3>
         <div class="chips two-rows" data-ref="teams"></div>
         <button class="btn-big" data-ref="join">UNIRSE AL DUELO</button>
