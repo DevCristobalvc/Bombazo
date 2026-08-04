@@ -119,13 +119,31 @@
   line-height: 1.45;
 }
 
+/* Jerarquía: cada sección lleva una barra de acento y título más legible */
+.menu-screen .panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #dfe7f7;
+}
+
+.menu-screen .panel-title::before {
+  content: "";
+  width: 4px;
+  height: 13px;
+  border-radius: 2px;
+  background: var(--c-accent);
+  flex: none;
+}
+
 /* Personalización colapsable: acorta el flujo primario (modo→equipo→jugar) */
 .customizer > summary {
   list-style: none;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+}
+
+.customizer > summary .cz-hint {
+  margin-left: auto;
 }
 
 .customizer > summary::-webkit-details-marker {
