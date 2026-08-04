@@ -14,6 +14,26 @@ const URL = 'http://localhost:4173/';
   const host = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const guest = await browser.newPage({ viewport: { width: 390, height: 844 } });
 
+  const toClient = (page, sx, sy) =>
+    page.evaluate(([x, y]) => {
+      const svg = document.querySelector('#scene');
+      const r = svg.getBoundingClientRect();
+      const scale = Math.min(r.width / 360, r.height / 560);
+      return [r.left + (r.width - 360 * scale) / 2 + x * scale, r.top + (r.height - 560 * scale) / 2 + y * scale];
+    }, [sx, sy]);
+
+  const dragKeeper = async (page, tx0, ty0) => {
+    const [sx, sy] = await toClient(page, 180, 300);
+    const [tx, ty] = await toClient(page, tx0, ty0);
+    await page.mouse.move(sx, sy);
+    await page.mouse.down();
+    for (let i = 1; i <= 6; i++) {
+      await page.mouse.move(sx + ((tx - sx) * i) / 6, sy + ((ty - sy) * i) / 6);
+      await page.waitForTimeout(16);
+    }
+    await page.mouse.up();
+  };
+
   // Anfitrión: duelo con disciplina córners
   await host.goto(URL, { waitUntil: 'networkidle' });
   await host.click('[data-ref="modes"] [data-id="duelo"]');
@@ -34,7 +54,7 @@ const URL = 'http://localhost:4173/';
 
   // El invitado elige su vuelo mientras el centro del anfitrión viaja
   await guest.waitForSelector('#scene.aiming', { timeout: 20000 });
-  await guest.click('.zone[data-zone="8"]', { force: true });
+  await dragKeeper(guest, 260, 335);
 
   // Anfitrión: tocar a mitad del centro para el cabezazo
   await host.waitForSelector('#scene.crossing', { timeout: 20000 });
