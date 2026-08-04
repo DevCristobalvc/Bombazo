@@ -147,13 +147,12 @@ svg[data-sh-style='punk'] .hairv-punk {
 }
 
 .scene.celebrate .crowd-dots {
-  animation: crowd-jump 0.26s ease-in-out 4;
+  animation: crowd-jump 0.24s ease-in-out 5;
 }
 
 @keyframes crowd-jump {
-  50% {
-    transform: translateY(-4px);
-  }
+  0%, 100% { transform: translateY(0); }
+  45% { transform: translateY(-7px); }
 }
 
 /* --- La escena respira: nadie se queda quieto en un arcade --- */
