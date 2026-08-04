@@ -166,8 +166,11 @@ svg[data-sh-style='punk'] .hairv-punk {
 }
 
 @keyframes keeper-idle {
-  0%, 100% { transform: translateX(-8px); }
-  50% { transform: translateX(8px); }
+  0% { transform: translate(-7px, 0) rotate(-1.5deg); }
+  25% { transform: translate(0, -3px) rotate(0deg); }
+  50% { transform: translate(7px, 0) rotate(1.5deg); }
+  75% { transform: translate(0, -3px) rotate(0deg); }
+  100% { transform: translate(-7px, 0) rotate(-1.5deg); }
 }
 
 .shooter-art {
