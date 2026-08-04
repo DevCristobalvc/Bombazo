@@ -77,6 +77,8 @@ Layout vertical, de arriba hacia abajo:
 
 ## 4. La grilla de 9 zonas (mecánica central)
 
+> ⚠️ **Actualización v2 (mecánica continua).** A partir de v2 la grilla de 9 zonas se **retiró**: la puntería y la atajada son **continuas**. Se patea deslizando hacia cualquier punto del arco (física de swipe, ya en v1) y se ataja **arrastrando al arquero** a un punto libre. El resultado ya **no** compara casillas: se decide por **distancia** — si el balón cae dentro del *alcance* del arquero (`AI_REACH` / `PLAYER_REACH` / `KEEPER_REACH` en `core/zones.js`, asimétrico a favor del humano), la ataja; si no, es gol. La IA es continua (`keeperAim` / `shooterAim` en `core/ai.js`, apuntan a `{x,y}` con error por dificultad) y el balance se afina con `scripts/balance-sim.mjs`. Las zonas sobreviven solo como utilidad interna (`zoneNearest`) para el mapa de calor y la lectura de costumbres. Lo de abajo queda como referencia histórica del modelo de v1.
+
 El arco se divide en una grilla invisible de **3 columnas × 3 filas = 9 casillas**:
 
 ```
