@@ -28,7 +28,7 @@ export function keeperAim(diff, shot, habits) {
     const fav = favoritePoint(habits);
     if (fav) return jitter(fav, 34);
   }
-  const sigma = diff === 'imposible' ? 24 : diff === 'medio' ? 72 : 150;
+  const sigma = diff === 'imposible' ? 62 : diff === 'medio' ? 112 : 195;
   return {
     x: clampX(shot.tx + noise() * sigma),
     y: clampY(shot.ty + noise() * sigma * 0.85),
