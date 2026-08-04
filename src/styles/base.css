@@ -236,3 +236,18 @@ button {
 .dot.now {
   box-shadow: 0 0 0 2px var(--c-accent);
 }
+
+/* Accesibilidad: respeta a quien pide menos movimiento. Desactiva las
+   animaciones y transiciones DECORATIVAS de CSS (confeti, sacudidas, pops,
+   balanceos). La mecánica —vuelo del balón y estirada del arquero— usa
+   requestAnimationFrame con transform inline, así que sigue funcionando. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
