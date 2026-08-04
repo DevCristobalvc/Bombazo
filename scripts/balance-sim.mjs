@@ -8,7 +8,7 @@
  */
 import { keeperAim, shooterAim } from '../src/core/ai.js';
 import { isSaved, cpuAimShot } from '../src/core/physics.js';
-import { GOAL, inGoal } from '../src/core/zones.js';
+import { GOAL, inGoal, AI_REACH, PLAYER_REACH } from '../src/core/zones.js';
 
 const N = Number(process.argv[2]) || 2000;
 const DIFFS = ['facil', 'medio', 'imposible'];
@@ -24,7 +24,7 @@ function shootVsKeeper(diff) {
     const target = goalPoint();
     const shot = { tx: target.x, ty: target.y, curve: 0, dur: 400 };
     const keeper = keeperAim(diff, shot, NO_HABITS);
-    if (!isSaved(shot, keeper)) goals++;
+    if (!isSaved(shot, keeper, AI_REACH)) goals++;
   }
   return goals / N;
 }
@@ -39,7 +39,7 @@ function saveVsShooter(diff) {
     const shot = cpuAimShot(aim, aim.offTarget);
     const isOff = aim.offTarget || !inGoal(shot.tx, shot.ty);
     if (isOff) { off++; continue; }
-    if (isSaved(shot, dive)) saves++;
+    if (isSaved(shot, dive, PLAYER_REACH)) saves++;
   }
   return { save: saves / N, off: off / N };
 }

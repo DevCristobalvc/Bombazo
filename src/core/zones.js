@@ -13,8 +13,14 @@ export const KEEPER_HOME = { x: 180, y: 371 };
 
 /** Alcance de las manos del arquero (radio, px de escena). Define la atajada
  *  en el modelo continuo: si el balón cae dentro de este radio del punto al
- *  que se lanzó el arquero, la ataja. */
-export const KEEPER_REACH = 58;
+ *  que se lanzó el arquero, la ataja.
+ *  Es asimétrico a favor del humano: el arquero IA (cuando el jugador patea)
+ *  tiene menos alcance para que se pueda marcar; el arquero humano (cuando el
+ *  jugador ataja) tiene más para que atajar sea posible. KEEPER_REACH es el
+ *  neutro que se usa en duelos humano vs humano. */
+export const KEEPER_REACH = 52;
+export const AI_REACH = 38;
+export const PLAYER_REACH = 66;
 
 /** ¿El punto cae dentro de la boca del arco? (inverso de zoneAt===null). */
 export const inGoal = (x, y) => x >= GOAL.left && x <= GOAL.right && y >= GOAL.top && y <= GOAL.bottom;

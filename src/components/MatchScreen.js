@@ -9,7 +9,7 @@
  */
 import { createShootout, registerKick, registerHabit, winner, isSuddenDeath, score } from '../core/shootout.js';
 import { keeperAim, shooterAim } from '../core/ai.js';
-import { zoneAt, zoneNearest, inGoal } from '../core/zones.js';
+import { zoneAt, zoneNearest, inGoal, AI_REACH, PLAYER_REACH } from '../core/zones.js';
 import { cpuAimShot, isSaved, cornerCrossPath, headerShot, wallBlocks, applyWind } from '../core/physics.js';
 import { recordShot } from '../core/stats.js';
 import { createPitch } from './Pitch.js';
@@ -254,7 +254,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(keeper);
     await pitch.ballFlight(shot);
 
-    const goal = !shot.offTarget && !isSaved(shot, keeper);
+    const goal = !shot.offTarget && !isSaved(shot, keeper, AI_REACH);
     await settleMyKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
@@ -276,7 +276,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(dive);
     await pitch.ballFlight(cpuShot);
 
-    const goal = !off && !isSaved(cpuShot, dive);
+    const goal = !off && !isSaved(cpuShot, dive, PLAYER_REACH);
     await settleTheirKick({ goal, offTarget: off, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
   }
 
@@ -313,7 +313,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(keeper);
     await pitch.ballFlight(shot, { x: tap.x, y: tap.y });
 
-    const goal = !off && !isSaved(shot, keeper);
+    const goal = !off && !isSaved(shot, keeper, AI_REACH);
     await settleMyKick({ goal, offTarget: off, ballZone: zoneNearest(shot.tx, shot.ty) });
   }
 
@@ -341,7 +341,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(dive);
     await pitch.ballFlight(cpuShot, headPoint);
 
-    const goal = !off && !isSaved(cpuShot, dive);
+    const goal = !off && !isSaved(cpuShot, dive, PLAYER_REACH);
     await settleTheirKick({ goal, offTarget: off, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
   }
 
@@ -380,7 +380,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     sfx.kick();
     pitch.keeperDive(keeper);
     await pitch.ballFlight(shot);
-    const goal = finalZone !== null && !isSaved(shot, keeper);
+    const goal = finalZone !== null && !isSaved(shot, keeper, AI_REACH);
     await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
@@ -425,7 +425,7 @@ export function createMatchScreen({ onFinish, onExit }) {
 
     pitch.keeperDive(dive);
     await pitch.ballFlight(cpuShot);
-    const goal = finalZone !== null && !isSaved(cpuShot, dive);
+    const goal = finalZone !== null && !isSaved(cpuShot, dive, PLAYER_REACH);
     await settleTheirKick({ goal, offTarget: finalZone === null, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
   }
 
