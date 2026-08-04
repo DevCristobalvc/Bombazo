@@ -57,6 +57,14 @@
   min-height: 15px;
 }
 
+.stats-line b {
+  color: var(--c-accent);
+}
+
+.rank-next {
+  opacity: 0.7;
+}
+
 /* Mapa de calor de puntería (mini arco 3x3) */
 .heatmap-row {
   display: flex;

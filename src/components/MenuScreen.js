@@ -7,7 +7,7 @@ import { heroSVG } from '../art/players.js';
 import { flagSVG } from '../art/flags.js';
 import { logoSVG } from '../art/logo.js';
 import { icon, flames } from '../art/icons.js';
-import { loadStats } from '../core/stats.js';
+import { loadStats, rankFor } from '../core/stats.js';
 import { loadProfile, saveProfile, SKINS, HAIRS, NUMBERS, HAIRSTYLES } from '../core/profile.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
@@ -86,10 +86,13 @@ export function createMenuScreen({ onPlay }) {
 
   function renderStats() {
     const s = loadStats();
-    refs.stats.textContent =
+    const r = rankFor(s.xp);
+    const record =
       s.wins + s.losses > 0
-        ? `Victorias ${s.wins} · Derrotas ${s.losses} · Racha ${s.streak} · Récord ${s.best}`
-        : '';
+        ? `V ${s.wins} · D ${s.losses} · Racha ${s.streak}`
+        : 'Nuevo jugador';
+    const toNext = r.next ? ` · ${r.next.min - s.xp} pts para ${r.next.name}` : ' · rango máximo';
+    refs.stats.innerHTML = `<b>${r.icon} ${r.name}</b> · ${s.xp} pts · ${record}<span class="rank-next">${toNext}</span>`;
 
     // Mapa de calor: efectividad de tus remates por zona del arco
     const hasShots = s.zones.some((z) => z.shots > 0);

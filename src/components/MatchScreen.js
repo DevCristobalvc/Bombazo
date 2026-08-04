@@ -11,7 +11,7 @@ import { createShootout, registerKick, registerHabit, winner, isSuddenDeath, sco
 import { keeperAim, shooterAim } from '../core/ai.js';
 import { zoneAt, zoneNearest, inGoal, AI_REACH, PLAYER_REACH } from '../core/zones.js';
 import { cpuAimShot, isSaved, cornerCrossPath, headerShot, wallBlocks, applyWind } from '../core/physics.js';
-import { recordShot } from '../core/stats.js';
+import { recordShot, recordSave } from '../core/stats.js';
 import { createPitch } from './Pitch.js';
 import { createScoreboard } from './Scoreboard.js';
 import { createAnnouncer } from './Announcer.js';
@@ -231,6 +231,7 @@ export function createMatchScreen({ onFinish, onExit }) {
       buzz(60);
       pitch.celebrate();
       pitch.shake();
+      recordSave(); // puntos por atajada propia
     }
     registerKick(ctx.s, 'C', goal);
     updateBoard();
