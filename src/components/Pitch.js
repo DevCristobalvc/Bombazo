@@ -128,7 +128,10 @@ export function createPitch() {
       d += ` L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
     }
     aimLine.setAttribute('d', d);
-    aimLine.setAttribute('opacity', '0.65');
+    // La guía comunica potencia: gesto más veloz (dur menor) = línea más gruesa y sólida
+    const power = Math.min(1, Math.max(0, (560 - shot.dur) / 310));
+    aimLine.setAttribute('stroke-width', (2 + power * 4).toFixed(1));
+    aimLine.setAttribute('opacity', (0.5 + power * 0.4).toFixed(2));
     return shot;
   }
 
