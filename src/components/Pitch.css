@@ -193,18 +193,22 @@ svg[data-sh-style='punk'] .hairv-punk {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 65%);
+  background: radial-gradient(circle at 50% 40%, rgba(255, 236, 170, 0.9), rgba(255, 209, 0, 0) 64%);
   opacity: 0;
   pointer-events: none;
 }
 
 .pitch.flash-on::after {
-  animation: goal-flash 0.34s ease-out;
+  animation: goal-flash 0.36s ease-out;
 }
 
+/* Doble pulso dorado: más celebración que un simple destello blanco */
 @keyframes goal-flash {
-  from { opacity: 0.75; }
-  to { opacity: 0; }
+  0% { opacity: 0; }
+  15% { opacity: 0.85; }
+  45% { opacity: 0.18; }
+  68% { opacity: 0.55; }
+  100% { opacity: 0; }
 }
 
 /* Confeti de celebración: cae desde arriba del arco y se desvanece */
