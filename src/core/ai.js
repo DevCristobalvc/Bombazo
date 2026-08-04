@@ -46,9 +46,11 @@ export function shooterAim(diff, keeper) {
   const offRate = diff === 'facil' ? 0.15 : diff === 'medio' ? 0.08 : 0;
   if (chance(offRate)) return { ...anyPoint(), offTarget: true };
 
-  if (diff === 'facil' && keeper && chance(0.35)) return { ...jitter(keeper, 26), offTarget: false };
+  if (diff === 'facil' && keeper && chance(0.28)) return { ...jitter(keeper, 26), offTarget: false };
 
-  if (diff === 'imposible' && keeper) {
+  // Imposible casi siempre clava el rincón opuesto, pero deja una rendija:
+  // ~15% de las veces no hace el tiro perfecto y se puede atajar.
+  if (diff === 'imposible' && keeper && chance(0.8)) {
     const cx = (GOAL.left + GOAL.right) / 2;
     const cy = (GOAL.top + GOAL.bottom) / 2;
     const x = keeper.x < cx ? rand(GOAL.right - 74, GOAL.right - 14) : rand(GOAL.left + 14, GOAL.left + 74);
