@@ -4,7 +4,7 @@
  * es el de verdad. Al avanzar, los demás cruces se simulan y tu próximo
  * rival emerge del bracket, como en la copa real.
  */
-import { pick } from '../utils/random.js';
+import { pick, randInt } from '../utils/random.js';
 
 export const STAGES = ['Octavos de final', 'Cuartos de final', 'Semifinal', 'GRAN FINAL'];
 
@@ -27,6 +27,11 @@ const rivalOf = (pairs, id) => {
 
 export function createTournament(playerTeamId) {
   const pairs = REAL_PAIRINGS.map((p) => [...p]);
+  // Si tu selección no clasificó a los 16 reales, se cuela en un cruce de la
+  // llave (así cualquier equipo elegible puede jugar el torneo sin romperlo).
+  if (!pairs.some((p) => p.includes(playerTeamId))) {
+    pick(pairs)[randInt(2)] = playerTeamId;
+  }
   return { playerTeamId, pairs, stage: 0, rivals: [rivalOf(pairs, playerTeamId)] };
 }
 

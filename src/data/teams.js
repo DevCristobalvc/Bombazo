@@ -149,6 +149,42 @@ export const TEAMS = [
     skin: '#C68642',
     hair: '#160D05',
   },
+  {
+    id: 'ned',
+    name: 'Países Bajos',
+    short: 'NED',
+    kit: { shirt: '#EC6E1F', accent: '#FFFFFF', shorts: '#FFFFFF', socks: '#EC6E1F' },
+    gk: { shirt: '#111827', accent: '#EC6E1F' },
+    skin: '#E8B98A',
+    hair: '#3B2A16',
+  },
+  {
+    id: 'ger',
+    name: 'Alemania',
+    short: 'GER',
+    kit: { shirt: '#FFFFFF', accent: '#111111', shorts: '#111111', socks: '#FFFFFF' },
+    gk: { shirt: '#0EAD69', accent: '#05402A' },
+    skin: '#E8B98A',
+    hair: '#3B2A16',
+  },
+  {
+    id: 'ita',
+    name: 'Italia',
+    short: 'ITA',
+    kit: { shirt: '#1E4785', accent: '#FFFFFF', shorts: '#FFFFFF', socks: '#1E4785' },
+    gk: { shirt: '#FFD100', accent: '#5A4600' },
+    skin: '#D9A97A',
+    hair: '#231208',
+  },
+  {
+    id: 'jpn',
+    name: 'Japón',
+    short: 'JPN',
+    kit: { shirt: '#0A1E5A', accent: '#FFFFFF', shorts: '#0A1E5A', socks: '#0A1E5A' },
+    gk: { shirt: '#F15BB5', accent: '#511238' },
+    skin: '#E8C39E',
+    hair: '#0A0A0A',
+  },
 ];
 
 export const teamById = (id) => TEAMS.find((t) => t.id === id);

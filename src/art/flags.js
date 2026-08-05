@@ -105,6 +105,21 @@ const DRAWERS = {
     <rect y="${h / 3}" width="${w}" height="${h / 3}" fill="#ffffff"/>
     <rect y="${(h * 2) / 3}" width="${w}" height="${h / 3}" fill="#000000"/>
     <rect x="${w / 2 - 1.6}" y="${h / 2 - 3.2}" width="3.2" height="6.4" fill="#C09300"/>`,
+  ned: (w, h) => `
+    <rect width="${w}" height="${h / 3}" fill="#AE1C28"/>
+    <rect y="${h / 3}" width="${w}" height="${h / 3}" fill="#ffffff"/>
+    <rect y="${(h * 2) / 3}" width="${w}" height="${h / 3}" fill="#21468B"/>`,
+  ger: (w, h) => `
+    <rect width="${w}" height="${h / 3}" fill="#000000"/>
+    <rect y="${h / 3}" width="${w}" height="${h / 3}" fill="#DD0000"/>
+    <rect y="${(h * 2) / 3}" width="${w}" height="${h / 3}" fill="#FFCE00"/>`,
+  ita: (w, h) => `
+    <rect width="${w / 3}" height="${h}" fill="#009246"/>
+    <rect x="${w / 3}" width="${w / 3}" height="${h}" fill="#ffffff"/>
+    <rect x="${(w * 2) / 3}" width="${w / 3}" height="${h}" fill="#CE2B37"/>`,
+  jpn: (w, h) => `
+    <rect width="${w}" height="${h}" fill="#ffffff"/>
+    <circle cx="${w / 2}" cy="${h / 2}" r="${h * 0.28}" fill="#BC002D"/>`,
 };
 
 export function flagSVG(teamId, w = 36, h = 24) {
