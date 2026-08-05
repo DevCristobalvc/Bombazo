@@ -9,6 +9,7 @@ import { logoSVG } from '../art/logo.js';
 import { icon, flames } from '../art/icons.js';
 import { loadStats, rankFor } from '../core/stats.js';
 import { loadProfile, saveProfile, SKINS, HAIRS, NUMBERS, HAIRSTYLES } from '../core/profile.js';
+import { exportCode, importCode } from '../core/account.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
@@ -67,6 +68,19 @@ export function createMenuScreen({ onPlay }) {
           <div class="chips" data-ref="styles"></div>
           <div class="chips" data-ref="numbers"></div>
           <input class="name-input" data-ref="name" maxlength="10" placeholder="TU NOMBRE EN LA CAMISETA" autocomplete="off" spellcheck="false">
+        </details>
+        <details class="account">
+          <summary class="panel-title">Guardar / cargar perfil <span class="cz-hint">respaldo ▾</span></summary>
+          <p class="account-hint">Copia tu código para respaldar o pasar de teléfono. Pega uno y cárgalo.</p>
+          <div class="account-row">
+            <input class="name-input account-code" data-ref="exportField" readonly>
+            <button class="btn-ghost" data-ref="copyBtn" type="button">Copiar</button>
+          </div>
+          <div class="account-row">
+            <input class="name-input account-code" data-ref="importField" placeholder="PEGA UN CÓDIGO" autocomplete="off" spellcheck="false">
+            <button class="btn-ghost" data-ref="loadBtn" type="button">Cargar</button>
+          </div>
+          <p class="account-msg" data-ref="accountMsg"></p>
         </details>
         <p class="howto"><b>Desliza</b> desde el balón hacia el arco para rematar — curva el gesto para darle efecto. Para <b>atajar</b>, arrastra a tu arquero a donde crees que va el balón. Empate = muerte súbita.</p>
         <button class="btn-big" data-ref="play">¡A LA CANCHA!</button>
@@ -161,6 +175,7 @@ export function createMenuScreen({ onPlay }) {
                 : `${player.short} <i class="vs">VS</i> ${rival.short} · ${diff.label}`;
     renderProfile();
     renderStats();
+    if (refs.exportField) refs.exportField.value = exportCode();
   }
 
   /** Personalización: piel, pelo, peinado y dorsal (repetir un color lo devuelve al de la selección). */
@@ -180,6 +195,30 @@ export function createMenuScreen({ onPlay }) {
     }
     saveProfile(p);
     render();
+  });
+
+  /** Respaldo de perfil: copiar el código propio o cargar uno pegado. */
+  const accountMsg = (t) => { if (refs.accountMsg) refs.accountMsg.textContent = t; };
+  refs.copyBtn?.addEventListener('click', async () => {
+    const code = exportCode();
+    refs.exportField.value = code;
+    try {
+      await navigator.clipboard.writeText(code);
+      accountMsg('¡Código copiado!');
+    } catch {
+      refs.exportField.select?.();
+      accountMsg('Selecciona y copia el código');
+    }
+  });
+  refs.loadBtn?.addEventListener('click', () => {
+    const res = importCode(refs.importField.value);
+    if (res.ok) {
+      accountMsg('¡Perfil cargado!');
+      refs.importField.value = '';
+      render();
+    } else {
+      accountMsg(res.error ?? 'No se pudo cargar');
+    }
   });
 
   /** Nombre en la camiseta: guarda sin re-renderizar (no pierde el foco). */

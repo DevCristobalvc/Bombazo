@@ -261,3 +261,38 @@
     font-size: 22px;
   }
 }
+
+/* Respaldo de perfil: exportar/importar código */
+.account-hint {
+  color: var(--c-muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  margin: 4px 0 8px;
+}
+
+.account-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.account-row .account-code {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: none;
+}
+
+.account-row .btn-ghost {
+  flex: none;
+  padding: 8px 12px;
+}
+
+.account-msg {
+  min-height: 14px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--c-accent);
+}
