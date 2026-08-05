@@ -121,7 +121,7 @@ export function createEndScreen({ onAction }) {
       ${rankHTML(result)}
       ${(result.newAchievements?.length)
         ? `<div class="end-achievements">${result.newAchievements
-            .map((a) => `<div class="end-ach"><span class="end-ach-ic">${a.icon}</span><span><b>¡Logro!</b> ${a.name}</span></div>`)
+            .map((a) => `<div class="end-ach"><span class="end-ach-ic">${a.icon}</span><span><b>¡Logro!</b> ${a.name}${a.xp ? ` <span class="end-ach-xp">+${a.xp} pts</span>` : ''}</span></div>`)
             .join('')}</div>`
         : ''}
       <div class="end-actions">

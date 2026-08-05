@@ -272,3 +272,8 @@
 }
 
 .end-ach-ic { font-size: 20px; }
+
+.end-ach-xp {
+  color: var(--c-good, #37d67a);
+  font-weight: 900;
+}

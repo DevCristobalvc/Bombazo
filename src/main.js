@@ -199,11 +199,13 @@ const match = createMatchScreen({
         if (!d.already) awardPoints(60);
         result.dailyStreak = d.streak;
       }
-      const after = recordResult(result.won); // hot-seat no cuenta en tus stats
+      const after0 = recordResult(result.won); // hot-seat no cuenta en tus stats
+      result.newAchievements = evaluateAchievements(after0); // logros recién desbloqueados
+      const achBonus = result.newAchievements.reduce((n, a) => n + (a.xp || 0), 0);
+      const after = achBonus ? awardPoints(achBonus) : after0; // bono de XP por logro
       result.points = after.xp - matchStartXp;
       result.rank = rankFor(after.xp);
       result.rankUp = rankFor(matchStartXp).index < result.rank.index ? result.rank : null;
-      result.newAchievements = evaluateAchievements(after); // logros recién desbloqueados
       // Sube tu XP al ranking global (no-op sin backend/login)
       submitScore({ name: loadProfile().name || 'Jugador', xp: after.xp }).catch(() => {});
     }
