@@ -13,6 +13,7 @@ import { exportCode, importCode } from '../core/account.js';
 import { isConfigured, getSession, signInWithGoogle, signOut, fetchLeaderboard } from '../net/cloud.js';
 import { isMuted, setMuted } from '../audio/sfx.js';
 import { reduceMotionEnabled, setReduceMotion, resetProgress } from '../core/settings.js';
+import { initInstallPrompt, promptInstall } from '../core/pwa.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
@@ -45,6 +46,7 @@ export function createMenuScreen({ onPlay }) {
         <button class="rank-open" data-ref="statsBtn" type="button">📊 Mis estadísticas</button>
         <button class="rank-open" data-ref="rankBtn" type="button">🏆 Ranking global</button>
         <button class="rank-open" data-ref="settingsBtn" type="button">⚙ Ajustes</button>
+        <button class="rank-open rank-open-cta" data-ref="installBtn" type="button" hidden>⬇ Instalar app</button>
       </div>
       <div class="heatmap-row" data-ref="heatrow" hidden>
         <span class="heatmap-label">Tu puntería</span>
@@ -310,6 +312,10 @@ export function createMenuScreen({ onPlay }) {
       }
     };
   }
+  /** Botón de instalar app: aparece solo cuando el navegador lo permite. */
+  initInstallPrompt((available) => { if (refs.installBtn) refs.installBtn.hidden = !available; });
+  refs.installBtn?.addEventListener('click', () => { promptInstall(); });
+
   refs.settingsBtn?.addEventListener('click', () => { refs.settingsOverlay.hidden = false; renderSettings(); });
   refs.settingsClose?.addEventListener('click', () => { refs.settingsOverlay.hidden = true; });
   refs.settingsOverlay?.addEventListener('click', (e) => { if (e.target === refs.settingsOverlay) refs.settingsOverlay.hidden = true; });

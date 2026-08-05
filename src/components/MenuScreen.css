@@ -502,3 +502,9 @@
   color: #ff8585;
   border-color: rgba(255, 133, 133, 0.5);
 }
+
+/* CTA del boton instalar app */
+.rank-open-cta {
+  border-color: var(--c-accent);
+  background: rgba(255, 209, 0, 0.16);
+}
