@@ -39,6 +39,15 @@ export function createMenuScreen({ onPlay }) {
 
   const el = fromHTML(`
     <section class="screen menu-screen">
+      <header class="hud-bar">
+        <div class="hud-lvl"><span class="hud-lvl-n" data-ref="hudLvl">1</span><span class="hud-lvl-l">LVL</span></div>
+        <div class="hud-id">
+          <span class="hud-name" data-ref="hudName">JUGADOR</span>
+          <span class="hud-rank" data-ref="hudRank">Amateur</span>
+          <div class="hud-xp"><i data-ref="hudXpFill"></i></div>
+        </div>
+        <div class="hud-pts"><span class="hud-pts-n" data-ref="hudPts">0</span><span class="hud-pts-l">PTS</span></div>
+      </header>
       <h1 class="logo" aria-label="Bombazo">${logoSVG()}</h1>
       <p class="tagline">Tanda de penales · Mundial 2026</p>
       <div class="hero" data-ref="hero"></div>
@@ -140,6 +149,15 @@ export function createMenuScreen({ onPlay }) {
   function renderStats() {
     const s = loadStats();
     const r = rankFor(s.xp);
+    // Barra HUD superior (lobby)
+    if (refs.hudLvl) {
+      refs.hudLvl.textContent = Math.floor((s.xp || 0) / 150) + 1;
+      refs.hudName.textContent = (loadProfile().name || 'JUGADOR').toUpperCase();
+      refs.hudRank.textContent = r.name;
+      refs.hudRank.style.color = r.color;
+      refs.hudXpFill.style.width = `${Math.round(r.progress * 100)}%`;
+      refs.hudPts.textContent = s.xp || 0;
+    }
     const record =
       s.wins + s.losses > 0
         ? `V ${s.wins} · D ${s.losses} · Racha ${s.streak}`

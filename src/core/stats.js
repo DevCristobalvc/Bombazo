@@ -10,12 +10,12 @@ export const POINTS = { goal: 15, save: 12, win: 120, loss: 30 };
 
 /** Escalafón de rangos por XP acumulada (umbral de entrada, nombre, emoji). */
 export const RANKS = [
-  { min: 0, name: 'Amateur', icon: '🥉' },
-  { min: 300, name: 'Semipro', icon: '🥈' },
-  { min: 900, name: 'Profesional', icon: '🥇' },
-  { min: 2000, name: 'Crack', icon: '⭐' },
-  { min: 4000, name: 'Estrella', icon: '🌟' },
-  { min: 8000, name: 'Leyenda', icon: '👑' },
+  { min: 0, name: 'Amateur', icon: '🥉', color: '#cd7f32' },
+  { min: 300, name: 'Semipro', icon: '🥈', color: '#c7cdd6' },
+  { min: 900, name: 'Profesional', icon: '🥇', color: '#ffd100' },
+  { min: 2000, name: 'Crack', icon: '⭐', color: '#37d6c0' },
+  { min: 4000, name: 'Estrella', icon: '🌟', color: '#7b8cff' },
+  { min: 8000, name: 'Leyenda', icon: '👑', color: '#ff5c39' },
 ];
 
 /** Rango actual + progreso al siguiente, a partir de la XP. */

@@ -29,4 +29,23 @@
 
   /* Layout vertical mobile-first */
   --app-max-width: 430px;
+
+  /* --- Lobby AAA (Free Fire / PUBG): HUD, cristal, brillos, biseles --- */
+  --c-hud: rgba(10, 16, 38, 0.68);
+  --c-hud-line: rgba(130, 160, 230, 0.28);
+  --c-glass: rgba(18, 28, 60, 0.55);
+  --radius-hud: 7px; /* esquinas más marcadas, menos redondas */
+  --grad-accent: linear-gradient(135deg, #ffd100 0%, #ff8a1e 100%);
+  --grad-play: linear-gradient(135deg, #ff5c39 0%, #ffd100 100%);
+  --grad-hud: linear-gradient(180deg, rgba(20, 32, 68, 0.9), rgba(8, 14, 34, 0.9));
+  --glow-accent: 0 0 18px rgba(255, 209, 0, 0.45);
+  --glow-play: 0 6px 22px rgba(255, 92, 57, 0.45);
+
+  /* Colores por rango (badges del HUD, sin emojis) */
+  --rank-0: #cd7f32; /* Amateur (bronce) */
+  --rank-1: #c7cdd6; /* Semipro (plata) */
+  --rank-2: #ffd100; /* Profesional (oro) */
+  --rank-3: #37d6c0; /* Crack */
+  --rank-4: #7b8cff; /* Estrella */
+  --rank-5: #ff5c39; /* Leyenda */
 }
