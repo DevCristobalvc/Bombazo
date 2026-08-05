@@ -6,7 +6,7 @@ import './styles/tokens.css';
 import './styles/base.css';
 import { teamById } from './data/teams.js';
 import { createTournament, currentRival, currentStage, advance, isChampion, STAGES } from './core/tournament.js';
-import { recordResult } from './core/stats.js';
+import { recordResult, loadStats, rankFor } from './core/stats.js';
 import { loadProfile } from './core/profile.js';
 import { createMenuScreen } from './components/MenuScreen.js';
 import { createMatchScreen } from './components/MatchScreen.js';
@@ -16,6 +16,7 @@ import { createJoinScreen } from './components/JoinScreen.js';
 
 const app = document.getElementById('app');
 let session = null; // { mode, teamId, rivalId, diff, tournament? }
+let matchStartXp = 0; // XP al empezar el partido, para calcular lo ganado y detectar subidas de rango
 let duel = null; // sesión WebRTC activa (net/duel)
 let duelCtx = null; // { isHost, myTeamId, rivalTeamId }
 
@@ -42,6 +43,7 @@ function startQuickMatch() {
 
 function startTournamentMatch() {
   const t = session.tournament;
+  matchStartXp = loadStats().xp; // cada ronda cuenta su propia ganancia
   show(match.el);
   match.start({
     playerTeam: teamById(t.playerTeamId),
@@ -158,6 +160,7 @@ function startLocalMatch() {
 const menu = createMenuScreen({
   onPlay(config) {
     session = config;
+    matchStartXp = loadStats().xp;
     if (config.mode === 'torneo') {
       session.tournament = createTournament(config.teamId);
       startTournamentMatch();
@@ -183,7 +186,12 @@ function buildBracket(t, lostCurrent) {
 
 const match = createMatchScreen({
   onFinish(result) {
-    if (session?.mode !== 'local') recordResult(result.won); // hot-seat no cuenta en tus stats
+    if (session?.mode !== 'local') {
+      const after = recordResult(result.won); // hot-seat no cuenta en tus stats
+      result.points = after.xp - matchStartXp;
+      result.rank = rankFor(after.xp);
+      result.rankUp = rankFor(matchStartXp).index < result.rank.index ? result.rank : null;
+    }
     show(end.el);
 
     if (session?.mode === 'local') {

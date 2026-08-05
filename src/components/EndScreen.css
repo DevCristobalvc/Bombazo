@@ -178,3 +178,64 @@
   font-size: 20px;
   padding: 13px 8px 10px;
 }
+
+/* Recap de puntaje y rango en la pantalla final */
+.end-rank {
+  margin: 6px 0 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.end-rankline {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.end-rankline b { color: var(--c-accent); }
+
+.end-pts {
+  color: var(--c-good, #37d67a);
+  font-weight: 900;
+}
+
+.rank-bar {
+  height: 8px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.rank-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--c-accent), var(--c-accent-2, #ff5c39));
+  transition: width 0.5s ease;
+}
+
+.rank-cap {
+  font-size: 11px;
+  color: var(--c-muted);
+  font-weight: 800;
+  text-align: center;
+}
+
+.end-rankup {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--c-accent);
+  text-shadow: 0 0 16px rgba(255, 209, 0, 0.6);
+  animation: rankup-pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+@keyframes rankup-pop {
+  0% { opacity: 0; transform: scale(0.4) rotate(-4deg); }
+  60% { opacity: 1; transform: scale(1.15); }
+  100% { transform: scale(1); }
+}

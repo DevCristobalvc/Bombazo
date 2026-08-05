@@ -60,6 +60,19 @@ export function createEndScreen({ onAction }) {
     setTimeout(() => layer.remove(), 5000);
   }
 
+  /** Recap de puntaje: puntos ganados, rango actual y barra de progreso. */
+  const rankHTML = (result) => {
+    const r = result.rank;
+    if (!r) return '';
+    const up = result.rankUp ? `<div class="end-rankup">${result.rankUp.icon} ¡Subiste a ${result.rankUp.name}!</div>` : '';
+    const pts = result.points != null ? `<span class="end-pts">+${result.points} pts</span>` : '';
+    const bar = r.next
+      ? `<div class="rank-bar"><i style="width:${Math.round(r.progress * 100)}%"></i></div>
+         <span class="rank-cap">${r.xp} pts · faltan ${r.next.min - r.xp} para ${r.next.name}</span>`
+      : `<span class="rank-cap">Rango máximo · ${r.xp} pts</span>`;
+    return `<div class="end-rank">${up}<div class="end-rankline"><b>${r.icon} ${r.name}</b> ${pts}</div>${bar}</div>`;
+  };
+
   function show(result, opts = {}) {
     const { won, playerTeam, rivalTeam } = result;
     const iconName = opts.icon ?? (won ? 'trophy' : 'sadball');
@@ -85,6 +98,7 @@ export function createEndScreen({ onAction }) {
         ${recapRow(result.kicksC)}
       </div>
       ${opts.bracket ? bracketHTML(opts.bracket) : ''}
+      ${rankHTML(result)}
       <div class="end-actions">
         <button class="btn-big" data-act="${primary.act}">${primary.label}</button>
         <button class="btn-ghost" data-act="menu">Menú</button>

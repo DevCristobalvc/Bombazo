@@ -31,6 +31,18 @@ const OUT = path.join(__dirname, '..', '.smoke');
     await page.mouse.up();
   };
 
+  const dragKeeper = async (tx0, ty0) => {
+    const [sx, sy] = await toClient(180, 300);
+    const [tx, ty] = await toClient(tx0, ty0);
+    await page.mouse.move(sx, sy);
+    await page.mouse.down();
+    for (let i = 1; i <= 6; i++) {
+      await page.mouse.move(sx + ((tx - sx) * i) / 6, sy + ((ty - sy) * i) / 6);
+      await page.waitForTimeout(16);
+    }
+    await page.mouse.up();
+  };
+
   await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
   await page.click('.chips [data-id="torneo"]');
   await page.click('[data-ref="diffs"] [data-id="facil"]');
@@ -46,7 +58,8 @@ const OUT = path.join(__dirname, '..', '.smoke');
       const [cx, cy] = corners[i % 4];
       await swipeShot(cx, cy);
     } else if (await page.$('#scene.aiming')) {
-      await page.click(`.zone[data-zone="${Math.floor(Math.random() * 9)}"]`, { force: true }).catch(() => {});
+      const dz = [[100, 189], [180, 189], [260, 189], [100, 262], [180, 262], [260, 262], [100, 335], [180, 335], [260, 335]][Math.floor(Math.random() * 9)];
+      await dragKeeper(dz[0], dz[1]).catch(() => {});
     }
     await page.waitForTimeout(350);
   }
