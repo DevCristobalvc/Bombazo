@@ -239,3 +239,13 @@
   60% { opacity: 1; transform: scale(1.15); }
   100% { transform: scale(1); }
 }
+
+/* Fila de acciones secundarias (compartir / menú) */
+.end-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.end-actions-row .btn-ghost {
+  flex: 1;
+}

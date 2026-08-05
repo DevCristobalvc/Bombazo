@@ -28,6 +28,25 @@ export function createEndScreen({ onAction }) {
       <div class="panel end-card" data-ref="card"></div>
     </section>`);
   const card = el.querySelector('[data-ref="card"]');
+  let lastResult = null;
+
+  const SHARE_URL = 'https://bombazo.devcristobalvc.com';
+  /** Comparte el resultado (Web Share en móvil, portapapeles como respaldo). */
+  async function shareResult() {
+    const r = lastResult;
+    if (!r) return;
+    const verb = r.won ? 'Gané' : 'Jugué';
+    const rank = r.rank ? ` · ${r.rank.icon} ${r.rank.name}` : '';
+    const text = `${verb} ${r.scoreP}-${r.scoreC} con ${r.playerTeam.short} en ⚽ BOMBAZO${rank}. ¿Le ganas a mi tanda?`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'BOMBAZO', text, url: SHARE_URL });
+        return;
+      }
+      await navigator.clipboard.writeText(`${text}\n${SHARE_URL}`);
+      setStatus('¡Copiado! Pégalo donde quieras.');
+    } catch { /* cancelado o sin permiso: sin ruido */ }
+  }
 
   const recapRow = (kicks) =>
     `<div class="sb-dots">${kicks.map((k) => `<i class="dot ${k ? 'goal' : 'fail'}"></i>`).join('')}</div>`;
@@ -74,6 +93,7 @@ export function createEndScreen({ onAction }) {
   };
 
   function show(result, opts = {}) {
+    lastResult = result;
     const { won, playerTeam, rivalTeam } = result;
     const iconName = opts.icon ?? (won ? 'trophy' : 'sadball');
     const iconTone = iconName === 'trophy' ? 'gold' : iconName === 'ticket' ? 'gold' : 'muted';
@@ -101,7 +121,10 @@ export function createEndScreen({ onAction }) {
       ${rankHTML(result)}
       <div class="end-actions">
         <button class="btn-big" data-act="${primary.act}">${primary.label}</button>
-        <button class="btn-ghost" data-act="menu">Menú</button>
+        <div class="end-actions-row">
+          <button class="btn-ghost" data-act="share">Compartir</button>
+          <button class="btn-ghost" data-act="menu">Menú</button>
+        </div>
       </div>
       <p class="end-status" data-ref="status"></p>`;
 
@@ -118,6 +141,7 @@ export function createEndScreen({ onAction }) {
   card.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-act]');
     if (!btn) return;
+    if (btn.dataset.act === 'share') { shareResult(); return; }
     onAction(btn.dataset.act);
   });
 
