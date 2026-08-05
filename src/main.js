@@ -11,6 +11,8 @@ import { submitScore } from './net/cloud.js';
 import { loadProfile } from './core/profile.js';
 import { applyReduceMotion } from './core/settings.js';
 import { evaluateAchievements } from './core/achievements.js';
+import { markDoneToday } from './core/daily.js';
+import { awardPoints } from './core/stats.js';
 import { createMenuScreen } from './components/MenuScreen.js';
 import { createMatchScreen } from './components/MatchScreen.js';
 import { createEndScreen } from './components/EndScreen.js';
@@ -191,6 +193,12 @@ function buildBracket(t, lostCurrent) {
 const match = createMatchScreen({
   onFinish(result) {
     if (session?.mode !== 'local') {
+      // Reto del día: al completarlo, bono de XP y racha (una vez por día)
+      if (session?.daily) {
+        const d = markDoneToday();
+        if (!d.already) awardPoints(60);
+        result.dailyStreak = d.streak;
+      }
       const after = recordResult(result.won); // hot-seat no cuenta en tus stats
       result.points = after.xp - matchStartXp;
       result.rank = rankFor(after.xp);

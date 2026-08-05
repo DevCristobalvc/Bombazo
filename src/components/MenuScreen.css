@@ -557,3 +557,31 @@
   color: var(--c-muted);
   font-weight: 700;
 }
+
+/* Botón del Reto del día */
+.daily-btn {
+  align-self: center;
+  max-width: 92%;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--c-accent);
+  background: linear-gradient(90deg, rgba(255, 209, 0, 0.22), rgba(255, 92, 57, 0.18));
+  color: var(--c-text);
+  font-family: var(--font-ui);
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform 0.12s;
+}
+
+.daily-btn:active { transform: scale(0.97); }
+
+.daily-btn.done {
+  border-color: var(--c-line);
+  background: rgba(55, 214, 122, 0.14);
+  color: var(--c-muted);
+}

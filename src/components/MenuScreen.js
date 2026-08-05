@@ -15,6 +15,7 @@ import { isMuted, setMuted } from '../audio/sfx.js';
 import { reduceMotionEnabled, setReduceMotion, resetProgress } from '../core/settings.js';
 import { initInstallPrompt, promptInstall } from '../core/pwa.js';
 import { ACHIEVEMENTS, loadUnlocked } from '../core/achievements.js';
+import { dailyConfig, isDoneToday, dailyStreak } from '../core/daily.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
@@ -43,6 +44,7 @@ export function createMenuScreen({ onPlay }) {
       <div class="hero" data-ref="hero"></div>
       <p class="vs-line" data-ref="vs"></p>
       <p class="stats-line" data-ref="stats"></p>
+      <button class="daily-btn" data-ref="dailyBtn" type="button"></button>
       <div class="menu-quick">
         <button class="rank-open" data-ref="statsBtn" type="button">📊 Mis estadísticas</button>
         <button class="rank-open" data-ref="rankBtn" type="button">🏆 Ranking global</button>
@@ -213,6 +215,16 @@ export function createMenuScreen({ onPlay }) {
     renderProfile();
     renderStats();
     if (refs.exportField) refs.exportField.value = exportCode();
+    if (refs.dailyBtn) {
+      const dc = dailyConfig(TEAMS);
+      const t = teamById(dc.teamId);
+      const rv = teamById(dc.rivalId);
+      const diffLabel = DIFFICULTIES.find((d) => d.id === dc.diff)?.label ?? dc.diff;
+      refs.dailyBtn.classList.toggle('done', isDoneToday());
+      refs.dailyBtn.innerHTML = isDoneToday()
+        ? `🗓️ Reto de hoy ✓ · racha ${dailyStreak()} 🔥`
+        : `🗓️ Reto del día · ${t.short} vs ${rv.short} · ${diffLabel}`;
+    }
   }
 
   /** Personalización: piel, pelo, peinado y dorsal (repetir un color lo devuelve al de la selección). */
@@ -431,6 +443,12 @@ export function createMenuScreen({ onPlay }) {
   });
 
   refs.play.addEventListener('click', () => onPlay({ ...state }));
+
+  /** Reto del día: partido determinista por fecha, con racha. */
+  refs.dailyBtn?.addEventListener('click', () => {
+    const dc = dailyConfig(TEAMS);
+    onPlay({ mode: 'rapido', teamId: dc.teamId, rivalId: dc.rivalId, diff: dc.diff, daily: true });
+  });
 
   render();
   return { el, refresh: renderStats };
