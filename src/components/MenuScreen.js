@@ -82,6 +82,11 @@ export function createMenuScreen({ onPlay }) {
             <input class="name-input account-code" data-ref="importField" placeholder="PEGA UN CÓDIGO" autocomplete="off" spellcheck="false">
             <button class="btn-ghost" data-ref="loadBtn" type="button">Cargar</button>
           </div>
+          <div class="account-row">
+            <button class="btn-ghost" data-ref="downloadBtn" type="button">⬇ Descargar respaldo</button>
+            <button class="btn-ghost" data-ref="fileBtn" type="button">📂 Cargar archivo</button>
+            <input type="file" data-ref="fileInput" accept=".txt,.json,text/plain" hidden>
+          </div>
           <p class="account-msg" data-ref="accountMsg"></p>
         </details>
         <p class="howto"><b>Desliza</b> desde el balón hacia el arco para rematar — curva el gesto para darle efecto. Para <b>atajar</b>, arrastra a tu arquero a donde crees que va el balón. Empate = muerte súbita.</p>
@@ -251,8 +256,8 @@ export function createMenuScreen({ onPlay }) {
       accountMsg('Selecciona y copia el código');
     }
   });
-  refs.loadBtn?.addEventListener('click', () => {
-    const res = importCode(refs.importField.value);
+  const applyImport = (code) => {
+    const res = importCode(code);
     if (res.ok) {
       accountMsg('¡Perfil cargado!');
       refs.importField.value = '';
@@ -260,6 +265,29 @@ export function createMenuScreen({ onPlay }) {
     } else {
       accountMsg(res.error ?? 'No se pudo cargar');
     }
+  };
+  refs.loadBtn?.addEventListener('click', () => applyImport(refs.importField.value));
+
+  /** Respaldo como archivo: descargar el código y cargarlo desde un archivo. */
+  refs.downloadBtn?.addEventListener('click', () => {
+    const blob = new Blob([exportCode()], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bombazo-perfil.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    accountMsg('Respaldo descargado');
+  });
+  refs.fileBtn?.addEventListener('click', () => refs.fileInput?.click());
+  refs.fileInput?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => applyImport(String(reader.result));
+    reader.onerror = () => accountMsg('No se pudo leer el archivo');
+    reader.readAsText(file);
+    e.target.value = '';
   });
 
   /** Nombre en la camiseta: guarda sin re-renderizar (no pierde el foco). */
