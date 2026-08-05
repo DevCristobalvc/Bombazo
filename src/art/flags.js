@@ -120,6 +120,26 @@ const DRAWERS = {
   jpn: (w, h) => `
     <rect width="${w}" height="${h}" fill="#ffffff"/>
     <circle cx="${w / 2}" cy="${h / 2}" r="${h * 0.28}" fill="#BC002D"/>`,
+  pol: (w, h) => `
+    <rect width="${w}" height="${h / 2}" fill="#ffffff"/>
+    <rect y="${h / 2}" width="${w}" height="${h / 2}" fill="#DC143C"/>`,
+  per: (w, h) => `
+    <rect width="${w / 3}" height="${h}" fill="#D91023"/>
+    <rect x="${w / 3}" width="${w / 3}" height="${h}" fill="#ffffff"/>
+    <rect x="${(w * 2) / 3}" width="${w / 3}" height="${h}" fill="#D91023"/>`,
+  nga: (w, h) => `
+    <rect width="${w / 3}" height="${h}" fill="#008751"/>
+    <rect x="${w / 3}" width="${w / 3}" height="${h}" fill="#ffffff"/>
+    <rect x="${(w * 2) / 3}" width="${w / 3}" height="${h}" fill="#008751"/>`,
+  uru: (w, h) => {
+    let stripes = '';
+    for (let i = 1; i < 8; i += 2) stripes += `<rect y="${(i * h) / 8}" width="${w}" height="${h / 8}" fill="#5CBFEB"/>`;
+    return `
+    <rect width="${w}" height="${h}" fill="#ffffff"/>
+    ${stripes}
+    <rect width="${w * 0.42}" height="${h * 0.5}" fill="#ffffff"/>
+    <circle cx="${w * 0.21}" cy="${h * 0.25}" r="${h * 0.16}" fill="#F4C300"/>`;
+  },
 };
 
 export function flagSVG(teamId, w = 36, h = 24) {
