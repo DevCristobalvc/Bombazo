@@ -466,3 +466,39 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* Panel de Ajustes */
+.set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 4px;
+  font-weight: 800;
+  border-bottom: 1px solid var(--c-line);
+}
+
+.set-toggle {
+  min-width: 58px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1.5px solid var(--c-line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--c-muted);
+  font-family: var(--font-ui);
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.set-toggle.on {
+  border-color: var(--c-accent);
+  background: var(--c-accent);
+  color: #3a2600;
+}
+
+.set-danger {
+  margin-top: 14px;
+  width: 100%;
+  color: #ff8585;
+  border-color: rgba(255, 133, 133, 0.5);
+}

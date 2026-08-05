@@ -9,6 +9,7 @@ import { createTournament, currentRival, currentStage, advance, isChampion, STAG
 import { recordResult, loadStats, rankFor } from './core/stats.js';
 import { submitScore } from './net/cloud.js';
 import { loadProfile } from './core/profile.js';
+import { applyReduceMotion } from './core/settings.js';
 import { createMenuScreen } from './components/MenuScreen.js';
 import { createMatchScreen } from './components/MatchScreen.js';
 import { createEndScreen } from './components/EndScreen.js';
@@ -16,6 +17,7 @@ import { createDuelLobby } from './components/DuelLobby.js';
 import { createJoinScreen } from './components/JoinScreen.js';
 
 const app = document.getElementById('app');
+applyReduceMotion(); // aplica la preferencia guardada de reducir movimiento
 let session = null; // { mode, teamId, rivalId, diff, tournament? }
 let matchStartXp = 0; // XP al empezar el partido, para calcular lo ganado y detectar subidas de rango
 let duel = null; // sesión WebRTC activa (net/duel)

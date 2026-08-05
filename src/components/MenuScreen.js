@@ -11,6 +11,8 @@ import { loadStats, rankFor } from '../core/stats.js';
 import { loadProfile, saveProfile, SKINS, HAIRS, NUMBERS, HAIRSTYLES } from '../core/profile.js';
 import { exportCode, importCode } from '../core/account.js';
 import { isConfigured, getSession, signInWithGoogle, signOut, fetchLeaderboard } from '../net/cloud.js';
+import { isMuted, setMuted } from '../audio/sfx.js';
+import { reduceMotionEnabled, setReduceMotion, resetProgress } from '../core/settings.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
@@ -42,6 +44,7 @@ export function createMenuScreen({ onPlay }) {
       <div class="menu-quick">
         <button class="rank-open" data-ref="statsBtn" type="button">📊 Mis estadísticas</button>
         <button class="rank-open" data-ref="rankBtn" type="button">🏆 Ranking global</button>
+        <button class="rank-open" data-ref="settingsBtn" type="button">⚙ Ajustes</button>
       </div>
       <div class="heatmap-row" data-ref="heatrow" hidden>
         <span class="heatmap-label">Tu puntería</span>
@@ -107,6 +110,13 @@ export function createMenuScreen({ onPlay }) {
           <button class="rank-close" data-ref="statsClose" type="button" aria-label="Cerrar">✕</button>
           <h2 class="rank-title">📊 Mis estadísticas</h2>
           <div class="rank-body" data-ref="statsBody"></div>
+        </div>
+      </div>
+      <div class="rank-overlay" data-ref="settingsOverlay" hidden>
+        <div class="rank-card">
+          <button class="rank-close" data-ref="settingsClose" type="button" aria-label="Cerrar">✕</button>
+          <h2 class="rank-title">⚙ Ajustes</h2>
+          <div class="rank-body" data-ref="settingsBody"></div>
         </div>
       </div>
     </section>`);
@@ -276,6 +286,33 @@ export function createMenuScreen({ onPlay }) {
   refs.statsBtn?.addEventListener('click', () => { refs.statsOverlay.hidden = false; renderStatsPanel(); });
   refs.statsClose?.addEventListener('click', () => { refs.statsOverlay.hidden = true; });
   refs.statsOverlay?.addEventListener('click', (e) => { if (e.target === refs.statsOverlay) refs.statsOverlay.hidden = true; });
+
+  /** Panel de Ajustes: sonido, reducir movimiento, reiniciar progreso. */
+  function renderSettings() {
+    const toggle = (on) => (on ? 'ON' : 'OFF');
+    refs.settingsBody.innerHTML = `
+      <div class="set-row">
+        <span>🔊 Sonido</span>
+        <button class="set-toggle ${!isMuted() ? 'on' : ''}" data-ref="soundToggle" type="button">${toggle(!isMuted())}</button>
+      </div>
+      <div class="set-row">
+        <span>🌀 Reducir movimiento</span>
+        <button class="set-toggle ${reduceMotionEnabled() ? 'on' : ''}" data-ref="motionToggle" type="button">${toggle(reduceMotionEnabled())}</button>
+      </div>
+      <button class="btn-ghost set-danger" data-ref="resetBtn" type="button">Reiniciar progreso</button>`;
+    refs.settingsBody.querySelector('[data-ref="soundToggle"]').onclick = () => { setMuted(!isMuted()); renderSettings(); };
+    refs.settingsBody.querySelector('[data-ref="motionToggle"]').onclick = () => { setReduceMotion(!reduceMotionEnabled()); renderSettings(); };
+    refs.settingsBody.querySelector('[data-ref="resetBtn"]').onclick = () => {
+      if (confirm('¿Borrar todo tu progreso (stats y perfil)? No se puede deshacer.')) {
+        resetProgress();
+        renderSettings();
+        render();
+      }
+    };
+  }
+  refs.settingsBtn?.addEventListener('click', () => { refs.settingsOverlay.hidden = false; renderSettings(); });
+  refs.settingsClose?.addEventListener('click', () => { refs.settingsOverlay.hidden = true; });
+  refs.settingsOverlay?.addEventListener('click', (e) => { if (e.target === refs.settingsOverlay) refs.settingsOverlay.hidden = true; });
 
   /** Respaldo de perfil: copiar el código propio o cargar uno pegado. */
   const accountMsg = (t) => { if (refs.accountMsg) refs.accountMsg.textContent = t; };
