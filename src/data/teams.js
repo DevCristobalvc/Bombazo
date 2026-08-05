@@ -221,6 +221,42 @@ export const TEAMS = [
     skin: '#D9A97A',
     hair: '#231208',
   },
+  {
+    id: 'chi',
+    name: 'Chile',
+    short: 'CHI',
+    kit: { shirt: '#D52B1E', accent: '#FFFFFF', shorts: '#0039A6', socks: '#FFFFFF' },
+    gk: { shirt: '#111827', accent: '#D52B1E' },
+    skin: '#D9A97A',
+    hair: '#231208',
+  },
+  {
+    id: 'den',
+    name: 'Dinamarca',
+    short: 'DEN',
+    kit: { shirt: '#C60C30', accent: '#FFFFFF', shorts: '#FFFFFF', socks: '#C60C30' },
+    gk: { shirt: '#111827', accent: '#C60C30' },
+    skin: '#EAC6A0',
+    hair: '#6B4A22',
+  },
+  {
+    id: 'swe',
+    name: 'Suecia',
+    short: 'SWE',
+    kit: { shirt: '#FECC02', accent: '#006AA7', shorts: '#006AA7', socks: '#FECC02' },
+    gk: { shirt: '#1A1A1A', accent: '#FECC02' },
+    skin: '#EAC6A0',
+    hair: '#C9A227',
+  },
+  {
+    id: 'gha',
+    name: 'Ghana',
+    short: 'GHA',
+    kit: { shirt: '#FFFFFF', accent: '#CE1126', shorts: '#FFFFFF', socks: '#FFFFFF' },
+    gk: { shirt: '#006B3F', accent: '#052E1F' },
+    skin: '#6B3F22',
+    hair: '#0A0A0A',
+  },
 ];
 
 export const teamById = (id) => TEAMS.find((t) => t.id === id);
