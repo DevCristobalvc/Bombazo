@@ -257,6 +257,33 @@ export const TEAMS = [
     skin: '#6B3F22',
     hair: '#0A0A0A',
   },
+  {
+    id: 'ecu',
+    name: 'Ecuador',
+    short: 'ECU',
+    kit: { shirt: '#FFD100', accent: '#0072CE', shorts: '#0039A6', socks: '#EF3340' },
+    gk: { shirt: '#111827', accent: '#FFD100' },
+    skin: '#C68642',
+    hair: '#160D05',
+  },
+  {
+    id: 'sen',
+    name: 'Senegal',
+    short: 'SEN',
+    kit: { shirt: '#FFFFFF', accent: '#00853F', shorts: '#FFFFFF', socks: '#00853F' },
+    gk: { shirt: '#E31B23', accent: '#5A0A0E' },
+    skin: '#5C3A21',
+    hair: '#0A0A0A',
+  },
+  {
+    id: 'crc',
+    name: 'Costa Rica',
+    short: 'CRC',
+    kit: { shirt: '#D90429', accent: '#FFFFFF', shorts: '#00369C', socks: '#D90429' },
+    gk: { shirt: '#111827', accent: '#D90429' },
+    skin: '#D9A97A',
+    hair: '#231208',
+  },
 ];
 
 export const teamById = (id) => TEAMS.find((t) => t.id === id);

@@ -164,6 +164,20 @@ const DRAWERS = {
     <rect y="${h / 3}" width="${w}" height="${h / 3}" fill="#FCD116"/>
     <rect y="${(h * 2) / 3}" width="${w}" height="${h / 3}" fill="#006B3F"/>
     <polygon points="${starPts(w / 2, h / 2, 5, h * 0.16, h * 0.07)}" fill="#000000"/>`,
+  ecu: (w, h) => `
+    <rect width="${w}" height="${h / 2}" fill="#FFD100"/>
+    <rect y="${h / 2}" width="${w}" height="${h / 4}" fill="#0072CE"/>
+    <rect y="${(h * 3) / 4}" width="${w}" height="${h / 4}" fill="#EF3340"/>`,
+  sen: (w, h) => `
+    <rect width="${w / 3}" height="${h}" fill="#00853F"/>
+    <rect x="${w / 3}" width="${w / 3}" height="${h}" fill="#FDEF42"/>
+    <rect x="${(w * 2) / 3}" width="${w / 3}" height="${h}" fill="#E31B23"/>
+    <polygon points="${starPts(w / 2, h / 2, 5, h * 0.16, h * 0.07)}" fill="#00853F"/>`,
+  crc: (w, h) => `
+    <rect width="${w}" height="${h}" fill="#002B7F"/>
+    <rect y="${h / 6}" width="${w}" height="${h / 6}" fill="#ffffff"/>
+    <rect y="${h / 3}" width="${w}" height="${h / 3}" fill="#CE1126"/>
+    <rect y="${(h * 2) / 3}" width="${w}" height="${h / 6}" fill="#ffffff"/>`,
 };
 
 export function flagSVG(teamId, w = 36, h = 24) {
