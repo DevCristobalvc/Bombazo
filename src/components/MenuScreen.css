@@ -16,20 +16,39 @@
 
 /* El héroe SOLO toma el espacio sobrante (base 0): si el resto del menú
    crece, él se encoge primero y nada desborda. Foco de luz dorado detrás. */
+/* Escenario del personaje (lobby): foco de luz desde arriba + podio brillante */
 .hero {
+  position: relative;
   flex: 1 1 0;
-  min-height: 96px;
+  min-height: 110px;
   display: flex;
   justify-content: center;
-  align-items: center;
-  background: radial-gradient(ellipse 52% 46% at 50% 60%, rgba(255, 209, 0, 0.13), transparent 70%);
+  align-items: flex-end;
+  background:
+    radial-gradient(58% 72% at 50% 0%, rgba(123, 140, 255, 0.12), transparent 62%),
+    radial-gradient(ellipse 48% 42% at 50% 90%, rgba(255, 209, 0, 0.18), transparent 72%);
+}
+
+/* Podio bajo los pies del personaje */
+.hero::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+  transform: translateX(-50%);
+  width: 48%;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 209, 0, 0.4), rgba(255, 209, 0, 0) 70%);
+  box-shadow: 0 0 34px rgba(255, 209, 0, 0.22);
 }
 
 .hero svg {
+  position: relative;
   height: 100%;
-  max-height: 235px;
+  max-height: 238px;
   width: auto;
-  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.5));
 }
 
 .vs-line {

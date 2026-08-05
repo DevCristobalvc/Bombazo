@@ -163,7 +163,7 @@ export function createMenuScreen({ onPlay }) {
         ? `V ${s.wins} · D ${s.losses} · Racha ${s.streak}`
         : 'Nuevo jugador';
     const toNext = r.next ? ` · ${r.next.min - s.xp} pts para ${r.next.name}` : ' · rango máximo';
-    refs.stats.innerHTML = `<b>${r.icon} ${r.name}</b> · ${s.xp} pts · ${record}<span class="rank-next">${toNext}</span>`;
+    refs.stats.innerHTML = `${record}<span class="rank-next">${toNext}</span>`;
 
     // Mapa de calor: efectividad de tus remates por zona del arco
     const hasShots = s.zones.some((z) => z.shots > 0);
