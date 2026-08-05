@@ -296,3 +296,125 @@
   font-weight: 800;
   color: var(--c-accent);
 }
+
+/* Botón para abrir el ranking global */
+.rank-open {
+  align-self: center;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--c-line);
+  background: rgba(255, 209, 0, 0.08);
+  color: var(--c-text);
+  font-family: var(--font-ui);
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.rank-open:hover {
+  border-color: var(--c-accent);
+  background: rgba(255, 209, 0, 0.16);
+}
+
+/* Overlay del ranking global */
+.rank-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(4, 8, 26, 0.82);
+  backdrop-filter: blur(3px);
+}
+
+.rank-overlay[hidden] {
+  display: none;
+}
+
+.rank-card {
+  position: relative;
+  width: min(94%, 420px);
+  max-height: 80dvh;
+  overflow-y: auto;
+  background: var(--c-panel);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-l);
+  padding: 20px 18px;
+  box-shadow: var(--shadow-1);
+}
+
+.rank-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--c-muted);
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.rank-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  text-align: center;
+  margin-bottom: 14px;
+  color: var(--c-accent);
+}
+
+.rank-empty {
+  text-align: center;
+  color: var(--c-muted);
+  font-weight: 700;
+  font-size: 13.5px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.rank-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rank-list li {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-m);
+  background: rgba(255, 255, 255, 0.04);
+  font-weight: 800;
+}
+
+.rank-list li.me {
+  background: rgba(255, 209, 0, 0.16);
+  outline: 1.5px solid var(--c-accent);
+}
+
+.rank-list .rp {
+  font-family: var(--font-display);
+  color: var(--c-accent);
+  text-align: center;
+}
+
+.rank-list .rn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-list .rx {
+  color: var(--c-good, #37d67a);
+  font-variant-numeric: tabular-nums;
+}

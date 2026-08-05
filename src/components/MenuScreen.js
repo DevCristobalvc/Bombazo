@@ -10,6 +10,7 @@ import { icon, flames } from '../art/icons.js';
 import { loadStats, rankFor } from '../core/stats.js';
 import { loadProfile, saveProfile, SKINS, HAIRS, NUMBERS, HAIRSTYLES } from '../core/profile.js';
 import { exportCode, importCode } from '../core/account.js';
+import { isConfigured, getSession, signInWithGoogle, signOut, fetchLeaderboard } from '../net/cloud.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
@@ -38,6 +39,7 @@ export function createMenuScreen({ onPlay }) {
       <div class="hero" data-ref="hero"></div>
       <p class="vs-line" data-ref="vs"></p>
       <p class="stats-line" data-ref="stats"></p>
+      <button class="rank-open" data-ref="rankBtn" type="button">🏆 Ranking global</button>
       <div class="heatmap-row" data-ref="heatrow" hidden>
         <span class="heatmap-label">Tu puntería</span>
         <div class="heatmap" data-ref="heat" title="Efectividad por zona del arco"></div>
@@ -84,6 +86,13 @@ export function createMenuScreen({ onPlay }) {
         </details>
         <p class="howto"><b>Desliza</b> desde el balón hacia el arco para rematar — curva el gesto para darle efecto. Para <b>atajar</b>, arrastra a tu arquero a donde crees que va el balón. Empate = muerte súbita.</p>
         <button class="btn-big" data-ref="play">¡A LA CANCHA!</button>
+      </div>
+      <div class="rank-overlay" data-ref="rankOverlay" hidden>
+        <div class="rank-card">
+          <button class="rank-close" data-ref="rankClose" type="button" aria-label="Cerrar">✕</button>
+          <h2 class="rank-title">🏆 Ranking global</h2>
+          <div class="rank-body" data-ref="rankBody"></div>
+        </div>
       </div>
     </section>`);
 
@@ -196,6 +205,38 @@ export function createMenuScreen({ onPlay }) {
     saveProfile(p);
     render();
   });
+
+  /** Ranking global: estados degradados (sin backend / sin login / con login). */
+  const esc = (t) => String(t ?? '').replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+  async function renderRank() {
+    const box = refs.rankBody;
+    if (!box) return;
+    if (!isConfigured()) {
+      box.innerHTML = '<p class="rank-empty">🏆 El ranking global llega muy pronto.<br>Por ahora tu progreso se guarda en este dispositivo.</p>';
+      return;
+    }
+    box.innerHTML = '<p class="rank-empty">Cargando…</p>';
+    let session = null;
+    try { session = await getSession(); } catch { /* sin sesión */ }
+    if (!session) {
+      box.innerHTML = `<p class="rank-empty">Juega sin cuenta cuando quieras. Inicia sesión para competir en el ranking global y no perder tu perfil.</p>
+        <button class="btn-big" data-ref="loginBtn" type="button">Iniciar sesión con Google</button>`;
+      box.querySelector('[data-ref="loginBtn"]').onclick = () => signInWithGoogle();
+      return;
+    }
+    const rows = await fetchLeaderboard(20);
+    const me = (loadProfile().name || '').trim().toUpperCase();
+    const list = rows
+      .map((r) => `<li class="${(r.name || '').trim().toUpperCase() === me ? 'me' : ''}"><span class="rp">${r.position}</span><span class="rn">${esc(r.name)}</span><span class="rx">${r.xp}</span></li>`)
+      .join('');
+    box.innerHTML = `<ol class="rank-list">${list || '<p class="rank-empty">Aún no hay puntajes. ¡Sé el primero!</p>'}</ol>
+      <button class="btn-ghost" data-ref="logoutBtn" type="button">Cerrar sesión</button>`;
+    const out = box.querySelector('[data-ref="logoutBtn"]');
+    if (out) out.onclick = async () => { await signOut(); renderRank(); };
+  }
+  refs.rankBtn?.addEventListener('click', () => { refs.rankOverlay.hidden = false; renderRank(); });
+  refs.rankClose?.addEventListener('click', () => { refs.rankOverlay.hidden = true; });
+  refs.rankOverlay?.addEventListener('click', (e) => { if (e.target === refs.rankOverlay) refs.rankOverlay.hidden = true; });
 
   /** Respaldo de perfil: copiar el código propio o cargar uno pegado. */
   const accountMsg = (t) => { if (refs.accountMsg) refs.accountMsg.textContent = t; };
