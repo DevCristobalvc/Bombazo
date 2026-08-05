@@ -119,6 +119,11 @@ export function createEndScreen({ onAction }) {
       </div>
       ${opts.bracket ? bracketHTML(opts.bracket) : ''}
       ${rankHTML(result)}
+      ${(result.newAchievements?.length)
+        ? `<div class="end-achievements">${result.newAchievements
+            .map((a) => `<div class="end-ach"><span class="end-ach-ic">${a.icon}</span><span><b>¡Logro!</b> ${a.name}</span></div>`)
+            .join('')}</div>`
+        : ''}
       <div class="end-actions">
         <button class="btn-big" data-act="${primary.act}">${primary.label}</button>
         <div class="end-actions-row">

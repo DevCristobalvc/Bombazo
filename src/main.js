@@ -10,6 +10,7 @@ import { recordResult, loadStats, rankFor } from './core/stats.js';
 import { submitScore } from './net/cloud.js';
 import { loadProfile } from './core/profile.js';
 import { applyReduceMotion } from './core/settings.js';
+import { evaluateAchievements } from './core/achievements.js';
 import { createMenuScreen } from './components/MenuScreen.js';
 import { createMatchScreen } from './components/MatchScreen.js';
 import { createEndScreen } from './components/EndScreen.js';
@@ -194,6 +195,7 @@ const match = createMatchScreen({
       result.points = after.xp - matchStartXp;
       result.rank = rankFor(after.xp);
       result.rankUp = rankFor(matchStartXp).index < result.rank.index ? result.rank : null;
+      result.newAchievements = evaluateAchievements(after); // logros recién desbloqueados
       // Sube tu XP al ranking global (no-op sin backend/login)
       submitScore({ name: loadProfile().name || 'Jugador', xp: after.xp }).catch(() => {});
     }

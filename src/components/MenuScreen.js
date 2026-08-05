@@ -14,6 +14,7 @@ import { isConfigured, getSession, signInWithGoogle, signOut, fetchLeaderboard }
 import { isMuted, setMuted } from '../audio/sfx.js';
 import { reduceMotionEnabled, setReduceMotion, resetProgress } from '../core/settings.js';
 import { initInstallPrompt, promptInstall } from '../core/pwa.js';
+import { ACHIEVEMENTS, loadUnlocked } from '../core/achievements.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
@@ -283,7 +284,23 @@ export function createMenuScreen({ onPlay }) {
         ${cell('Racha actual', s.streak)}
         ${cell('Goles', s.goalsFor ?? 0)}
         ${cell('Atajadas', s.saves ?? 0)}
-      </div>`;
+      </div>
+      <h3 class="ach-title">🏅 Logros</h3>
+      <div class="ach-list">${achievementsHTML()}</div>`;
+  }
+
+  /** Lista de logros con estado desbloqueado/bloqueado. */
+  function achievementsHTML() {
+    const unlocked = loadUnlocked();
+    return ACHIEVEMENTS
+      .map((a) => {
+        const done = unlocked.has(a.id);
+        return `<div class="ach-item ${done ? 'done' : ''}">
+          <span class="ach-ic">${done ? a.icon : '🔒'}</span>
+          <span class="ach-txt"><b>${a.name}</b><span>${a.desc}</span></span>
+        </div>`;
+      })
+      .join('');
   }
   refs.statsBtn?.addEventListener('click', () => { refs.statsOverlay.hidden = false; renderStatsPanel(); });
   refs.statsClose?.addEventListener('click', () => { refs.statsOverlay.hidden = true; });

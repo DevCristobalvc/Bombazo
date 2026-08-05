@@ -249,3 +249,26 @@
 .end-actions-row .btn-ghost {
   flex: 1;
 }
+
+/* Logros recién desbloqueados en la pantalla final */
+.end-achievements {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0 2px;
+}
+
+.end-ach {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--radius-m);
+  background: rgba(255, 209, 0, 0.14);
+  outline: 1.5px solid var(--c-accent);
+  font-weight: 800;
+  font-size: 13px;
+  animation: rankup-pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+.end-ach-ic { font-size: 20px; }
