@@ -418,3 +418,51 @@
   color: var(--c-good, #37d67a);
   font-variant-numeric: tabular-nums;
 }
+
+/* Fila de botones rápidos del menú (stats / ranking) */
+.menu-quick {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Grid de estadísticas de vida */
+.stat-rank {
+  text-align: center;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.stat-rank b { color: var(--c-accent); }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.stat-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 8px;
+  border-radius: var(--radius-m);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.stat-val {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--c-accent);
+  line-height: 1;
+}
+
+.stat-lbl {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--c-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

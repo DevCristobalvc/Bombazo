@@ -3,7 +3,7 @@ const KEY = 'bombazo:stats';
 
 const freshZones = () => Array.from({ length: 9 }, () => ({ shots: 0, goals: 0 }));
 
-const DEFAULTS = { wins: 0, losses: 0, streak: 0, best: 0, xp: 0 };
+const DEFAULTS = { wins: 0, losses: 0, streak: 0, best: 0, xp: 0, goalsFor: 0, saves: 0, matches: 0 };
 
 /** Puntos por acción (base del ranking global futuro). */
 export const POINTS = { goal: 15, save: 12, win: 120, loss: 30 };
@@ -60,18 +60,23 @@ export function recordShot(zone, goal) {
   s.zones[zone].shots += 1;
   if (goal) {
     s.zones[zone].goals += 1;
+    s.goalsFor = (s.goalsFor ?? 0) + 1;
     s.xp = (s.xp ?? 0) + POINTS.goal;
   }
   save(s);
 }
 
-/** Puntos por atajada propia (el rival pateó y lo tapaste). */
+/** Atajada propia (el rival pateó y lo tapaste): puntos + total de vida. */
 export function recordSave() {
-  awardPoints(POINTS.save);
+  const s = loadStats();
+  s.saves = (s.saves ?? 0) + 1;
+  s.xp = (s.xp ?? 0) + POINTS.save;
+  save(s);
 }
 
 export function recordResult(won) {
   const s = loadStats();
+  s.matches = (s.matches ?? 0) + 1;
   if (won) {
     s.wins += 1;
     s.streak += 1;

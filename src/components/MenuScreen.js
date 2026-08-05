@@ -39,7 +39,10 @@ export function createMenuScreen({ onPlay }) {
       <div class="hero" data-ref="hero"></div>
       <p class="vs-line" data-ref="vs"></p>
       <p class="stats-line" data-ref="stats"></p>
-      <button class="rank-open" data-ref="rankBtn" type="button">🏆 Ranking global</button>
+      <div class="menu-quick">
+        <button class="rank-open" data-ref="statsBtn" type="button">📊 Mis estadísticas</button>
+        <button class="rank-open" data-ref="rankBtn" type="button">🏆 Ranking global</button>
+      </div>
       <div class="heatmap-row" data-ref="heatrow" hidden>
         <span class="heatmap-label">Tu puntería</span>
         <div class="heatmap" data-ref="heat" title="Efectividad por zona del arco"></div>
@@ -97,6 +100,13 @@ export function createMenuScreen({ onPlay }) {
           <button class="rank-close" data-ref="rankClose" type="button" aria-label="Cerrar">✕</button>
           <h2 class="rank-title">🏆 Ranking global</h2>
           <div class="rank-body" data-ref="rankBody"></div>
+        </div>
+      </div>
+      <div class="rank-overlay" data-ref="statsOverlay" hidden>
+        <div class="rank-card">
+          <button class="rank-close" data-ref="statsClose" type="button" aria-label="Cerrar">✕</button>
+          <h2 class="rank-title">📊 Mis estadísticas</h2>
+          <div class="rank-body" data-ref="statsBody"></div>
         </div>
       </div>
     </section>`);
@@ -242,6 +252,30 @@ export function createMenuScreen({ onPlay }) {
   refs.rankBtn?.addEventListener('click', () => { refs.rankOverlay.hidden = false; renderRank(); });
   refs.rankClose?.addEventListener('click', () => { refs.rankOverlay.hidden = true; });
   refs.rankOverlay?.addEventListener('click', (e) => { if (e.target === refs.rankOverlay) refs.rankOverlay.hidden = true; });
+
+  /** Panel de estadísticas de vida del jugador. */
+  function renderStatsPanel() {
+    const s = loadStats();
+    const r = rankFor(s.xp);
+    const played = s.matches ?? 0;
+    const winPct = played ? Math.round((s.wins / played) * 100) : 0;
+    const cell = (label, val) => `<div class="stat-cell"><span class="stat-val">${val}</span><span class="stat-lbl">${label}</span></div>`;
+    refs.statsBody.innerHTML = `
+      <div class="stat-rank"><b>${r.icon} ${r.name}</b> · ${s.xp} pts</div>
+      <div class="stat-grid">
+        ${cell('Partidos', played)}
+        ${cell('Victorias', s.wins)}
+        ${cell('Derrotas', s.losses)}
+        ${cell('% Victorias', winPct + '%')}
+        ${cell('Mejor racha', s.best)}
+        ${cell('Racha actual', s.streak)}
+        ${cell('Goles', s.goalsFor ?? 0)}
+        ${cell('Atajadas', s.saves ?? 0)}
+      </div>`;
+  }
+  refs.statsBtn?.addEventListener('click', () => { refs.statsOverlay.hidden = false; renderStatsPanel(); });
+  refs.statsClose?.addEventListener('click', () => { refs.statsOverlay.hidden = true; });
+  refs.statsOverlay?.addEventListener('click', (e) => { if (e.target === refs.statsOverlay) refs.statsOverlay.hidden = true; });
 
   /** Respaldo de perfil: copiar el código propio o cargar uno pegado. */
   const accountMsg = (t) => { if (refs.accountMsg) refs.accountMsg.textContent = t; };
