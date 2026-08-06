@@ -11,9 +11,16 @@
 }
 
 .join-hero svg {
-  height: clamp(110px, 20dvh, 180px);
+  height: clamp(84px, 14dvh, 108px);
   width: auto;
-  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+}
+
+.join-card .btn-big {
+  border-radius: var(--radius-m);
+  background: var(--c-accent);
+  color: #2a1200;
+  box-shadow: 0 6px 16px rgba(255, 209, 0, 0.16);
 }
 
 .join-card {

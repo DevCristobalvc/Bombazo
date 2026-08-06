@@ -4,7 +4,7 @@
  */
 import { TEAMS, teamById } from '../data/teams.js';
 import { flagSVG } from '../art/flags.js';
-import { heroSVG } from '../art/players.js';
+import { avatarSVG } from '../art/players.js';
 import { icon } from '../art/icons.js';
 import { fromHTML } from '../utils/dom.js';
 import './JoinScreen.css';
@@ -38,7 +38,7 @@ export function createJoinScreen({ onJoin, onCancel }) {
         ${flagSVG(t.id, 26, 17)} ${t.name}
       </button>`
     ).join('');
-    refs.hero.innerHTML = heroSVG(teamById(state.teamId));
+    refs.hero.innerHTML = avatarSVG(teamById(state.teamId));
     refs.code.textContent = state.code.toUpperCase();
   }
 
