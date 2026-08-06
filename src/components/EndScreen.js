@@ -36,7 +36,7 @@ export function createEndScreen({ onAction }) {
     const r = lastResult;
     if (!r) return;
     const verb = r.won ? 'Gané' : 'Jugué';
-    const rank = r.rank ? ` · ${r.rank.icon} ${r.rank.name}` : '';
+    const rank = r.rank ? ` · ${r.rank.name}` : '';
     const text = `${verb} ${r.scoreP}-${r.scoreC} con ${r.playerTeam.short} en ⚽ BOMBAZO${rank}. ¿Le ganas a mi tanda?`;
     try {
       if (navigator.share) {
@@ -83,13 +83,13 @@ export function createEndScreen({ onAction }) {
   const rankHTML = (result) => {
     const r = result.rank;
     if (!r) return '';
-    const up = result.rankUp ? `<div class="end-rankup">${result.rankUp.icon} ¡Subiste a ${result.rankUp.name}!</div>` : '';
+    const up = result.rankUp ? `<div class="end-rankup">Subiste a ${result.rankUp.name}</div>` : '';
     const pts = result.points != null ? `<span class="end-pts">+${result.points} pts</span>` : '';
     const bar = r.next
       ? `<div class="rank-bar"><i style="width:${Math.round(r.progress * 100)}%"></i></div>
          <span class="rank-cap">${r.xp} pts · faltan ${r.next.min - r.xp} para ${r.next.name}</span>`
       : `<span class="rank-cap">Rango máximo · ${r.xp} pts</span>`;
-    return `<div class="end-rank">${up}<div class="end-rankline"><b>${r.icon} ${r.name}</b> ${pts}</div>${bar}</div>`;
+    return `<div class="end-rank">${up}<div class="end-rankline"><b>${r.name}</b> ${pts}</div>${bar}</div>`;
   };
 
   function show(result, opts = {}) {
@@ -121,7 +121,7 @@ export function createEndScreen({ onAction }) {
       ${rankHTML(result)}
       ${(result.newAchievements?.length)
         ? `<div class="end-achievements">${result.newAchievements
-            .map((a) => `<div class="end-ach"><span class="end-ach-ic">${a.icon}</span><span><b>¡Logro!</b> ${a.name}${a.xp ? ` <span class="end-ach-xp">+${a.xp} pts</span>` : ''}</span></div>`)
+            .map((a) => `<div class="end-ach"><span><b>Logro</b> ${a.name}${a.xp ? ` <span class="end-ach-xp">+${a.xp} pts</span>` : ''}</span></div>`)
             .join('')}</div>`
         : ''}
       <div class="end-actions">
