@@ -5,9 +5,26 @@
  * el efecto (comba). La trayectoria es una Bézier cuadrática con leve arco
  * de gravedad; el punto de control se desplaza según la curva.
  */
-import { BALL_HOME, zoneCenter, KEEPER_REACH } from './zones.js';
+import { BALL_HOME, zoneCenter, KEEPER_REACH, GOAL, inGoal } from './zones.js';
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+/** Grosor de la banda del marco (postes y travesaño), en px de escena. */
+export const WOODWORK = 7;
+
+/**
+ * ¿El tiro pega en el palo o el travesaño? Es un remate a puerta (dentro del
+ * arco) que roza el marco: cerca de un poste o del travesaño. Realismo puro:
+ * en penales el palo es lo más dramático. No cuenta la línea de gol (suelo).
+ */
+export function hitsWoodwork(shot) {
+  if (!shot || !inGoal(shot.tx, shot.ty)) return false;
+  return (
+    shot.tx <= GOAL.left + WOODWORK ||
+    shot.tx >= GOAL.right - WOODWORK ||
+    shot.ty <= GOAL.top + WOODWORK
+  );
+}
 
 /**
  * Atajada continua: ¿el arquero (punto {x,y} al que se lanzó) alcanza el

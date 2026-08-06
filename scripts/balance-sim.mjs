@@ -7,7 +7,7 @@
  * Uso: node scripts/balance-sim.mjs [N]
  */
 import { keeperAim, shooterAim } from '../src/core/ai.js';
-import { isSaved, cpuAimShot } from '../src/core/physics.js';
+import { isSaved, cpuAimShot, hitsWoodwork } from '../src/core/physics.js';
 import { GOAL, inGoal, AI_REACH, PLAYER_REACH } from '../src/core/zones.js';
 
 const N = Number(process.argv[2]) || 2000;
@@ -24,6 +24,7 @@ function shootVsKeeper(diff) {
     const target = goalPoint();
     const shot = { tx: target.x, ty: target.y, curve: 0, dur: 400 };
     const keeper = keeperAim(diff, shot, NO_HABITS);
+    if (hitsWoodwork(shot)) continue; // al palo: no es gol
     if (!isSaved(shot, keeper, AI_REACH)) goals++;
   }
   return goals / N;

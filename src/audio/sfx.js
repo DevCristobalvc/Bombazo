@@ -125,6 +125,11 @@ export const sfx = {
     [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.12, { at: i * 0.09, vol: 0.16 }));
     noise(1.1, { vol: 0.09, at: 0.05, cutoff: 1500 });
   }),
+  /** Balón al palo o travesaño: golpe metálico seco. */
+  post: guard(() => {
+    tone(1500, 0.07, { type: 'square', vol: 0.18, slideTo: 760 });
+    tone(950, 0.13, { type: 'triangle', vol: 0.12, at: 0.02 });
+  }),
   /** Manotazo del arquero. */
   save: guard(() => {
     tone(200, 0.09, { vol: 0.2, slideTo: 120 });

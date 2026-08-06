@@ -10,7 +10,7 @@
 import { createShootout, registerKick, registerHabit, winner, isSuddenDeath, score } from '../core/shootout.js';
 import { keeperAim, shooterAim } from '../core/ai.js';
 import { zoneAt, zoneNearest, inGoal, AI_REACH, PLAYER_REACH } from '../core/zones.js';
-import { cpuAimShot, isSaved, cornerCrossPath, headerShot, wallBlocks, applyWind } from '../core/physics.js';
+import { cpuAimShot, isSaved, hitsWoodwork, cornerCrossPath, headerShot, wallBlocks, applyWind } from '../core/physics.js';
 import { recordShot, recordSave } from '../core/stats.js';
 import { createPitch } from './Pitch.js';
 import { createScoreboard } from './Scoreboard.js';
@@ -39,6 +39,7 @@ const COPY = {
   crossLost: ['¡PASÓ DE LARGO!', '¡SE FUE EL CENTRO!', '¡NADIE LA PEINÓ!'],
   wallBlockMine: ['¡A LA BARRERA!', '¡LA TAPÓ LA BARRERA!', '¡MURO INFRANQUEABLE!'],
   wallBlockTheirs: ['¡TU BARRERA LA SACÓ!', '¡CHOCÓ CON EL MURO!'],
+  woodwork: ['¡AL PALO!', '¡AL TRAVESAÑO!', '¡LA MADERA LO SALVÓ!', '¡UUUY, EL POSTE!'],
 };
 
 export function createMatchScreen({ onFinish, onExit }) {
@@ -188,9 +189,14 @@ export function createMatchScreen({ onFinish, onExit }) {
   }
 
   /** Resultado + festejo de un penal propio. */
-  async function settleMyKick({ goal, offTarget, ballZone }) {
-    if (!offTarget) recordShot(ballZone, goal); // mapa de calor de puntería
-    if (goal) {
+  async function settleMyKick({ goal, offTarget, ballZone, woodwork }) {
+    if (!offTarget) recordShot(ballZone, goal); // mapa de calor (el palo cuenta como remate sin gol)
+    if (woodwork) {
+      pitch.ballDeflect();
+      sfx.post();
+      pitch.shake();
+      buzz([30, 40]);
+    } else if (goal) {
       sfx.goal();
       buzz(80);
       pitch.celebrate();
@@ -208,15 +214,21 @@ export function createMatchScreen({ onFinish, onExit }) {
     }
     registerKick(ctx.s, 'P', goal);
     updateBoard();
-    const copy = goal ? COPY.goalPlayer : offTarget ? COPY.playerMiss : COPY.savedShot;
+    const copy = woodwork ? COPY.woodwork : goal ? COPY.goalPlayer : offTarget ? COPY.playerMiss : COPY.savedShot;
     await announcer.say(pick(copy), goal ? 'goal' : 'miss');
     pitch.reset();
     await sleep(240);
   }
 
   /** Resultado de un penal del rival (yo atajo). */
-  async function settleTheirKick({ goal, offTarget, ballZone }) {
-    if (goal) {
+  async function settleTheirKick({ goal, offTarget, ballZone, woodwork }) {
+    if (woodwork) {
+      pitch.ballDeflect();
+      sfx.post();
+      sfx.cheer();
+      pitch.shake();
+      buzz(40);
+    } else if (goal) {
       sfx.fail();
       buzz([40, 50, 40]);
       pitch.shake();
@@ -235,7 +247,7 @@ export function createMatchScreen({ onFinish, onExit }) {
     }
     registerKick(ctx.s, 'C', goal);
     updateBoard();
-    const copyKey = goal ? 'cpuGoal' : offTarget ? 'cpuMiss' : 'playerSave';
+    const copyKey = woodwork ? 'woodwork' : goal ? 'cpuGoal' : offTarget ? 'cpuMiss' : 'playerSave';
     await announcer.say(pick(COPY[copyKey]), goal ? 'miss' : 'save');
     pitch.reset();
     await sleep(240);
@@ -255,8 +267,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(keeper);
     await pitch.ballFlight(shot);
 
-    const goal = !shot.offTarget && !isSaved(shot, keeper, AI_REACH);
-    await settleMyKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
+    const wood = !shot.offTarget && hitsWoodwork(shot);
+    const goal = !shot.offTarget && !wood && !isSaved(shot, keeper, AI_REACH);
+    await settleMyKick({ goal, offTarget: shot.offTarget, woodwork: wood, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   async function cpuKick() {
@@ -277,8 +290,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(dive);
     await pitch.ballFlight(cpuShot);
 
-    const goal = !off && !isSaved(cpuShot, dive, PLAYER_REACH);
-    await settleTheirKick({ goal, offTarget: off, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
+    const wood = !off && hitsWoodwork(cpuShot);
+    const goal = !off && !wood && !isSaved(cpuShot, dive, PLAYER_REACH);
+    await settleTheirKick({ goal, offTarget: off, woodwork: wood, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
   }
 
   /* ---------- Modo Córners: cabezazo con timing ---------- */
@@ -314,8 +328,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(keeper);
     await pitch.ballFlight(shot, { x: tap.x, y: tap.y });
 
-    const goal = !off && !isSaved(shot, keeper, AI_REACH);
-    await settleMyKick({ goal, offTarget: off, ballZone: zoneNearest(shot.tx, shot.ty) });
+    const wood = !off && hitsWoodwork(shot);
+    const goal = !off && !wood && !isSaved(shot, keeper, AI_REACH);
+    await settleMyKick({ goal, offTarget: off, woodwork: wood, ballZone: zoneNearest(shot.tx, shot.ty) });
   }
 
   async function theirCornerKick() {
@@ -342,8 +357,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(dive);
     await pitch.ballFlight(cpuShot, headPoint);
 
-    const goal = !off && !isSaved(cpuShot, dive, PLAYER_REACH);
-    await settleTheirKick({ goal, offTarget: off, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
+    const wood = !off && hitsWoodwork(cpuShot);
+    const goal = !off && !wood && !isSaved(cpuShot, dive, PLAYER_REACH);
+    await settleTheirKick({ goal, offTarget: off, woodwork: wood, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
   }
 
   /* ---------- Modo Tiros libres: la barrera tapa el centro ---------- */
@@ -381,8 +397,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     sfx.kick();
     pitch.keeperDive(keeper);
     await pitch.ballFlight(shot);
-    const goal = finalZone !== null && !isSaved(shot, keeper, AI_REACH);
-    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) });
+    const wood = finalZone !== null && hitsWoodwork(shot);
+    const goal = finalZone !== null && !wood && !isSaved(shot, keeper, AI_REACH);
+    await settleMyKick({ goal, offTarget: finalZone === null, woodwork: wood, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   async function theirFreeKick() {
@@ -426,8 +443,9 @@ export function createMatchScreen({ onFinish, onExit }) {
 
     pitch.keeperDive(dive);
     await pitch.ballFlight(cpuShot);
-    const goal = finalZone !== null && !isSaved(cpuShot, dive, PLAYER_REACH);
-    await settleTheirKick({ goal, offTarget: finalZone === null, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
+    const wood = finalZone !== null && hitsWoodwork(cpuShot);
+    const goal = finalZone !== null && !wood && !isSaved(cpuShot, dive, PLAYER_REACH);
+    await settleTheirKick({ goal, offTarget: finalZone === null, woodwork: wood, ballZone: zoneNearest(cpuShot.tx, cpuShot.ty) });
   }
 
   /* ---------- Rival humano (duelo WebRTC) ---------- */
@@ -446,8 +464,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(dive);
     await pitch.ballFlight(shot);
 
-    const goal = !shot.offTarget && !isSaved(shot, dive);
-    await settleMyKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
+    const wood = !shot.offTarget && hitsWoodwork(shot);
+    const goal = !shot.offTarget && !wood && !isSaved(shot, dive);
+    await settleMyKick({ goal, offTarget: shot.offTarget, woodwork: wood, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   async function theirDuelKick() {
@@ -470,8 +489,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     pitch.keeperDive(dive);
     await pitch.ballFlight(shot);
 
-    const goal = !shot.offTarget && !isSaved(shot, dive);
-    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
+    const wood = !shot.offTarget && hitsWoodwork(shot);
+    const goal = !shot.offTarget && !wood && !isSaved(shot, dive);
+    await settleTheirKick({ goal, offTarget: shot.offTarget, woodwork: wood, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   /* ---------- Modo 2 jugadores (mismo teléfono, hot-seat) ---------- */
@@ -507,8 +527,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     sfx.kick();
     pitch.keeperDive(dive);
     await pitch.ballFlight(shot);
-    const goal = finalZone !== null && !isSaved(shot, dive);
-    const outcome = { goal, offTarget: finalZone === null, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) };
+    const wood = finalZone !== null && hitsWoodwork(shot);
+    const goal = finalZone !== null && !wood && !isSaved(shot, dive);
+    const outcome = { goal, offTarget: finalZone === null, woodwork: wood, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) };
     if (shooterIsP1) await settleMyKick(outcome);
     else await settleTheirKick(outcome);
   }
@@ -551,8 +572,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     }
     pitch.keeperDive(dive);
     await pitch.ballFlight(shot);
-    const goal = finalZone !== null && !isSaved(shot, dive);
-    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) });
+    const wood = finalZone !== null && hitsWoodwork(shot);
+    const goal = finalZone !== null && !wood && !isSaved(shot, dive);
+    await settleMyKick({ goal, offTarget: finalZone === null, woodwork: wood, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   async function theirDuelFreeKick() {
@@ -587,8 +609,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     }
     pitch.keeperDive(dive);
     await pitch.ballFlight(shot);
-    const goal = !shot.offTarget && !isSaved(shot, dive);
-    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
+    const wood = !shot.offTarget && hitsWoodwork(shot);
+    const goal = !shot.offTarget && !wood && !isSaved(shot, dive);
+    await settleTheirKick({ goal, offTarget: shot.offTarget, woodwork: wood, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   /* ---------- Duelo: córners ---------- */
@@ -629,8 +652,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     sfx.kick();
     pitch.keeperDive(dive);
     await pitch.ballFlight(shot, { x: tap.x, y: tap.y });
-    const goal = finalZone !== null && !isSaved(shot, dive);
-    await settleMyKick({ goal, offTarget: finalZone === null, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) });
+    const wood = finalZone !== null && hitsWoodwork(shot);
+    const goal = finalZone !== null && !wood && !isSaved(shot, dive);
+    await settleMyKick({ goal, offTarget: finalZone === null, woodwork: wood, ballZone: finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   async function theirDuelCornerKick() {
@@ -665,8 +689,9 @@ export function createMatchScreen({ onFinish, onExit }) {
     sfx.kick();
     pitch.keeperDive(dive);
     await pitch.ballFlight(shot, { x: shot.headX ?? headPoint.x, y: shot.headY ?? headPoint.y });
-    const goal = !shot.offTarget && !isSaved(shot, dive);
-    await settleTheirKick({ goal, offTarget: shot.offTarget, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
+    const wood = !shot.offTarget && hitsWoodwork(shot);
+    const goal = !shot.offTarget && !wood && !isSaved(shot, dive);
+    await settleTheirKick({ goal, offTarget: shot.offTarget, woodwork: wood, ballZone: shot.finalZone ?? zoneNearest(shot.tx, shot.ty) });
   }
 
   /* ---------- Orquestación ---------- */
