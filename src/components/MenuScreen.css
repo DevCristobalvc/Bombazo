@@ -594,3 +594,30 @@
   border-radius: 4px;
   background: rgba(38, 64, 127, 0.5);
 }
+
+/* Microinteracciones sutiles */
+.mm-play {
+  box-shadow: 0 6px 16px rgba(255, 209, 0, 0.16);
+}
+
+.mm-play:hover {
+  filter: brightness(1.04);
+}
+
+.mm-field select:hover {
+  border-color: var(--c-hud-line);
+}
+
+.mm-more-btn:hover,
+.mm-links button:hover {
+  border-color: var(--c-accent);
+}
+
+.mm-overlay:not([hidden]) .mm-sheet {
+  animation: mm-sheet-up 0.24s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes mm-sheet-up {
+  from { transform: translateY(22px); opacity: 0.5; }
+  to { transform: translateY(0); opacity: 1; }
+}
