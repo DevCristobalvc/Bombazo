@@ -7,7 +7,7 @@
  * - keeperDive, kickAnim, celebrate, shake, flash, reset.
  */
 import { sceneSVG } from '../art/stadium.js';
-import { zoneCenter, BALL_HOME, KEEPER_HOME, clampToGoal } from '../core/zones.js';
+import { BALL_HOME, KEEPER_HOME, clampToGoal } from '../core/zones.js';
 import { analyzeSwipe, projectTarget, shotPath } from '../core/physics.js';
 import { fromHTML, sleep } from '../utils/dom.js';
 import './Pitch.css';
@@ -305,12 +305,9 @@ export function createPitch() {
     svg.classList.toggle('with-wall', visible);
   }
 
-  /** Rebote del balón al estrellarse contra la barrera. */
+  /** Rebote del balón al estrellarse contra la barrera o el palo. */
   function ballDeflect() {
-    ball.style.transition = '';
-    requestAnimationFrame(() => {
-      ball.style.transform = `translate(${(Math.random() * 70 - 35).toFixed(0)}px, -6px) scale(1)`;
-    });
+    ballRebound();
   }
 
   let cancelCross = null;
@@ -385,13 +382,32 @@ export function createPitch() {
     if (lastImpact) spawnNetPunch(lastImpact.x, lastImpact.y);
   }
 
-  /** Rebote tras la atajada (vuelve a transición CSS). */
-  function ballBounce(zone) {
-    const c = zoneCenter(zone);
-    ball.style.transition = '';
-    requestAnimationFrame(() => {
-      ball.style.transform = `translate(${(c.x - BALL_HOME.x) * 0.55}px, -46px) scale(.85)`;
-    });
+  /** Rebote físico del balón desde el punto de impacto: sale hacia afuera en
+   *  una parábola corta y cae al césped (tras atajada, palo o barrera). */
+  function ballRebound(dirX) {
+    if (!lastImpact) return;
+    ball.style.transition = 'none';
+    const sx = lastImpact.x;
+    const sy = lastImpact.y;
+    const dir = dirX ?? (sx < 180 ? 1 : -1); // por defecto, lejos del palo más cercano
+    const ex = Math.min(322, Math.max(38, sx + dir * (60 + Math.random() * 50)));
+    const ey = 420 + Math.random() * 24;
+    const dur = 460;
+    const t0 = performance.now();
+    const step = (now) => {
+      const u = Math.min(1, (now - t0) / dur);
+      const x = sx + (ex - sx) * u;
+      const y = sy + (ey - sy) * u - 38 * Math.sin(Math.PI * u);
+      const s = 0.82 + 0.18 * u;
+      ball.style.transform = `translate(${(x - BALL_HOME.x).toFixed(1)}px, ${(y - BALL_HOME.y).toFixed(1)}px) scale(${s.toFixed(3)})`;
+      if (u < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  /** Rebote tras la atajada (desde el punto donde el arquero la sacó). */
+  function ballBounce() {
+    ballRebound();
   }
 
   async function kickAnim() {
