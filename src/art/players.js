@@ -82,18 +82,40 @@ export function heroSVG(team, profile = {}) {
   </svg>`;
 }
 
-/** Avatar plano y minimalista (menú): busto geométrico con los colores del
- *  equipo y el dorsal. Sin caricatura, sin sombras: diseño limpio y sobrio. */
+/** Avatar de perfil (menú): busto enmarcado, estilo flat profesional. Usa los
+ *  colores del equipo y del perfil (piel/pelo/dorsal). Limpio, con profundidad
+ *  sutil por gradiente, sin caricatura. */
 export function avatarSVG(team, profile = {}) {
   const { shirt, accent } = team.kit;
   const skin = profile.skin ?? team.skin;
+  const hair = profile.hair ?? team.hair;
   const number = profile.number ?? 10;
   return `
-  <svg viewBox="0 0 100 100" class="avatar-svg" role="img" aria-label="Tu jugador">
-    <rect width="100" height="100" rx="22" fill="${shirt}"/>
-    <path d="M17 100 a33 33 0 0 1 66 0 z" fill="${accent}"/>
-    <circle cx="50" cy="41" r="19" fill="${skin}"/>
-    <text x="50" y="90" text-anchor="middle" font-size="20" font-weight="900" fill="${shirt}" font-family="Nunito, sans-serif">${number}</text>
+  <svg viewBox="0 0 120 120" class="avatar-svg" role="img" aria-label="Tu jugador">
+    <defs>
+      <linearGradient id="av-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1c2e5c"/>
+        <stop offset="1" stop-color="#0a1226"/>
+      </linearGradient>
+      <radialGradient id="av-vig" cx=".5" cy=".4" r=".72">
+        <stop offset=".55" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".3"/>
+      </radialGradient>
+      <clipPath id="av-clip"><circle cx="60" cy="60" r="56"/></clipPath>
+    </defs>
+    <circle cx="60" cy="60" r="56" fill="url(#av-bg)"/>
+    <g clip-path="url(#av-clip)">
+      <path d="M14 120 v-9 a46 46 0 0 1 92 0 v9 z" fill="${shirt}"/>
+      <path d="M15 111 a45 45 0 0 1 90 0" fill="none" stroke="${accent}" stroke-width="4.5" opacity=".8"/>
+      <path d="M50 84 L60 95 L70 84 L67 76 H53 z" fill="${accent}"/>
+      <rect x="53" y="69" width="14" height="15" rx="6" fill="${skin}"/>
+      <circle cx="60" cy="51" r="21" fill="${skin}"/>
+      <path d="M40 51 a20 20 0 0 1 40 0 q-8 -10 -20 -10 q-12 0 -20 10 z" fill="${hair}"/>
+      <rect x="4" y="4" width="112" height="112" fill="url(#av-vig)"/>
+    </g>
+    <circle cx="60" cy="60" r="55" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2"/>
+    <circle cx="97" cy="97" r="16" fill="#0a1226" stroke="${accent}" stroke-width="2"/>
+    <text x="97" y="102.5" text-anchor="middle" font-size="15" font-weight="900" fill="#ffffff" font-family="Nunito, sans-serif">${number}</text>
   </svg>`;
 }
 
