@@ -266,3 +266,12 @@ svg[data-sh-style='punk'] .hairv-punk {
   55% { transform: scale(1.25); opacity: 0.6; }
   100% { transform: scale(1); opacity: 0; }
 }
+
+/* Sombra de piso del arquero: se desvanece cuando se lanza (deja el suelo) */
+#keeper-shadow {
+  transition: opacity 0.3s ease;
+}
+
+.scene.diving #keeper-shadow {
+  opacity: 0.1;
+}

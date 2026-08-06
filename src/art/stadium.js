@@ -153,6 +153,7 @@ export function sceneSVG() {
     </g>
 
     <!-- actores -->
+    <ellipse id="keeper-shadow" cx="180" cy="374" rx="21" ry="5" fill="rgba(0,0,0,.3)" pointer-events="none"/>
     <g transform="translate(180 371)"><g id="keeper">${keeperSVG()}</g></g>
     <g transform="translate(126 556) scale(.66)"><g id="shooter">${shooterSVG()}</g></g>
     <ellipse id="ball-shadow" cx="180" cy="472" rx="11" ry="3.6" fill="rgba(0,0,0,.34)" pointer-events="none"/>
