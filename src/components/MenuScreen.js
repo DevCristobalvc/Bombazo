@@ -6,6 +6,7 @@
  */
 import { TEAMS, DIFFICULTIES, teamById } from '../data/teams.js';
 import { avatarSVG } from '../art/players.js';
+import { flagSVG } from '../art/flags.js';
 import { loadStats, rankFor } from '../core/stats.js';
 import { loadProfile, saveProfile, SKINS, HAIRS, NUMBERS, HAIRSTYLES } from '../core/profile.js';
 import { exportCode, importCode } from '../core/account.js';
@@ -183,14 +184,16 @@ export function createMenuScreen({ onPlay }) {
     const rival = teamById(state.rivalId);
     const diff = DIFFICULTIES.find((d) => d.id === state.diff);
     refs.play.textContent = state.mode === 'duelo' ? 'CREAR SALA' : 'JUGAR';
+    const flag = (t) => `<span class="mm-vs-t">${flagSVG(t.id, 22, 15)}<b>${t.short}</b></span>`;
+    const vsBadge = '<i class="mm-vs-b">VS</i>';
     refs.vs.innerHTML =
       state.mode === 'torneo'
-        ? `${player.short} · Torneo a 4 rondas · ${diff.label}`
+        ? `${flag(player)}<span class="mm-vs-sub">Torneo a 4 rondas · ${diff.label}</span>`
         : state.mode === 'duelo'
-          ? `${player.short} · Duelo de ${DUEL_MODES.find((m) => m.id === state.duelMode).label.toLowerCase()} · escanea QR`
+          ? `${flag(player)}<span class="mm-vs-sub">Duelo de ${DUEL_MODES.find((m) => m.id === state.duelMode).label.toLowerCase()} · escanea QR</span>`
           : state.mode === 'local'
-            ? `${player.short} vs ${rival.short} · 2 jugadores, un teléfono`
-            : `${player.short} vs ${rival.short} · ${diff.label}`;
+            ? `${flag(player)}${vsBadge}${flag(rival)}<span class="mm-vs-sub">2 jugadores, un teléfono</span>`
+            : `${flag(player)}${vsBadge}${flag(rival)}<span class="mm-vs-sub">${diff.label}</span>`;
 
     renderIdentity();
     renderProfile();

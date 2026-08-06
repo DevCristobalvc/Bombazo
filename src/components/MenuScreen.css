@@ -147,11 +147,43 @@
 }
 
 .mm-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 20px;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.mm-vs-t {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mm-vs-t svg {
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.mm-vs-b {
+  font-style: normal;
+  font-weight: 900;
+  font-size: 11px;
+  color: #2a1a00;
+  background: var(--c-accent);
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+
+.mm-vs-sub {
+  width: 100%;
   text-align: center;
   color: var(--c-muted);
-  font-weight: 800;
-  font-size: 13px;
-  min-height: 16px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .mm-play {
