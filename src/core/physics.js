@@ -33,7 +33,11 @@ export function hitsWoodwork(shot) {
  */
 export function isSaved(shot, keeper, reach = KEEPER_REACH) {
   if (!keeper) return false;
-  return Math.hypot(shot.tx - keeper.x, shot.ty - keeper.y) <= reach;
+  // El pace importa: un tiro potente (dur menor) reduce el alcance efectivo del
+  // arquero (llega pero no lo aguanta). Placement vs potencia.
+  const power = Math.min(1, Math.max(0, (560 - (shot.dur || 400)) / 310));
+  const eff = reach + (0.5 - power) * 18; // centrado: rápido cuesta más, suave se aguanta
+  return Math.hypot(shot.tx - keeper.x, shot.ty - keeper.y) <= eff;
 }
 
 /** Construye un tiro (tx,ty,curve,dur) que apunta a un punto continuo del
