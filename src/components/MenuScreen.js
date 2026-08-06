@@ -266,6 +266,14 @@ export function createMenuScreen({ onPlay }) {
   };
 
   refs.moreBtn.addEventListener('click', () => openOverlay(refs.moreOverlay));
+  // Tocar el avatar abre la personalización directamente
+  refs.avatar.style.cursor = 'pointer';
+  refs.avatar.setAttribute('title', 'Personalizar tu jugador');
+  refs.avatar.addEventListener('click', () => {
+    openOverlay(refs.moreOverlay);
+    const d = refs.moreOverlay.querySelector('.mm-details');
+    if (d) d.open = true;
+  });
   bindClose(refs.moreOverlay, refs.moreClose);
   bindClose(refs.rankOverlay, refs.rankClose);
   bindClose(refs.statsOverlay, refs.statsClose);
