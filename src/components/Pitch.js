@@ -27,6 +27,7 @@ export function createPitch() {
 
   let resolveDive = null;
   let cancelSwipe = null;
+  let lastImpact = null; // punto (x,y) donde terminó el último vuelo del balón
 
   /* ---------- Atajar: arrastre continuo del arquero ---------- */
 
@@ -293,7 +294,7 @@ export function createPitch() {
         if (frame % every === 0 && u > 0.05 && u < 0.95) spawnTrail(p.x, p.y, s, power);
         frame += 1;
         if (u < 1) requestAnimationFrame(step);
-        else resolve();
+        else { lastImpact = { x: p.x, y: p.y }; resolve(); }
       };
       requestAnimationFrame(step);
     });
@@ -362,12 +363,26 @@ export function createPitch() {
     });
   }
 
-  /** La red ondea cuando el balón la sacude. */
+  /** Bulto de la red en el punto exacto donde entra el balón. */
+  function spawnNetPunch(x, y) {
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    p.setAttribute('cx', x.toFixed(1));
+    p.setAttribute('cy', y.toFixed(1));
+    p.setAttribute('r', '18');
+    p.setAttribute('fill', 'url(#g-netpunch)');
+    p.setAttribute('class', 'net-punch');
+    p.setAttribute('pointer-events', 'none');
+    svg.insertBefore(p, ballAnchor);
+    setTimeout(() => p.remove(), 420);
+  }
+
+  /** La red ondea cuando el balón la sacude, con un bulto en el punto de impacto. */
   function netRipple() {
     svg.classList.remove('ripple');
     void svg.getBoundingClientRect();
     svg.classList.add('ripple');
     setTimeout(() => svg.classList.remove('ripple'), 450);
+    if (lastImpact) spawnNetPunch(lastImpact.x, lastImpact.y);
   }
 
   /** Rebote tras la atajada (vuelve a transición CSS). */

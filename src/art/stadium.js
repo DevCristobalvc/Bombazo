@@ -66,6 +66,10 @@ export function sceneSVG() {
         <stop offset=".45" stop-color="#ffffff" stop-opacity="0"/>
         <stop offset="1" stop-color="#000000" stop-opacity=".3"/>
       </radialGradient>
+      <radialGradient id="g-netpunch" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".85"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </radialGradient>
     </defs>
 
     <!-- cielo -->

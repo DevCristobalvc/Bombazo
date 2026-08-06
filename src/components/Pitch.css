@@ -253,3 +253,16 @@ svg[data-sh-style='punk'] .hairv-punk {
   70% { transform: scale(1.014, 1.022); }
   100% { transform: scale(1, 1); }
 }
+
+/* Bulto de la red en el punto de impacto del gol */
+.net-punch {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: net-punch 0.4s ease-out forwards;
+}
+
+@keyframes net-punch {
+  0% { transform: scale(0.2); opacity: 0.9; }
+  55% { transform: scale(1.25); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 0; }
+}
