@@ -1,12 +1,14 @@
 .scoreboard {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  background: var(--c-panel);
-  border: 1px solid var(--c-line);
+  gap: 7px;
+  background: var(--c-glass);
+  border: 1px solid var(--c-hud-line);
   border-radius: var(--radius-m);
-  padding: 8px 12px;
+  padding: 9px 13px;
   margin-right: 44px; /* espacio para el botón salir */
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
 }
 
 .sb-row {
@@ -22,7 +24,8 @@
   opacity: 1;
 }
 
-.sb-row.is-active .sb-name {
+.sb-row.is-active .sb-name,
+.sb-row.is-active .sb-score {
   color: var(--c-accent);
 }
 
