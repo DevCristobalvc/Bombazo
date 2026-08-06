@@ -16,8 +16,8 @@ const URL = 'http://localhost:4173/';
 
   // Anfitrión: crea la sala
   await host.goto(URL, { waitUntil: 'networkidle' });
-  await host.click('.chips [data-id="duelo"]');
-  await host.click('.btn-big');
+  await host.selectOption('[data-ref="modeSel"]', 'duelo');
+  await host.click('.mm-play');
   await host.waitForFunction(() => document.querySelector('.lobby-code')?.textContent.length >= 6, null, { timeout: 20000 });
   const code = (await host.textContent('.lobby-code')).trim().toLowerCase();
   console.log('sala creada:', code);
@@ -26,7 +26,7 @@ const URL = 'http://localhost:4173/';
   // Invitado: entra por el enlace del QR y se une con España
   await guest.goto(`${URL}#d=${code}`, { waitUntil: 'networkidle' });
   await guest.screenshot({ path: path.join(OUT, 'duel-2-join.png') });
-  await guest.click('.join-screen .chips [data-id="esp"]');
+  await guest.evaluate(() => document.querySelector('.join-screen .chips [data-id="esp"]')?.click());
   await guest.click('.join-screen .btn-big');
 
   // Ambos deben entrar al partido (tras la presentación VS)

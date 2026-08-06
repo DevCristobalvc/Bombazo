@@ -48,8 +48,8 @@ const OUT = path.join(__dirname, '..', '.smoke');
   };
 
   await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
-  await page.click('[data-ref="modes"] [data-id="local"]');
-  await page.click('.btn-big');
+  await page.selectOption('[data-ref="modeSel"]', 'local');
+  await page.click('.mm-play');
 
   // P1 (COL) remata a la esquina alta izquierda
   await page.waitForSelector('#scene.guide', { timeout: 20000 });

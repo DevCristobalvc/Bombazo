@@ -44,11 +44,11 @@ const OUT = path.join(__dirname, '..', '.smoke');
   };
 
   await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
-  await page.click('.chips [data-id="torneo"]');
-  await page.click('[data-ref="diffs"] [data-id="facil"]');
-  const facilOk = await page.$eval('[data-ref="diffs"] [data-id="facil"]', (el) => el.classList.contains('is-selected'));
+  await page.selectOption('[data-ref="modeSel"]', 'torneo');
+  await page.selectOption('[data-ref="diffSel"]', 'facil');
+  const facilOk = await page.$eval('[data-ref="diffSel"]', (el) => el.value === 'facil');
   console.log('dificultad facil seleccionada:', facilOk);
-  await page.click('.btn-big');
+  await page.click('.mm-play');
 
   for (let i = 0; i < 300; i++) {
     if (await page.$('.end-screen.active')) break;

@@ -32,9 +32,9 @@ const OUT = path.join(__dirname, '..', '.smoke');
   };
 
   await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
-  await page.click('.chips [data-id="corners"]');
+  await page.selectOption('[data-ref="modeSel"]', 'corners');
   await page.screenshot({ path: path.join(OUT, 'corners-1-menu.png') });
-  await page.click('.btn-big');
+  await page.click('.mm-play');
 
   // Ataque: esperar el centro y tocar cuando el balón va por la mitad
   await page.waitForSelector('#scene.crossing', { timeout: 20000 });

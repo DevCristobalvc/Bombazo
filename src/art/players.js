@@ -82,6 +82,21 @@ export function heroSVG(team, profile = {}) {
   </svg>`;
 }
 
+/** Avatar plano y minimalista (menú): busto geométrico con los colores del
+ *  equipo y el dorsal. Sin caricatura, sin sombras: diseño limpio y sobrio. */
+export function avatarSVG(team, profile = {}) {
+  const { shirt, accent } = team.kit;
+  const skin = profile.skin ?? team.skin;
+  const number = profile.number ?? 10;
+  return `
+  <svg viewBox="0 0 100 100" class="avatar-svg" role="img" aria-label="Tu jugador">
+    <rect width="100" height="100" rx="22" fill="${shirt}"/>
+    <path d="M17 100 a33 33 0 0 1 66 0 z" fill="${accent}"/>
+    <circle cx="50" cy="41" r="19" fill="${skin}"/>
+    <text x="50" y="90" text-anchor="middle" font-size="20" font-weight="900" fill="${shirt}" font-family="Nunito, sans-serif">${number}</text>
+  </svg>`;
+}
+
 export function shooterSVG() {
   return `
   <g class="shooter-art">

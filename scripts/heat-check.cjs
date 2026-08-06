@@ -17,7 +17,7 @@ const OUT = path.join(__dirname, '..', '.smoke');
     }, [sx, sy]);
 
   await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
-  await page.click('.btn-big');
+  await page.click('.mm-play');
   await page.waitForSelector('#scene.guide', { timeout: 15000 });
 
   // remate y captura a mitad de vuelo para ver la estela
@@ -36,7 +36,11 @@ const OUT = path.join(__dirname, '..', '.smoke');
   await page.waitForTimeout(1800);
   await page.click('.btn-exit');
   await page.waitForTimeout(400);
-  const heatVisible = await page.$eval('[data-ref="heatrow"]', (el) => !el.hidden);
+  // El mapa de calor vive ahora en el overlay de estadísticas (Más → Estadísticas)
+  await page.click('[data-ref="moreBtn"]');
+  await page.click('[data-ref="statsBtn"]');
+  await page.waitForTimeout(300);
+  const heatVisible = await page.$$eval('.heatmap .heat-cell', (els) => els.length === 9);
   await page.screenshot({ path: path.join(OUT, 'menu-heatmap.png') });
   console.log(heatVisible ? 'OK: mapa de calor visible tras el primer remate' : 'FALLO: mapa de calor oculto');
   await browser.close();

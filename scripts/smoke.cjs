@@ -86,14 +86,14 @@ async function assertNoPageScroll(page, label, failures) {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(250);
 
-  // cambiar de equipo para ver el héroe cambiar de camiseta
-  await page.click('.chips [data-id="esp"]');
+  // cambiar de equipo para ver el avatar cambiar de camiseta
+  await page.selectOption('[data-ref="teamSel"]', 'esp');
   await page.waitForTimeout(200);
   await page.screenshot({ path: path.join(OUT, '2-menu-espana.png') });
-  await page.click('.chips [data-id="col"]');
+  await page.selectOption('[data-ref="teamSel"]', 'col');
 
   // jugar: primero la presentación VS, luego la fase de remate por swipe
-  await page.click('.btn-big');
+  await page.click('.mm-play');
   await page.waitForTimeout(500);
   await page.screenshot({ path: path.join(OUT, '3-vs-splash.png') });
   await page.waitForSelector('#scene.guide', { timeout: 15000 });
@@ -115,10 +115,10 @@ async function assertNoPageScroll(page, label, failures) {
   // menú en modo torneo
   await page.click('.btn-exit');
   await page.waitForTimeout(300);
-  await page.click('.chips [data-id="torneo"]');
+  await page.selectOption('[data-ref="modeSel"]', 'torneo');
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(OUT, '8-menu-torneo.png') });
-  await page.click('.btn-big');
+  await page.click('.mm-play');
   await page.waitForTimeout(600);
   await page.screenshot({ path: path.join(OUT, '9-torneo-vs.png') });
   await page.waitForSelector('#scene.guide', { timeout: 15000 });

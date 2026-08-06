@@ -36,15 +36,15 @@ const URL = 'http://localhost:4173/';
 
   // Anfitrión: duelo con disciplina córners
   await host.goto(URL, { waitUntil: 'networkidle' });
-  await host.click('[data-ref="modes"] [data-id="duelo"]');
-  await host.click('[data-ref="duelModes"] [data-id="corners"]');
-  await host.click('.btn-big');
+  await host.selectOption('[data-ref="modeSel"]', 'duelo');
+  await host.selectOption('[data-ref="duelSel"]', 'corners');
+  await host.click('.mm-play');
   await host.waitForFunction(() => document.querySelector('.lobby-code')?.textContent.length >= 6, null, { timeout: 20000 });
   const code = (await host.textContent('.lobby-code')).trim().toLowerCase();
   console.log('sala corners:', code);
 
   await guest.goto(`${URL}#d=${code}`, { waitUntil: 'networkidle' });
-  await guest.click('.join-screen .chips [data-id="esp"]', { force: true });
+  await guest.evaluate(() => document.querySelector('.join-screen .chips [data-id="esp"]')?.click());
   await guest.click('.join-screen .btn-big');
 
   await host.waitForSelector('.match-screen.active', { timeout: 25000 });

@@ -17,7 +17,7 @@ const OUT = path.join(__dirname, '..', '.smoke');
     }, [sx, sy]);
 
   await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
-  await page.click('.btn-big');
+  await page.click('.mm-play');
   await page.waitForSelector('#scene.guide', { timeout: 20000 });
 
   // Gesto curvado a mitad de camino: la línea proyectada debe verse

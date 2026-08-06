@@ -44,8 +44,8 @@ const OUT = path.join(__dirname, '..', '.smoke');
   };
 
   await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
-  await page.click('.chips [data-id="libres"]');
-  await page.click('.btn-big');
+  await page.selectOption('[data-ref="modeSel"]', 'libres');
+  await page.click('.mm-play');
 
   // La barrera debe estar visible en la escena
   await page.waitForSelector('#scene.guide', { timeout: 20000 });
