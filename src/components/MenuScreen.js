@@ -16,6 +16,7 @@ import { reduceMotionEnabled, setReduceMotion, resetProgress } from '../core/set
 import { initInstallPrompt, promptInstall } from '../core/pwa.js';
 import { ACHIEVEMENTS, loadUnlocked } from '../core/achievements.js';
 import { dailyConfig, isDoneToday, dailyStreak } from '../core/daily.js';
+import { analyticsSummary } from '../core/analytics.js';
 import { fromHTML } from '../utils/dom.js';
 import './MenuScreen.css';
 
@@ -332,8 +333,23 @@ export function createMenuScreen({ onPlay }) {
         ${cell('Puntos', s.xp ?? 0)}
       </div>
       ${heatmapHTML(s)}
+      ${activityHTML(cell)}
       <h3 class="ach-title">Logros</h3>
       <div class="ach-list">${achievementsHTML()}</div>`;
+  }
+
+  /** Resumen de actividad (analítica local). */
+  function activityHTML(cell) {
+    const a = analyticsSummary();
+    if (!a.started) return '';
+    const modeLabel = MODES.find((m) => m.id === a.topMode)?.label ?? a.topMode ?? '—';
+    return `<h3 class="ach-title">Actividad</h3>
+      <div class="stat-grid">
+        ${cell('Modo favorito', modeLabel)}
+        ${cell('Iniciados', a.started)}
+        ${cell('Terminados', a.finished)}
+        ${cell('Finalización', a.completion + '%')}
+      </div>`;
   }
 
   /** Mapa de calor de puntería por zona del arco (verde/ámbar/rojo). */

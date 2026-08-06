@@ -12,6 +12,7 @@ import { loadProfile } from './core/profile.js';
 import { applyReduceMotion } from './core/settings.js';
 import { evaluateAchievements } from './core/achievements.js';
 import { markDoneToday } from './core/daily.js';
+import { trackPlay, trackResult, trackQuit } from './core/analytics.js';
 import { awardPoints } from './core/stats.js';
 import { createMenuScreen } from './components/MenuScreen.js';
 import { createMatchScreen } from './components/MatchScreen.js';
@@ -167,6 +168,7 @@ const menu = createMenuScreen({
   onPlay(config) {
     session = config;
     matchStartXp = loadStats().xp;
+    trackPlay(config.mode);
     if (config.mode === 'torneo') {
       session.tournament = createTournament(config.teamId);
       startTournamentMatch();
@@ -192,6 +194,7 @@ function buildBracket(t, lostCurrent) {
 
 const match = createMatchScreen({
   onFinish(result) {
+    trackResult(session?.diff || session?.mode || 'otro', result.won);
     if (session?.mode !== 'local') {
       // Reto del día: al completarlo, bono de XP y racha (una vez por día)
       if (session?.daily) {
@@ -281,6 +284,7 @@ const match = createMatchScreen({
     }
   },
   onExit() {
+    trackQuit();
     closeDuel();
     backToMenu();
   },
