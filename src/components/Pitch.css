@@ -275,3 +275,12 @@ svg[data-sh-style='punk'] .hairv-punk {
 .scene.diving #keeper-shadow {
   opacity: 0.1;
 }
+
+/* Sombra de piso del pateador: se queda en el suelo y se atenua al rematar */
+#shooter-shadow {
+  transition: opacity 0.2s ease;
+}
+
+.scene.kick #shooter-shadow {
+  opacity: 0.12;
+}

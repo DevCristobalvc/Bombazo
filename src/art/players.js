@@ -122,7 +122,6 @@ export function avatarSVG(team, profile = {}) {
 export function shooterSVG() {
   return `
   <g class="shooter-art">
-    <ellipse cx="0" cy="2" rx="34" ry="7" fill="rgba(0,0,0,.3)"/>
     <rect x="-20" y="-54" width="14" height="48" rx="7" fill="var(--sh-socks)"/>
     <rect x="6" y="-54" width="14" height="48" rx="7" fill="var(--sh-socks)"/>
     <rect x="-20" y="-54" width="14" height="7" rx="3" fill="var(--sh-accent)"/>
