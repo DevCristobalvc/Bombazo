@@ -13,23 +13,23 @@
 - **31 selecciones** (16 reales + 15 añadidas) con banderas SVG. Torneo robusto para cualquier equipo.
 - **Retención**: puntaje/rango (Amateur→Leyenda), estadísticas de vida, 8 logros, **reto del día** con racha, compartir resultado (Web Share), instalar PWA.
 - **Perfil**: código export/import + respaldo por archivo (`core/account.js`).
-- **P3a (cliente Supabase, dormido)**: `src/net/cloud.js` (lazy, degrada sin backend), overlay de ranking en el menú, `submitScore` al fin de partido, `supabase/migrations/0001_scores.sql`. Todo funciona **sin** backend (el juego no depende de él).
+- **P3 · Ranking global (HECHO, en producción v2)**: proyecto Supabase `bombazo` (ref `egwxmsrdydjlpbhaplob`), `0001_scores.sql` aplicada (tabla `scores` + RLS + vista `leaderboard`), auth anónima activada. Se juega y compite **sin login** (sesión anónima al enviar el puntaje); Google opcional. Leaderboard público visible directo. `src/net/cloud.js` con fallback público de URL + anon key (clave pública protegida por RLS; overrideable con `VITE_SUPABASE_*`). Verificado end-to-end en vivo.
+- **Login con Privy (HECHO, opcional)**: `src/net/privyBridge.js` (island React aislado, único punto con React, lazy) + `src/net/privy.js` (wrapper vanilla). Botón "Iniciar sesión" en el ranking (Google alternativo). App ID público. Todo el stack React+Privy+web3 va a un chunk `login-*` lazy **excluido del precache** (instalación PWA ~512KB). Dominio de prod ya whitelisteado en Privy.
 
 ## ⛔ Bloqueado — necesita a Cristo
-### P3b · Encender el ranking global (backend real)
-Falta **acceso a Supabase**. Opciones:
-1. Reconectar el **Supabase MCP** (estaba desconectado), o
-2. Pasar `URL` + `anon key` de un proyecto Supabase.
+### Puente Privy → Supabase (persistencia cross-device real)
+El login de Privy ya funciona, pero **estar conectado aún no conserva el puesto entre dispositivos**: el puntaje se sigue enviando anónimo (el copy NO promete cross-device todavía). Falta el puente, que es un cambio **atómico** de auth en vivo y necesita **a Cristo presente** para verificar el login de Privy en el **dominio real** (localhost no puede: CSP de Privy no whitelistea localhost). Factibilidad ya confirmada por API (endpoint `third-party-auth` responde; JWKS de Privy accesible).
 
-Pasos una vez con acceso:
-1. Crear/usar proyecto Supabase.
-2. Aplicar `supabase/migrations/0001_scores.sql` (tabla `scores` + RLS + vista `leaderboard`).
-3. Setear env en Vercel (production + preview): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.
-4. Activar provider **Google** en Supabase Auth (para el login opcional).
-5. Redeploy `v2` y verificar: `isConfigured()` true, login, leaderboard con tu fila.
+Runbook (una sola sesión, en orden):
+1. Aplicar `supabase/migrations/0002_privy_identity.sql` (user_id→text, RLS unificado `coalesce(auth.jwt()->>'sub', auth.uid()::text)`).
+2. **Verificar que el ranking ANÓNIMO sigue verde** (test node con anon key: signInAnonymously → upsert → leaderboard). Si rompe, revertir 0002.
+3. Configurar Third-Party Auth (Privy) en Supabase: `POST /v1/projects/<ref>/config/auth/third-party-auth` con el issuer/JWKS de Privy (`https://auth.privy.io/api/v1/apps/<APP_ID>/jwks.json`, iss `privy.io`).
+4. En `net/cloud.js`: pasar `accessToken: () => getPrivyAccessToken()` al `createClient` cuando haya sesión Privy, y en `submitScore` usar el DID de Privy como `user_id` si está logueado.
+5. Actualizar copy del ranking (ya sí "tu puesto se conserva entre dispositivos").
+6. Verificar en el dominio real: login Privy → jugar → aparece en leaderboard; y desde otro dispositivo, misma cuenta = mismo puesto.
 
 ### P4 · Multiplayer con salas/matchmaking
-Más allá del duelo P2P por QR (WebRTC). Usará **Supabase Realtime** → depende de P3b.
+Más allá del duelo P2P por QR (WebRTC). Usará **Supabase Realtime** (backend ya disponible).
 
 ### P5 · Publicidad
 Decidir red: **AdSense** (web) o **AdMob** (si empaquetamos TWA/Capacitor). Intersticial entre tandas / banner no intrusivo. Necesita decisión de Cristo.
