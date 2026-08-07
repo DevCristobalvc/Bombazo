@@ -289,22 +289,23 @@ export function createMenuScreen({ onPlay }) {
       return;
     }
     box.innerHTML = '<p class="rank-empty">Cargando…</p>';
-    let session = null;
-    try { session = await getSession(); } catch { /* sin sesión */ }
-    if (!session) {
-      box.innerHTML = `<p class="rank-empty">Juega sin cuenta cuando quieras. Inicia sesión para competir en el ranking global.</p>
-        <button class="mm-play" data-ref="loginBtn" type="button">Iniciar sesión con Google</button>`;
-      box.querySelector('[data-ref="loginBtn"]').onclick = () => signInWithGoogle();
-      return;
-    }
+    // El ranking es público: se muestra sin exigir login. Juegas y apareces con
+    // tu nombre (sesión anónima al enviar). Google es opcional para no perderlo.
     const rows = await fetchLeaderboard(20);
     const me = (loadProfile().name || '').trim().toUpperCase();
     const list = rows
       .map((r) => `<li class="${(r.name || '').trim().toUpperCase() === me ? 'me' : ''}"><span class="rp">${r.position}</span><span class="rn">${esc(r.name)}</span><span class="rx">${r.xp}</span></li>`)
       .join('');
+    let session = null;
+    try { session = await getSession(); } catch { /* sin sesión */ }
+    const authBtn = session && !session.user?.is_anonymous
+      ? '<button class="btn-ghost" data-ref="logoutBtn" type="button">Cerrar sesión</button>'
+      : '<button class="btn-ghost" data-ref="loginBtn" type="button">Vincular cuenta Google</button>';
     box.innerHTML = `<ol class="rank-list">${list || '<p class="rank-empty">Aún no hay puntajes. ¡Sé el primero!</p>'}</ol>
-      <button class="btn-ghost" data-ref="logoutBtn" type="button">Cerrar sesión</button>`;
-    box.querySelector('[data-ref="logoutBtn"]').onclick = async () => { await signOut(); renderRank(); };
+      <p class="rank-empty">Juegas y apareces con tu nombre. Vincula Google para conservar tu puesto entre dispositivos.</p>
+      ${authBtn}`;
+    box.querySelector('[data-ref="loginBtn"]')?.addEventListener('click', () => signInWithGoogle());
+    box.querySelector('[data-ref="logoutBtn"]')?.addEventListener('click', async () => { await signOut(); renderRank(); });
   }
   refs.rankBtn.addEventListener('click', () => { openOverlay(refs.rankOverlay); renderRank(); });
 

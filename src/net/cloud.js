@@ -5,8 +5,10 @@
  * El SDK se carga de forma diferida (dynamic import) para no engordar el
  * bundle base cuando no hay backend configurado.
  */
-const URL = import.meta.env.VITE_SUPABASE_URL;
-const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Fallback publico (anon key es clave publica protegida por RLS). Se puede
+// overridear con VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY en Vercel.
+const URL = import.meta.env.VITE_SUPABASE_URL || 'https://egwxmsrdydjlpbhaplob.supabase.co';
+const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnd3htc3JkeWRqbHBiaGFwbG9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNTk3NjUsImV4cCI6MjEwMTYzNTc2NX0.k8mYbzyGBvD5ppLqu4IxqtwZowCjSwKJrXF6zkSDMmc';
 
 let clientPromise = null;
 
@@ -54,7 +56,14 @@ export async function submitScore({ name, xp }) {
   const c = await client();
   if (!c) return { ok: false, reason: 'no-backend' };
   const { data } = await c.auth.getSession();
-  const uid = data.session?.user?.id;
+  let uid = data.session?.user?.id;
+  // Login opcional: si no hay sesión, entra anónimo para poder competir en el
+  // ranking sin fricción (luego puede vincular una cuenta Google si quiere).
+  if (!uid) {
+    const { data: anon, error: aerr } = await c.auth.signInAnonymously();
+    if (aerr) return { ok: false, reason: aerr.message };
+    uid = anon.user?.id;
+  }
   if (!uid) return { ok: false, reason: 'no-auth' };
   const { error } = await c
     .from('scores')
