@@ -2,6 +2,22 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        // Todo el stack del login (React + Privy + su enorme árbol web3) se
+        // agrupa en un ÚNICO chunk `login-*`, que se carga diferido solo al
+        // iniciar sesión y se EXCLUYE del precache del PWA (ver globIgnores).
+        // Las deps que el juego sí usa (Supabase, peerjs, qrcode) quedan fuera
+        // para no romper su carga diferida propia.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (/node_modules[\\/](@supabase|peerjs|qrcode)[\\/]/.test(id)) return;
+          return 'login';
+        },
+      },
+    },
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
@@ -23,6 +39,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png}'],
+        // El stack del login (React + Privy) es pesado y OPCIONAL: carga bajo
+        // demanda solo al iniciar sesión. No lo precacheamos para no inflar la
+        // instalación del PWA; se sirve por red cuando hace falta.
+        globIgnores: ['**/login-*.js', '**/privyBridge-*.js'],
         // Fuentes de Google cacheadas en runtime para jugar offline con la tipografía correcta
         runtimeCaching: [
           {

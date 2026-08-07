@@ -11,6 +11,7 @@ import { loadStats, rankFor } from '../core/stats.js';
 import { loadProfile, saveProfile, SKINS, HAIRS, NUMBERS, HAIRSTYLES } from '../core/profile.js';
 import { exportCode, importCode } from '../core/account.js';
 import { isConfigured, getSession, signInWithGoogle, signOut, fetchLeaderboard } from '../net/cloud.js';
+import { privyLogin, privyLogout, onPrivyChange, privyState, privyUserLabel } from '../net/privy.js';
 import { isMuted, setMuted } from '../audio/sfx.js';
 import { reduceMotionEnabled, setReduceMotion, resetProgress } from '../core/settings.js';
 import { initInstallPrompt, promptInstall } from '../core/pwa.js';
@@ -296,18 +297,31 @@ export function createMenuScreen({ onPlay }) {
     const list = rows
       .map((r) => `<li class="${(r.name || '').trim().toUpperCase() === me ? 'me' : ''}"><span class="rp">${r.position}</span><span class="rn">${esc(r.name)}</span><span class="rx">${r.xp}</span></li>`)
       .join('');
+    const pv = privyState();
     let session = null;
     try { session = await getSession(); } catch { /* sin sesión */ }
-    const authBtn = session && !session.user?.is_anonymous
-      ? '<button class="btn-ghost" data-ref="logoutBtn" type="button">Cerrar sesión</button>'
-      : '<button class="btn-ghost" data-ref="loginBtn" type="button">Vincular cuenta Google</button>';
+    const googleOn = session && !session.user?.is_anonymous;
+    let authHtml;
+    if (pv.authenticated) {
+      authHtml = `<p class="rank-empty">Conectado como <b>${esc(privyUserLabel() || 'Jugador')}</b>.</p>
+        <button class="btn-ghost" data-ref="privyOutBtn" type="button">Cerrar sesión</button>`;
+    } else if (googleOn) {
+      authHtml = `<button class="btn-ghost" data-ref="logoutBtn" type="button">Cerrar sesión (Google)</button>`;
+    } else {
+      authHtml = `<p class="rank-empty">Juegas y apareces con tu nombre sin cuenta. Inicia sesión para jugar con tu identidad.</p>
+        <button class="mm-play" data-ref="privyBtn" type="button">Iniciar sesión</button>
+        <button class="btn-ghost" data-ref="loginBtn" type="button">Usar Google</button>`;
+    }
     box.innerHTML = `<ol class="rank-list">${list || '<p class="rank-empty">Aún no hay puntajes. ¡Sé el primero!</p>'}</ol>
-      <p class="rank-empty">Juegas y apareces con tu nombre. Vincula Google para conservar tu puesto entre dispositivos.</p>
-      ${authBtn}`;
+      ${authHtml}`;
+    box.querySelector('[data-ref="privyBtn"]')?.addEventListener('click', () => privyLogin());
+    box.querySelector('[data-ref="privyOutBtn"]')?.addEventListener('click', async () => { await privyLogout(); renderRank(); });
     box.querySelector('[data-ref="loginBtn"]')?.addEventListener('click', () => signInWithGoogle());
     box.querySelector('[data-ref="logoutBtn"]')?.addEventListener('click', async () => { await signOut(); renderRank(); });
   }
   refs.rankBtn.addEventListener('click', () => { openOverlay(refs.rankOverlay); renderRank(); });
+  // Si cambia la sesión de Privy con el ranking abierto, refresca la vista.
+  onPrivyChange(() => { if (!refs.rankOverlay.hidden) renderRank(); });
 
   /* Estadísticas de vida + logros. */
   function achievementsHTML() {
