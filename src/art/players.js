@@ -90,30 +90,73 @@ export function avatarSVG(team, profile = {}) {
   const skin = profile.skin ?? team.skin;
   const hair = profile.hair ?? team.hair;
   const number = profile.number ?? 10;
+  // ids únicos por combinación piel/pelo para que los gradientes no colisionen
+  // si hay varios avatares en la página.
+  const uid = `${(skin || '#000').slice(1)}${(hair || '#000').slice(1)}`;
   return `
   <svg viewBox="0 0 120 120" class="avatar-svg" role="img" aria-label="Tu jugador">
     <defs>
-      <linearGradient id="av-bg" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#1c2e5c"/>
-        <stop offset="1" stop-color="#0a1226"/>
-      </linearGradient>
-      <radialGradient id="av-vig" cx=".5" cy=".4" r=".72">
-        <stop offset=".55" stop-color="#000000" stop-opacity="0"/>
-        <stop offset="1" stop-color="#000000" stop-opacity=".3"/>
+      <radialGradient id="av-bg-${uid}" cx=".5" cy=".32" r=".85">
+        <stop offset="0" stop-color="#26407e"/>
+        <stop offset=".6" stop-color="#152a44"/>
+        <stop offset="1" stop-color="#080f22"/>
       </radialGradient>
-      <clipPath id="av-clip"><circle cx="60" cy="60" r="56"/></clipPath>
+      <radialGradient id="av-skin-${uid}" cx=".38" cy=".34" r=".75">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".28"/>
+        <stop offset=".5" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".34"/>
+      </radialGradient>
+      <linearGradient id="av-shirt-${uid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".18"/>
+        <stop offset=".45" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".3"/>
+      </linearGradient>
+      <linearGradient id="av-hair-${uid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".32"/>
+        <stop offset=".6" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".28"/>
+      </linearGradient>
+      <radialGradient id="av-vig-${uid}" cx=".5" cy=".42" r=".72">
+        <stop offset=".5" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity=".4"/>
+      </radialGradient>
+      <clipPath id="av-clip-${uid}"><circle cx="60" cy="60" r="56"/></clipPath>
     </defs>
-    <circle cx="60" cy="60" r="56" fill="url(#av-bg)"/>
-    <g clip-path="url(#av-clip)">
-      <path d="M14 120 v-9 a46 46 0 0 1 92 0 v9 z" fill="${shirt}"/>
-      <path d="M15 111 a45 45 0 0 1 90 0" fill="none" stroke="${accent}" stroke-width="4.5" opacity=".8"/>
-      <path d="M50 84 L60 95 L70 84 L67 76 H53 z" fill="${accent}"/>
-      <rect x="53" y="69" width="14" height="15" rx="6" fill="${skin}"/>
-      <circle cx="60" cy="51" r="21" fill="${skin}"/>
-      <path d="M40 51 a20 20 0 0 1 40 0 q-8 -10 -20 -10 q-12 0 -20 10 z" fill="${hair}"/>
-      <rect x="4" y="4" width="112" height="112" fill="url(#av-vig)"/>
+    <circle cx="60" cy="60" r="56" fill="url(#av-bg-${uid})"/>
+    <g clip-path="url(#av-clip-${uid})">
+      <!-- foco de luz cenital del estadio -->
+      <ellipse cx="60" cy="26" rx="46" ry="34" fill="#ffffff" opacity=".07"/>
+      <!-- hombros / camiseta con cuello y volumen de tela -->
+      <path d="M8 120 v-11 a52 52 0 0 1 104 0 v11 z" fill="${shirt}"/>
+      <path d="M8 120 v-11 a52 52 0 0 1 104 0 v11 z" fill="url(#av-shirt-${uid})"/>
+      <path d="M42 92 q18 14 36 0" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="3"/>
+      <path d="M12 108 a48 48 0 0 1 96 0" fill="none" stroke="${accent}" stroke-width="5" opacity=".85"/>
+      <!-- cuello con sombra bajo el mentón -->
+      <path d="M50 82 h20 v-11 a10 10 0 0 1 -20 0 z" fill="${skin}"/>
+      <path d="M50 82 h20 v-4 q-10 6 -20 0 z" fill="#000000" opacity=".22"/>
+      <path d="M50 78 q10 8 20 0 v4 q-10 6 -20 0 z" fill="${accent}" opacity=".9"/>
+      <!-- cabeza: óvalo con orejas, mandíbula marcada -->
+      <path d="M39 47 q0 -22 21 -22 q21 0 21 22 q0 16 -9 24 q-6 5 -12 5 q-6 0 -12 -5 q-9 -8 -9 -24 z" fill="${skin}"/>
+      <ellipse cx="39.5" cy="50" rx="4" ry="6" fill="${skin}"/>
+      <ellipse cx="80.5" cy="50" rx="4" ry="6" fill="${skin}"/>
+      <!-- cejas + ojos contenidos (realistas, no caricatura) -->
+      <path d="M48 45 q5 -3 10 -1" stroke="#3a2a20" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/>
+      <path d="M62 44 q5 -2 10 1" stroke="#3a2a20" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/>
+      <ellipse cx="52" cy="50" rx="2.6" ry="2.9" fill="#2a2018"/>
+      <ellipse cx="68" cy="50" rx="2.6" ry="2.9" fill="#2a2018"/>
+      <path d="M57 52 q3 5 6 0" fill="none" stroke="#000" stroke-width="1.3" opacity=".26" stroke-linecap="round"/>
+      <path d="M54 63 q6 2 13 0" fill="none" stroke="#7a3a26" stroke-width="2.4" stroke-linecap="round"/>
+      <!-- pelo con volumen: base + mechón de luz -->
+      <path d="M38 48 q-2 -26 22 -26 q24 0 22 26 q-4 -12 -12 -15 q3 6 1 9 q-5 -9 -11 -9 q-6 0 -11 9 q-2 -3 1 -9 q-8 3 -12 15 z" fill="${hair}"/>
+      <path d="M38 48 q-2 -26 22 -26 q24 0 22 26 q-4 -12 -12 -15 q3 6 1 9 q-5 -9 -11 -9 q-6 0 -11 9 q-2 -3 1 -9 q-8 3 -12 15 z" fill="url(#av-hair-${uid})"/>
+      <!-- modelado de piel encima de todo el rostro -->
+      <path d="M39 47 q0 -22 21 -22 q21 0 21 22 q0 16 -9 24 q-6 5 -12 5 q-6 0 -12 -5 q-9 -8 -9 -24 z" fill="url(#av-skin-${uid})"/>
+      <rect x="4" y="4" width="112" height="112" fill="url(#av-vig-${uid})"/>
     </g>
-    <circle cx="60" cy="60" r="55" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2"/>
+    <!-- aro con luz de borde -->
+    <circle cx="60" cy="60" r="55" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
+    <circle cx="60" cy="60" r="55" fill="none" stroke="${accent}" stroke-width="1" opacity=".5"/>
+    <!-- dorsal -->
     <circle cx="97" cy="97" r="16" fill="#0a1226" stroke="${accent}" stroke-width="2"/>
     <text x="97" y="102.5" text-anchor="middle" font-size="15" font-weight="900" fill="#ffffff" font-family="Nunito, sans-serif">${number}</text>
   </svg>`;
